@@ -1,0 +1,10 @@
+// Export tous les composants UI pour faciliter les imports
+export * from './button'
+export * from './card'
+export * from './input'
+export * from './label'
+export * from './textarea'
+export * from './badge'
+export * from './progress'
+export * from './dialog'
+export * from './sonner'

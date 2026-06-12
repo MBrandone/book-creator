@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16
@@ -28,8 +26,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"  # API port
-      - "9001:9001"  # Console port
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -40,7 +38,6 @@ services:
     networks:
       - book-creator-network
 
-  # Service pour créer automatiquement le bucket MinIO
   minio-setup:
     image: minio/mc:latest
     container_name: book-creator-minio-setup
@@ -57,10 +54,42 @@ services:
     networks:
       - book-creator-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: book-creator-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - book-creator-network
+
+  ollama-setup:
+    image: ollama/ollama:latest
+    container_name: book-creator-ollama-setup
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      OLLAMA_HOST=http://ollama:11434 ollama pull llama3.2:3b &&
+      echo 'Model llama3.2:3b pulled successfully'
+      "
+    networks:
+      - book-creator-network
+
 volumes:
   postgres_data:
     driver: local
   minio_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:

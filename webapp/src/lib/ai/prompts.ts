@@ -48,7 +48,7 @@ L'histoire doit :
 - Avoir une morale ou un message positif
 
 Pour chaque scène, fournis :
-1. Le type de scène (introduction, conflict, action, ou resolution)
+1. Le type de scène (choisir parmi ces 4 chaines de caractères : introduction, conflict, action, ou resolution).
 2. Une description détaillée de la scène (2-4 phrases)
 3. Un prompt visuel pour générer une illustration (description détaillée de ce qui devrait apparaître dans l'image)
 
@@ -357,6 +357,7 @@ export function validateAIResponse(response: unknown): AIStoryResponse {
   }
 
   const data = response as Record<string, unknown>;
+  console.log("AI response for scenes : \n", data)
 
   if (!Array.isArray(data.scenes)) {
     throw new Error('Invalid AI response: scenes is not an array');

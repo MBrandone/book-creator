@@ -1,11 +1,5 @@
-/**
- * AI Services - Point d'entrée principal
- * Exporte tous les services et utilitaires IA
- */
-
-// Story Generator
 export {
-  type StoryGenerator,
+  type SceneGenerator,
   type GeneratedScene,
   type StoryGeneratorOptions,
   BaseStoryGenerator,
@@ -13,7 +7,7 @@ export {
   StoryGeneratorFactory,
   convertAIResponseToScenes,
   DEFAULT_OPTIONS,
-} from './story-generator';
+} from '../command-handler/generate-story-book-images/scene-generator';
 
 // Image Generator
 export {
@@ -22,14 +16,13 @@ export {
   type ImageGenerationResult,
   DEFAULT_CHILDREN_BOOK_STYLE,
   DEFAULT_NEGATIVE_PROMPT,
-} from './image-generator';
+} from '../command-handler/generate-story-book-images/image-generator';
 
 // Prompts
 export {
   type AISceneResponse,
   type AIStoryResponse,
   SYSTEM_PROMPT,
-  IMAGE_STYLE_PREFIX,
   FALLBACK_SCENES,
   generateUserPrompt,
   generateImagePrompt,

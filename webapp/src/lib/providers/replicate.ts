@@ -10,7 +10,7 @@ import type {
   ImageGenerator,
   ImageGenerationOptions,
   ImageGenerationResult,
-} from '../ai/image-generator';
+} from '../command-handler/generate-story-book-images/image-generator';
 import { minioClient, bucketName } from '../storage/minio';
 
 // Configuration du modèle SDXL

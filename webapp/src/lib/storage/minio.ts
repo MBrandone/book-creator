@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 // Configuration MinIO depuis les variables d'environnement
 const minioConfig = {
   endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-  port: parseInt(process.env.MINIO_PORT || '9000'),
+  port: Number.parseInt(process.env.MINIO_PORT || '9000'),
   useSSL: process.env.MINIO_USE_SSL === 'true',
   accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
   secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
@@ -15,10 +15,6 @@ const bucketName = process.env.MINIO_BUCKET || 'book-images';
 // Créer le client MinIO
 export const minioClient = new Minio.Client(minioConfig);
 
-/**
- * Initialise MinIO - Crée le bucket s'il n'existe pas
- * Cette fonction doit être appelée au démarrage de l'application
- */
 export async function initializeMinIO(): Promise<void> {
   try {
     // Vérifier si le bucket existe

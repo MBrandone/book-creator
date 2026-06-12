@@ -1,31 +1,33 @@
 #!/usr/bin/env tsx
 /**
- * Script de test pour vérifier la configuration MinIO
+ * Script de test pour vérifier la configuration Storage
+ * Compatible avec MinIO (local) et Supabase Storage
  * Usage: npm run test:minio ou tsx scripts/test-minio.ts
  */
 
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 import {
-  initializeMinIO,
+  initializeStorage,
   uploadImage,
   getImageUrl,
   deleteImage,
   imageExists,
   listImages,
   getImageMetadata,
-} from '../src/lib/storage/minio';
+} from '../src/lib/storage';
 
 // Charger les variables d'environnement
 dotenv.config({ path: resolve(__dirname, '../.env.local') });
 
 async function testMinIO() {
-  console.log('\n🚀 Démarrage des tests MinIO...\n');
+  const provider = process.env.STORAGE_PROVIDER || 'aws-s3';
+  console.log(`\n🚀 Démarrage des tests Storage (Provider: ${provider})...\n`);
 
   try {
     // Test 1: Initialisation et connexion
-    console.log('📋 Test 1: Initialisation de MinIO');
-    await initializeMinIO();
+    console.log('📋 Test 1: Initialisation du Storage');
+    await initializeStorage();
     console.log('✅ Test 1 réussi\n');
 
     // Test 2: Upload d'une image de test
@@ -107,24 +109,27 @@ async function testMinIO() {
 
     console.log('🎉 Tous les tests sont passés avec succès!');
     console.log('\n📊 Résumé:');
-    console.log('   - Connexion MinIO: ✅');
+    console.log(`   - Provider utilisé: ${provider}`);
+    console.log('   - Connexion Storage: ✅');
     console.log('   - Création de bucket: ✅');
     console.log('   - Upload d\'images: ✅');
     console.log('   - Récupération d\'URL: ✅');
     console.log('   - Métadonnées: ✅');
     console.log('   - Liste d\'images: ✅');
     console.log('   - Suppression d\'images: ✅');
-    console.log('\n✅ MinIO est correctement configuré et opérationnel!\n');
+    console.log('\n✅ Le storage est correctement configuré et opérationnel!\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Erreur lors des tests MinIO:');
+    console.error('\n❌ Erreur lors des tests Storage:');
     console.error(error);
     console.log('\n💡 Vérifiez que:');
-    console.log('   1. Docker est en cours d\'exécution');
-    console.log('   2. Le conteneur MinIO est démarré (docker-compose up -d minio)');
-    console.log('   3. Les variables d\'environnement dans .env.local sont correctes');
-    console.log('   4. Le port 9000 est accessible\n');
+    console.log('   1. Les variables d\'environnement dans .env.local sont correctes');
+    console.log(`   2. STORAGE_PROVIDER est défini (actuellement: ${provider})`);
+    console.log('   3. Si MinIO local: Docker est en cours d\'exécution');
+    console.log('   4. Si MinIO local: Le conteneur MinIO est démarré (docker-compose up -d minio)');
+    console.log('   5. Si Supabase: Les credentials S3 sont corrects');
+    console.log('   6. Le endpoint est accessible\n');
     process.exit(1);
   }
 }

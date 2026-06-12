@@ -17,7 +17,7 @@ import { resolve } from 'path';
 dotenv.config({ path: resolve(__dirname, '../.env.local') });
 
 import { ReplicateImageProvider } from '../src/lib/providers/replicate';
-import type { ImageGenerationOptions } from '../src/lib/ai/image-generator';
+import type { ImageGenerationOptions } from '@/lib/command-handler/generate-story-book-images/image-generator';
 
 // Couleurs pour la console
 const colors = {

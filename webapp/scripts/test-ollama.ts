@@ -4,7 +4,7 @@
  * Teste la connexion, la disponibilité et la génération d'une histoire simple
  */
 
-import { createOllamaGenerator } from '../src/lib/providers/ollama';
+import { createOllamaGenerator } from '../src/lib/providers/ollama-story-generator';
 import type { CharactersTable } from '../src/lib/db/schema';
 
 // Couleurs pour le terminal
@@ -50,23 +50,17 @@ function logWarning(message: string) {
 const testCharacters: CharactersTable[] = [
   {
     id: '1',
-    book_id: 'test-book',
+    story_id: 'test-book',
     name: 'Luna',
     description: 'Une petite lapine curieuse et courageuse qui adore explorer la forêt',
-    order: 1,
     image_url: null,
-    created_at: new Date(),
-    updated_at: new Date(),
   },
   {
     id: '2',
-    book_id: 'test-book',
+    story_id: 'test-book',
     name: 'Pixel',
     description: 'Un écureuil malicieux et joueur, meilleur ami de Luna',
-    order: 2,
     image_url: null,
-    created_at: new Date(),
-    updated_at: new Date(),
   },
 ];
 

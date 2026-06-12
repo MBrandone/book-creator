@@ -9,7 +9,7 @@ import {
   convertAIResponseToScenes,
   type GeneratedScene,
   type StoryGeneratorOptions,
-} from '@/lib/ai/story-generator';
+} from '@/lib/command-handler/generate-story-book-images/scene-generator';
 import {
   SYSTEM_PROMPT,
   generateUserPrompt,
@@ -80,6 +80,8 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     super('Ollama', options);
 
     // Configuration depuis les variables d'environnement
+    console.log('les variables d\'env Ollama : base url ', process.env.OLLAMA_BASE_URL, ' ollama_model ', process.env.OLLAMA_MODEL)
+
     this.config = {
       baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
       model: process.env.OLLAMA_MODEL || 'llama3',
@@ -96,7 +98,6 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     try {
       this.log('Checking Ollama availability...');
 
-      // Vérifier que le serveur Ollama répond
       const response = await fetch(`${this.config.baseUrl}/api/tags`, {
         method: 'GET',
         headers: {

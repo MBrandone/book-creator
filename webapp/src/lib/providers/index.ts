@@ -7,7 +7,7 @@
 export {
   OllamaStoryGenerator,
   createOllamaGenerator,
-} from './ollama';
+} from './ollama-story-generator';
 
 // Replicate Provider (Image Generation)
 export {
@@ -18,5 +18,5 @@ export {
 } from './replicate';
 
 // Export des types communs pour les providers
-export type { StoryGenerator, GeneratedScene, StoryGeneratorOptions } from '@/lib/ai/story-generator';
-export type { ImageGenerator, ImageGenerationOptions, ImageGenerationResult } from '@/lib/ai/image-generator';
+export type { SceneGenerator, GeneratedScene, StoryGeneratorOptions } from '@/lib/command-handler/generate-story-book-images/scene-generator';
+export type { ImageGenerator, ImageGenerationOptions, ImageGenerationResult } from '@/lib/command-handler/generate-story-book-images/image-generator';

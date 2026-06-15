@@ -76,8 +76,6 @@ src/lib/
 └── storage/
     └── minio.ts                # Client MinIO pour upload
 
-scripts/
-└── test-replicate.ts           # Script de test
 ```
 
 ### Interface `ImageGenerator`
@@ -395,12 +393,6 @@ Le script teste :
 1. Génération simple (1:1)
 2. Génération paysage (16:9)
 3. Génération avec style personnalisé (4:3)
-
-### Test manuel
-
-```bash
-npx tsx scripts/test-replicate.ts
-```
 
 ### Test dans l'application
 

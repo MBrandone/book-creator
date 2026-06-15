@@ -42,13 +42,6 @@
 
 ### 3. Tests et Documentation
 
-✅ **Script de test complet** (`scripts/test-ollama.ts`) :
-- Test de connexion à Ollama
-- Vérification de disponibilité du modèle
-- Test de génération d'histoire réelle
-- Test des scènes de fallback
-- Output formaté avec couleurs
-
 ✅ **Documentation** :
 - README détaillé dans `/src/lib/providers/README.md`
 - Guide d'installation Ollama

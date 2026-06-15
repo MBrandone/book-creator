@@ -306,12 +306,6 @@ weather: 'snowy'
    });
    ```
 
-4. **Tester les prompts**
-   ```bash
-   # Utilisez le script de test
-   npm run test:prompts
-   ```
-
 ### ❌ DON'T - À éviter
 
 1. **Mélanger les styles** entre les scènes d'un même livre
@@ -459,31 +453,6 @@ console.log(NEGATIVE_PROMPT);
 
 Utilisez ce prompt négatif lors de la génération d'images pour garantir des résultats appropriés.
 
----
-
-## Tester le système
-
-Le projet inclut un script de test complet :
-
-```bash
-# Lancer tous les tests de prompts
-npm run test:prompts
-
-# Ou directement avec npx
-npx tsx scripts/test-prompts.ts
-```
-
-Le script teste :
-- ✅ Tous les styles artistiques
-- ✅ Génération de descriptions de personnages
-- ✅ Prompts de base pour chaque type de scène
-- ✅ Comparaison entre styles
-- ✅ Options avancées
-- ✅ Analyse de la structure des prompts
-- ✅ Génération d'une histoire complète (4 scènes)
-
----
-
 ## API Reference
 
 ### Types
@@ -536,7 +505,6 @@ function generateCharacterDescription(characters: CharactersTable[]): string
 ## Support et ressources
 
 - 📖 Documentation complète : `book-creator/src/lib/ai/README.md`
-- 🧪 Script de test : `book-creator/scripts/test-prompts.ts`
 - 💡 Exemples : Voir section [Exemples](#exemples) ci-dessus
 
 Pour toute question ou suggestion d'amélioration, consultez le fichier `CLAUDE.md` à la racine du projet.

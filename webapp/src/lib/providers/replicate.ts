@@ -2,7 +2,7 @@
  * Replicate Provider
  * 
  * Implémente la génération d'images avec Stable Diffusion XL via Replicate API.
- * Gère le polling asynchrone et l'upload sur MinIO.
+ * Gère le polling asynchrone et l'upload vers le storage provider configuré.
  */
 
 import Replicate from 'replicate';
@@ -11,7 +11,7 @@ import type {
   ImageGenerationOptions,
   ImageGenerationResult,
 } from '../command-handler/generate-story-book-images/image-generator';
-import { minioClient, bucketName } from '../storage/minio';
+import { getStorageProvider } from '../storage/storage-factory';
 
 // Configuration du modèle SDXL
 const SDXL_MODEL = 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b';
@@ -50,22 +50,18 @@ export class ReplicateImageProvider implements ImageGenerator {
   }
 
   /**
-   * Upload l'image sur MinIO et retourne l'URL publique
+   * Upload l'image vers le storage provider configuré (MinIO, AWS S3, Supabase, etc.)
    */
-  private async uploadToMinio(imageBuffer: Buffer, filename: string): Promise<string> {
-    await minioClient.putObject(
-      bucketName,
-      filename,
-      imageBuffer,
-      imageBuffer.length,
-      {
-        'Content-Type': 'image/png',
-      }
-    );
+  private async uploadToStorage(imageBuffer: Buffer, filename: string): Promise<string> {
+    const storage = getStorageProvider();
+    
+    // Upload l'image avec les métadonnées appropriées
+    await storage.uploadImage(imageBuffer, filename, {
+      'Content-Type': 'image/png',
+    });
 
-    // Générer l'URL publique (présignée pour 7 jours)
-    const url = await minioClient.presignedGetObject(bucketName, filename, 7 * 24 * 60 * 60);
-    return url;
+    // Retourner l'URL publique de l'image
+    return storage.getImageUrl(filename);
   }
 
   /**
@@ -128,16 +124,16 @@ export class ReplicateImageProvider implements ImageGenerator {
       const imageBuffer = Buffer.from(arrayBuffer);
       console.log(`✅ Image buffer created (${imageBuffer.length} bytes)`);
 
-      // Upload sur MinIO
+      // Upload vers le storage provider
       const timestamp = Date.now();
       const filename = `images/generated/${timestamp}-${seed || 'random'}.png`;
       
-      console.log('📤 Uploading to MinIO...');
-      const minioUrl = await this.uploadToMinio(imageBuffer, filename);
-      console.log('✅ Image uploaded to MinIO');
+      console.log('📤 Uploading to storage...');
+      const imageUrl = await this.uploadToStorage(imageBuffer, filename);
+      console.log('✅ Image uploaded to storage');
 
       return {
-        url: minioUrl,
+        url: imageUrl,
         seed,
         prompt: fullPrompt,
         provider: this.name,

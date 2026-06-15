@@ -7,7 +7,15 @@ import { Pool } from 'pg';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-config({ path: path.join(__dirname, '..', '.env.local') });
+// Load environment-specific configuration
+const envFile = process.env.NODE_ENV === 'production' 
+  ? '.env.prod' 
+  : '.env.local';
+  
+config({ path: path.join(__dirname, '..', envFile) });
+
+console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`📁 Loading config from: ${envFile}\n`);
 
 const db = new Kysely({
   dialect: new PostgresDialect({
@@ -27,9 +35,7 @@ const migrator = new Migrator({
     fs,
     path,
     migrationFolder: path.join(__dirname, '..', 'migrations'),
-  }),
-  migrationTableName: 'schema_migrations',
-  migrationLockTableName: 'schema_migrations_lock',
+  })
 });
 
 async function migrateToLatest() {

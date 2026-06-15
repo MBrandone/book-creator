@@ -38,7 +38,6 @@ export interface UploadedPhotosTable {
 
 export interface GeneratedImagesTable {
   id: string;
-  story_id: string;
   scene_id: string;
   url: string;
 }

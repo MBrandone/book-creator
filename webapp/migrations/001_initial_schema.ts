@@ -43,7 +43,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('generated_images')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('story_id', 'uuid', (col) => col.notNull().references('stories.id').onDelete('cascade'))
     .addColumn('scene_id', 'uuid', (col) => col.notNull().references('scenes.id').onDelete('cascade'))
     .addColumn('url', 'varchar(500)', (col) => col.notNull())
     .execute();
@@ -52,7 +51,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema.createIndex('idx_scenes_story_id').on('scenes').column('story_id').execute();
   await db.schema.createIndex('idx_scenes_scene_number').on('scenes').columns(['story_id', 'scene_number']).execute();
   await db.schema.createIndex('idx_uploaded_photos_character_id').on('uploaded_photos').column('character_id').execute();
-  await db.schema.createIndex('idx_generated_images_story_id').on('generated_images').column('story_id').execute();
   await db.schema.createIndex('idx_generated_images_scene_id').on('generated_images').column('scene_id').execute();
   await db.schema.createIndex('idx_stories_status').on('stories').column('status').execute();
   await db.schema.createIndex('idx_stories_created_at').on('stories').column('created_at').execute();

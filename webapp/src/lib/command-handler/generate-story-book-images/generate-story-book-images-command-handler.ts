@@ -1,12 +1,12 @@
-import {SceneGenerator, StoryGeneratorFactory} from "@/lib/command-handler/generate-story-book-images/scene-generator";
+import {SceneGenerator} from "@/lib/command-handler/generate-story-book-images/scene-generator";
 import {type CharactersTable, db} from "@/lib/db";
 import {NextResponse} from "next/server";
 import {getReplicateProvider} from "@/lib/providers";
 
 export class GenerateStoryBookImagesCommandHandler {
     constructor(
-        // private readonly storyRepository: StoryRepository,
         private readonly scenesGenerator: SceneGenerator,
+        // private readonly storyRepository: StoryRepository,
         // private readonly imageGenerator: ImageGenerator,
     ) {
     }
@@ -83,15 +83,13 @@ export class GenerateStoryBookImagesCommandHandler {
 
     async generateStoryBackground(storyId: string, characters: CharactersTable[]) {
         try {
-            const storyGenerator = await StoryGeneratorFactory.getGenerator();
-
-            const isAvailable = await storyGenerator.isAvailable();
+            const isAvailable = await this.scenesGenerator.isAvailable();
 
             if (!isAvailable) {
-                throw new Error(`Story generator ${storyGenerator.name} is not available`);
+                throw new Error(`Story generator ${this.scenesGenerator.name} is not available`);
             }
 
-            const generatedScenes = await storyGenerator.generateStory(characters);
+            const generatedScenes = await this.scenesGenerator.generateStory(characters);
 
             if (generatedScenes.length !== 4) {
                 throw new Error(`Expected 4 scenes, got ${generatedScenes.length}`);

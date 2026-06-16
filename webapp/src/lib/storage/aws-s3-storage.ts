@@ -14,10 +14,6 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import type { StorageProvider, ImageMetadata, StorageConfig } from './storage-interface';
 
-/**
- * Implémentation AWS S3 du storage provider
- * Compatible avec : AWS S3, MinIO, Supabase Storage, et tout service S3-compatible
- */
 export class AwsS3Storage implements StorageProvider {
   private client: S3Client;
   private config: StorageConfig;
@@ -27,9 +23,6 @@ export class AwsS3Storage implements StorageProvider {
     this.client = this.createClient();
   }
 
-  /**
-   * Charge la configuration depuis les variables d'environnement
-   */
   private loadConfig(): StorageConfig {
     return {
       endpoint: process.env.STORAGE_ENDPOINT || 'localhost',
@@ -42,9 +35,6 @@ export class AwsS3Storage implements StorageProvider {
     };
   }
 
-  /**
-   * Crée le client S3 avec la configuration
-   */
   private createClient(): S3Client {
     const protocol = this.config.useSSL ? 'https' : 'http';
     const port = this.config.port ? `:${this.config.port}` : '';
@@ -61,12 +51,8 @@ export class AwsS3Storage implements StorageProvider {
     });
   }
 
-  /**
-   * Initialise le storage et crée le bucket si nécessaire
-   */
   async initialize(): Promise<void> {
     try {
-      // Vérifier si le bucket existe
       try {
         await this.client.send(
           new HeadBucketCommand({
@@ -76,7 +62,6 @@ export class AwsS3Storage implements StorageProvider {
         console.log(`✅ Bucket "${this.config.bucket}" existe déjà`);
       } catch (error: any) {
         if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
-          // Le bucket n'existe pas, le créer
           await this.client.send(
             new CreateBucketCommand({
               Bucket: this.config.bucket,
@@ -84,7 +69,6 @@ export class AwsS3Storage implements StorageProvider {
           );
           console.log(`✅ Bucket "${this.config.bucket}" créé avec succès`);
 
-          // Définir la politique du bucket pour permettre la lecture publique
           const policy = {
             Version: '2012-10-17',
             Statement: [
@@ -116,16 +100,12 @@ export class AwsS3Storage implements StorageProvider {
     }
   }
 
-  /**
-   * Upload une image vers S3
-   */
   async uploadImage(
     file: Buffer | Readable,
     key: string,
     metadata?: Record<string, string>
-  ): Promise<string> {
+  ): Promise<{ bucket: string; key: string }> {
     try {
-      // Convertir en buffer si nécessaire
       let body: Buffer;
       if (Buffer.isBuffer(file)) {
         body = file;
@@ -137,10 +117,8 @@ export class AwsS3Storage implements StorageProvider {
         body = Buffer.concat(chunks);
       }
 
-      // Préparer les métadonnées
       const contentType = metadata?.['Content-Type'] || 'application/octet-stream';
 
-      // Upload le fichier
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.config.bucket,
@@ -153,8 +131,7 @@ export class AwsS3Storage implements StorageProvider {
 
       console.log(`✅ Image uploadée avec succès: ${key}`);
 
-      // Retourner l'URL de l'image
-      return this.getImageUrl(key);
+      return { bucket: this.config.bucket, key };
     } catch (error) {
       console.error(`❌ Erreur lors de l'upload de l'image ${key}:`, error);
       throw new Error(
@@ -166,12 +143,9 @@ export class AwsS3Storage implements StorageProvider {
   /**
    * Récupère l'URL publique d'une image
    */
-  getImageUrl(key: string): string {
-    const protocol = this.config.useSSL ? 'https' : 'http';
-    const port = this.config.port && this.config.port !== 443 && this.config.port !== 80 
-      ? `:${this.config.port}` 
-      : '';
-    return `${protocol}://${this.config.endpoint}${port}/${this.config.bucket}/${key}`;
+  getImageUrl(bucket: string, key: string): string {
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
+    return `${publicBaseUrl}/${bucket}/${key}`;
   }
 
   /**

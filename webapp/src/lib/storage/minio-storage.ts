@@ -2,10 +2,6 @@ import * as Minio from 'minio';
 import { Readable } from 'stream';
 import type { StorageProvider, ImageMetadata, StorageConfig } from './storage-interface';
 
-/**
- * Implémentation MinIO native du storage provider
- * Utilise la librairie officielle MinIO
- */
 export class MinioStorage implements StorageProvider {
   private client: Minio.Client;
   private config: StorageConfig;
@@ -91,7 +87,7 @@ export class MinioStorage implements StorageProvider {
     file: Buffer | Readable,
     key: string,
     metadata?: Record<string, string>
-  ): Promise<string> {
+  ): Promise<{ bucket: string; key: string }> {
     try {
       // Déterminer la taille du fichier
       let size: number;
@@ -122,8 +118,8 @@ export class MinioStorage implements StorageProvider {
 
       console.log(`✅ Image uploadée avec succès: ${key}`);
 
-      // Retourner l'URL de l'image
-      return this.getImageUrl(key);
+      // Retourner le bucket et la clé
+      return { bucket: this.config.bucket, key };
     } catch (error) {
       console.error(`❌ Erreur lors de l'upload de l'image ${key}:`, error);
       throw new Error(
@@ -135,10 +131,9 @@ export class MinioStorage implements StorageProvider {
   /**
    * Récupère l'URL publique d'une image
    */
-  getImageUrl(key: string): string {
-    const protocol = this.config.useSSL ? 'https' : 'http';
-    const port = this.config.port === 443 || this.config.port === 80 ? '' : `:${this.config.port}`;
-    return `${protocol}://${this.config.endpoint}${port}/${this.config.bucket}/${key}`;
+  getImageUrl(bucket: string, key: string): string {
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
+    return `${publicBaseUrl}/${bucket}/${key}`;
   }
 
   /**

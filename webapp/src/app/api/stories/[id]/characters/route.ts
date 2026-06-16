@@ -124,7 +124,6 @@ async function insertCharactersInDatabase(storyId: string, characters: Character
     story_id: storyId,
     name: character.name,
     description: character.description,
-    image_url: null,
   }));
 
   await db

@@ -9,7 +9,6 @@ src/lib/storage/
 ├── minio-storage.ts          # Implémentation MinIO native
 ├── storage-factory.ts        # Factory pour sélectionner le provider
 ├── index.ts                  # Point d'entrée unifié
-├── minio.ts                  # [DÉPRÉCIÉ] Ancienne implémentation
 ├── README.md                 # Ce fichier
 └── TROUBLESHOOTING.md
 ```
@@ -302,24 +301,6 @@ class CustomStorage implements StorageProvider {
   // ... autres méthodes
 }
 ```
-
-## 🔄 Migration depuis l'Ancienne Version
-
-Si vous utilisez l'ancien code avec `minio.ts` directement:
-
-### Avant
-```typescript
-import { initializeMinIO, uploadImage } from '@/lib/storage/minio';
-```
-
-### Après
-```typescript
-import { initializeStorage, uploadImage } from '@/lib/storage';
-// ou gardez initializeMinIO comme alias
-import { initializeMinIO, uploadImage } from '@/lib/storage';
-```
-
-L'API est **100% compatible**, aucun changement de code nécessaire !
 
 ## 📚 Documentation Externe
 

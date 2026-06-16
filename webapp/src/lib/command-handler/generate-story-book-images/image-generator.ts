@@ -9,7 +9,8 @@ export interface ImageGenerationOptions {
 }
 
 export interface ImageGenerationResult {
-  url: string;
+  bucket: string;
+  key: string;
   seed?: number;
   prompt: string;
   provider: string;

@@ -105,7 +105,8 @@ export class GenerateStoryBookImagesCommandHandler {
                         scene_type: scene.scene_type,
                         description: scene.description,
                         prompt: scene.prompt,
-                        image_url: null,
+                        storage_bucket: null,
+                        storage_key: null,
                     })
                     .execute();
 
@@ -123,7 +124,10 @@ export class GenerateStoryBookImagesCommandHandler {
 
                     await db
                         .updateTable('scenes')
-                        .set({ image_url: imageResult.url })
+                        .set({ 
+                            storage_bucket: imageResult.bucket,
+                            storage_key: imageResult.key 
+                        })
                         .where('story_id', '=', storyId)
                         .where('scene_number', '=', scene.scene_number)
                         .execute();

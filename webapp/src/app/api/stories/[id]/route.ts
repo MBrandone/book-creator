@@ -45,14 +45,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
       // Récupérer tous les personnages de l'histoire
       db
         .selectFrom('characters')
-        .select(['id', 'name', 'description', 'image_url'])
+        .select(['id', 'name', 'description'])
         .where('story_id', '=', storyId)
         .execute(),
       
       // Récupérer toutes les scènes de l'histoire, ordonnées par numéro
       db
         .selectFrom('scenes')
-        .select(['id', 'scene_number', 'scene_type', 'description', 'image_url', 'prompt'])
+        .select(['id', 'scene_number', 'scene_type', 'description', 'storage_bucket', 'storage_key', 'prompt'])
         .where('story_id', '=', storyId)
         .orderBy('scene_number', 'asc')
         .execute(),
@@ -68,6 +68,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
+    // Construire l'URL publique à partir de storage_bucket et storage_key
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
+
     // Retourner la réponse complète
     return NextResponse.json({
       story: {
@@ -82,14 +85,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
         id: character.id,
         name: character.name,
         description: character.description,
-        image_url: character.image_url,
       })),
       scenes: scenes.map(scene => ({
         id: scene.id,
         scene_number: scene.scene_number,
         scene_type: scene.scene_type,
         description: scene.description,
-        image_url: scene.image_url,
+        image_url: scene.storage_bucket && scene.storage_key 
+          ? `${publicBaseUrl}/${scene.storage_bucket}/${scene.storage_key}`
+          : null,
         prompt: scene.prompt,
       })),
     });

@@ -52,16 +52,16 @@ export class ReplicateImageProvider implements ImageGenerator {
   /**
    * Upload l'image vers le storage provider configuré (MinIO, AWS S3, Supabase, etc.)
    */
-  private async uploadToStorage(imageBuffer: Buffer, filename: string): Promise<string> {
+  private async uploadToStorage(imageBuffer: Buffer, filename: string): Promise<{ bucket: string; key: string }> {
     const storage = getStorageProvider();
     
     // Upload l'image avec les métadonnées appropriées
-    await storage.uploadImage(imageBuffer, filename, {
+    const result = await storage.uploadImage(imageBuffer, filename, {
       'Content-Type': 'image/png',
     });
 
-    // Retourner l'URL publique de l'image
-    return storage.getImageUrl(filename);
+    // Retourner le bucket et la clé
+    return result;
   }
 
   /**
@@ -129,11 +129,12 @@ export class ReplicateImageProvider implements ImageGenerator {
       const filename = `images/generated/${timestamp}-${seed || 'random'}.png`;
       
       console.log('📤 Uploading to storage...');
-      const imageUrl = await this.uploadToStorage(imageBuffer, filename);
+      const { bucket, key } = await this.uploadToStorage(imageBuffer, filename);
       console.log('✅ Image uploaded to storage');
 
       return {
-        url: imageUrl,
+        bucket,
+        key,
         seed,
         prompt: fullPrompt,
         provider: this.name,

@@ -21,5 +21,6 @@ Voici le flow utilisateurs afin de créer une histoire aujourd'hui :
 - Avoir autant de personnages que possible
 - Avoir un compte
 - Avoir des personnages ré-utilisables dans mes histoires
-- Choisir le nombre de scène dans mon histoires
+- Choisir le nombre de scène dans mon histoire
 - Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
+- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques

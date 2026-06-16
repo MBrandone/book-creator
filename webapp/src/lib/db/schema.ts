@@ -17,7 +17,6 @@ export interface CharactersTable {
   story_id: string;
   name: string;
   description: string;
-  image_url: string | null;
 }
 
 export interface ScenesTable {
@@ -26,20 +25,9 @@ export interface ScenesTable {
   scene_number: number;
   scene_type: SceneType;
   description: string;
-  image_url: string | null;
+  storage_bucket: string | null;
+  storage_key: string | null;
   prompt: string | null;
-}
-
-export interface UploadedPhotosTable {
-  id: string;
-  url: string;
-  character_id: string;
-}
-
-export interface GeneratedImagesTable {
-  id: string;
-  scene_id: string;
-  url: string;
 }
 
 // Interface du schéma complet de la base de données
@@ -47,6 +35,4 @@ export interface Database {
   stories: StoriesTable;
   characters: CharactersTable;
   scenes: ScenesTable;
-  uploaded_photos: UploadedPhotosTable;
-  generated_images: GeneratedImagesTable;
 }

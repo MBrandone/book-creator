@@ -22,23 +22,24 @@ export async function initializeStorage(): Promise<void> {
  * @param file - Le fichier à uploader (Buffer ou Readable stream)
  * @param key - La clé/nom du fichier dans le storage
  * @param metadata - Métadonnées optionnelles (content-type, etc.)
- * @returns L'URL de l'image uploadée
+ * @returns Le bucket et la clé de l'image uploadée
  */
 export async function uploadImage(
   file: Buffer | NodeJS.ReadableStream,
   key: string,
   metadata?: Record<string, string>
-): Promise<string> {
+): Promise<{ bucket: string; key: string }> {
   return storage.uploadImage(file as Buffer<ArrayBufferLike> | Readable, key, metadata);
 }
 
 /**
  * Récupère l'URL publique d'une image stockée
+ * @param bucket - Le nom du bucket
  * @param key - La clé/nom du fichier
  * @returns L'URL complète de l'image
  */
-export function getImageUrl(key: string): string {
-  return storage.getImageUrl(key);
+export function getImageUrl(bucket: string, key: string): string {
+  return storage.getImageUrl(bucket, key);
 }
 
 /**

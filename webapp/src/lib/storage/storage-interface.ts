@@ -15,20 +15,21 @@ export interface StorageProvider {
    * @param file - Le fichier à uploader (Buffer ou Readable stream)
    * @param key - La clé/nom du fichier dans le storage
    * @param metadata - Métadonnées optionnelles (content-type, etc.)
-   * @returns L'URL de l'image uploadée
+   * @returns Le bucket et la clé de l'image uploadée
    */
   uploadImage(
     file: Buffer | Readable,
     key: string,
     metadata?: Record<string, string>
-  ): Promise<string>;
+  ): Promise<{ bucket: string; key: string }>;
 
   /**
    * Récupère l'URL publique d'une image stockée
+   * @param bucket - Le nom du bucket
    * @param key - La clé/nom du fichier
    * @returns L'URL complète de l'image
    */
-  getImageUrl(key: string): string;
+  getImageUrl(bucket: string, key: string): string;
 
   /**
    * Récupère une URL présignée pour accéder temporairement à une image

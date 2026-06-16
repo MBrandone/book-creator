@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { db } from '@/lib/db';
+import {NextRequest, NextResponse} from 'next/server';
+import {z} from 'zod';
+import {CreateAStoryCommandHandler} from '@/lib/command-handler/create-a-story/create-a-story-command-handler';
+import {DuplicateStoryError} from "@/lib/command-handler/create-a-story/duplicate-story-error";
+import {SqlStoryRepository} from '@/lib/repositories/story-repository/sql-story-repository';
 
 export async function POST(request: NextRequest) {
     try {
@@ -8,16 +10,28 @@ export async function POST(request: NextRequest) {
         const validationResult = createStorySchema.safeParse(body);
 
         if (!validationResult.success) {
-            return buildValidationErrorResponse(validationResult.error);
+            return NextResponse.json(
+                {
+                    error: 'Validation échouée',
+                    details: validationResult.error.issues.map(err => ({
+                        path: err.path.join('.'),
+                        message: err.message,
+                    })),
+                },
+                {status: 400}
+            );
         }
 
-        try {
-            await insertStoryInDatabase(validationResult.data);
-            return new NextResponse(null, { status: 201 });
-        } catch (dbError: any) {
-            return handleDatabaseError(dbError);
-        }
+        const storyRepository = new SqlStoryRepository();
+        const commandHandler = new CreateAStoryCommandHandler(storyRepository);
+        await commandHandler.execute(validationResult.data);
+
+        return new NextResponse(null, { status: 201 });
+
     } catch (error) {
+        if (error instanceof DuplicateStoryError) {
+            return new NextResponse(null, { status: 409 });
+        }
         console.error('Erreur serveur lors de la création de la story:', error);
         return new NextResponse(null, { status: 500 });
     }
@@ -29,44 +43,3 @@ const createStorySchema = z.object({
   description: z.string().min(10, 'La description doit contenir au moins 10 caractères'),
 });
 
-type CreateStoryInput = z.infer<typeof createStorySchema>;
-
-function buildValidationErrorResponse(error: z.ZodError) {
-  return NextResponse.json(
-    {
-      error: 'Validation échouée',
-      details: error.issues.map(err => ({
-        path: err.path.join('.'),
-        message: err.message,
-      })),
-    },
-    { status: 400 }
-  );
-}
-
-async function insertStoryInDatabase(data: CreateStoryInput) {
-  await db
-    .insertInto('stories')
-    .values({
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      status: 'pending',
-      created_at: new Date(),
-      updated_at: new Date(),
-    })
-    .execute();
-}
-
-function isDuplicateKeyError(error: any): boolean {
-  return error.code === '23505';
-}
-
-function handleDatabaseError(error: any) {
-  if (isDuplicateKeyError(error)) {
-    return new NextResponse(null, { status: 409 });
-  }
-
-  console.error('Erreur lors de l\'insertion en base de données:', error);
-  throw error;
-}

@@ -17,13 +17,7 @@ export interface ImageGenerationResult {
   metadata?: Record<string, any>;
 }
 
-export interface ImageGenerator {
+export interface SceneImageGenerator {
   generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult>;
   readonly name: string;
 }
-
-export const DEFAULT_CHILDREN_BOOK_STYLE =
-  "children's book illustration, colorful, friendly, warm lighting, storybook art style, digital painting";
-
-export const DEFAULT_NEGATIVE_PROMPT =
-  "scary, frightening, dark, violent, inappropriate, photorealistic, blurry, low quality";

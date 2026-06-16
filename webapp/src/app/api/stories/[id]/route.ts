@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/lib/db';
+import { GetStoryQueryHandler } from '@/lib/query-handler/get-story/get-story-query-handler';
+import { SqlStoryReadModel } from '@/lib/read-model/sql-story-read-model';
+import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-/**
- * GET /api/stories/[id]
- * Récupère une histoire complète avec tous ses détails :
- * - Métadonnées de l'histoire (title, description, status, dates)
- * - Personnages avec leurs données
- * - 4 scènes avec descriptions et images (URL depuis MinIO)
- */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { id: storyId } = await context.params;
     
-    // Validation de l'UUID
     const idValidationResult = z.string().uuid('L\'ID doit être un UUID valide').safeParse(storyId);
     
     if (!idValidationResult.success) {
@@ -33,33 +27,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Récupération des données en parallèle pour optimiser les performances
-    const [story, characters, scenes] = await Promise.all([
-      // Récupérer les métadonnées de l'histoire
-      db
-        .selectFrom('stories')
-        .select(['id', 'title', 'description', 'status', 'created_at', 'updated_at'])
-        .where('id', '=', storyId)
-        .executeTakeFirst(),
-      
-      // Récupérer tous les personnages de l'histoire
-      db
-        .selectFrom('characters')
-        .select(['id', 'name', 'description'])
-        .where('story_id', '=', storyId)
-        .execute(),
-      
-      // Récupérer toutes les scènes de l'histoire, ordonnées par numéro
-      db
-        .selectFrom('scenes')
-        .select(['id', 'scene_number', 'scene_type', 'description', 'storage_bucket', 'storage_key', 'prompt'])
-        .where('story_id', '=', storyId)
-        .orderBy('scene_number', 'asc')
-        .execute(),
-    ]);
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
+    const storyReadModel = new SqlStoryReadModel(publicBaseUrl);
+    const queryHandler = new GetStoryQueryHandler(storyReadModel);
 
-    // Vérifier si l'histoire existe
-    if (!story) {
+    const storyDetails = await queryHandler.execute(storyId);
+
+    return NextResponse.json(storyDetails);
+
+  } catch (error) {
+    if (error instanceof StoryNotFoundError) {
       return NextResponse.json(
         {
           error: 'Story non trouvée',
@@ -68,37 +45,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Construire l'URL publique à partir de storage_bucket et storage_key
-    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
-
-    // Retourner la réponse complète
-    return NextResponse.json({
-      story: {
-        id: story.id,
-        title: story.title,
-        description: story.description,
-        status: story.status,
-        created_at: story.created_at,
-        updated_at: story.updated_at,
-      },
-      characters: characters.map(character => ({
-        id: character.id,
-        name: character.name,
-        description: character.description,
-      })),
-      scenes: scenes.map(scene => ({
-        id: scene.id,
-        scene_number: scene.scene_number,
-        scene_type: scene.scene_type,
-        description: scene.description,
-        image_url: scene.storage_bucket && scene.storage_key 
-          ? `${publicBaseUrl}/${scene.storage_bucket}/${scene.storage_key}`
-          : null,
-        prompt: scene.prompt,
-      })),
-    });
-
-  } catch (error) {
     console.error('Erreur serveur lors de la récupération de l\'histoire:', error);
     return new NextResponse(null, { status: 500 });
   }

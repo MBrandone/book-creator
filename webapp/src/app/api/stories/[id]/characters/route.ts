@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/lib/db';
+import { CreateACharacterForStoryCommandHandler } from '@/lib/command-handler/create-a-character-for-story/create-a-character-for-story-command-handler';
+import { SqlStoryRepository } from '@/lib/repositories/story-repository/sql-story-repository';
+import { SqlCharacterRepository, DuplicateCharacterError } from '@/lib/repositories/character-repository/sql-character-repository';
+import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
+import { MaxCharactersReachedError } from '@/lib/command-handler/create-a-character-for-story/max-characters-reached-error';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -32,8 +36,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return buildValidationErrorResponse(validationResult.error);
     }
 
-    const storyExists = await checkStoryExists(storyId);
-    if (!storyExists) {
+    const storyRepository = new SqlStoryRepository();
+    const characterRepository = new SqlCharacterRepository();
+    const commandHandler = new CreateACharacterForStoryCommandHandler(
+      storyRepository,
+      characterRepository
+    );
+
+    await commandHandler.execute({
+      storyId,
+      characters: validationResult.data.characters,
+    });
+
+    return new NextResponse(null, { status: 201 });
+  } catch (error) {
+    if (error instanceof StoryNotFoundError) {
       return NextResponse.json(
         {
           error: 'Validation échouée',
@@ -46,27 +63,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const characterCount = await getCharacterCount(storyId);
-    if (characterCount >= 2) {
+    if (error instanceof MaxCharactersReachedError) {
       return NextResponse.json(
         {
           error: 'Validation échouée',
           details: [{
             path: 'story_id',
-            message: 'Cette story a déjà atteint le maximum de 2 personnages',
+            message: error.message,
           }],
         },
         { status: 400 }
       );
     }
 
-    try {
-      await insertCharactersInDatabase(storyId, validationResult.data.characters);
-      return new NextResponse(null, { status: 201 });
-    } catch (dbError: any) {
-      return handleDatabaseError(dbError);
+    if (error instanceof DuplicateCharacterError) {
+      return new NextResponse(null, { status: 409 });
     }
-  } catch (error) {
+
     console.error('Erreur serveur lors de la création des personnages:', error);
     return new NextResponse(null, { status: 500 });
   }
@@ -96,68 +109,4 @@ function buildValidationErrorResponse(error: z.ZodError) {
     },
     { status: 400 }
   );
-}
-
-async function checkStoryExists(storyId: string): Promise<boolean> {
-  const result = await db
-    .selectFrom('stories')
-    .select('id')
-    .where('id', '=', storyId)
-    .executeTakeFirst();
-  
-  return result !== undefined;
-}
-
-async function getCharacterCount(storyId: string): Promise<number> {
-  const result = await db
-    .selectFrom('characters')
-    .select(({ fn }) => [fn.countAll<number>().as('count')])
-    .where('story_id', '=', storyId)
-    .executeTakeFirst();
-  
-  return result?.count ?? 0;
-}
-
-async function insertCharactersInDatabase(storyId: string, characters: CharacterInput[]) {
-  const values = characters.map(character => ({
-    id: character.id,
-    story_id: storyId,
-    name: character.name,
-    description: character.description,
-  }));
-
-  await db
-    .insertInto('characters')
-    .values(values)
-    .execute();
-}
-
-function isDuplicateKeyError(error: any): boolean {
-  return error.code === '23505';
-}
-
-function isForeignKeyError(error: any): boolean {
-  return error.code === '23503';
-}
-
-function handleDatabaseError(error: any) {
-  if (isDuplicateKeyError(error)) {
-    return new NextResponse(null, { status: 409 });
-  }
-
-  if (isForeignKeyError(error)) {
-    return NextResponse.json(
-      {
-        error: 'Validation échouée',
-        details: [{
-          path: 'story_id',
-          message: 'La story spécifiée n\'existe pas',
-        }],
-      },
-      { status: 400 }
-    );
-  }
-
-  console.error('Erreur lors de l\'insertion en base de données:', error);
-  throw error;
 }

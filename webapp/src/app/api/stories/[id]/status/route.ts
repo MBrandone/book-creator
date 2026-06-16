@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/lib/db';
+import { GetStoryStatusQueryHandler } from '@/lib/query-handler/get-story-status/get-story-status-query-handler';
+import { SqlStoryReadModel } from '@/lib/read-model/sql-story-read-model';
+import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -25,13 +27,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const story = await db
-      .selectFrom('stories')
-      .select('status')
-      .where('id', '=', storyId)
-      .executeTakeFirst();
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
+    const storyReadModel = new SqlStoryReadModel(publicBaseUrl);
+    const queryHandler = new GetStoryStatusQueryHandler(storyReadModel);
 
-    if (!story) {
+    const storyStatus = await queryHandler.execute(storyId);
+
+    return NextResponse.json(storyStatus);
+
+  } catch (error) {
+    if (error instanceof StoryNotFoundError) {
       return NextResponse.json(
         {
           error: 'Story non trouvée',
@@ -40,11 +45,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    return NextResponse.json({
-      status: story.status,
-    });
-
-  } catch (error) {
     console.error('Erreur serveur lors de la récupération du statut:', error);
     return new NextResponse(null, { status: 500 });
   }

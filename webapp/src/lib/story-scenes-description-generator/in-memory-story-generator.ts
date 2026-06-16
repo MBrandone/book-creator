@@ -1,8 +1,9 @@
-import {GeneratedScene, SceneGenerator} from "@/lib/command-handler/generate-story-book-images/scene-generator";
+import {GeneratedScene, StoryScenesDescriptionGenerator} from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 import {type SceneType} from "@/lib/db";
-import {getStylePrefix} from "@/lib/ai/prompts";
 
-export class InMemorySceneGenerator implements SceneGenerator {
+import {getStylePrefix} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
+
+export class InMemorySceneGenerator implements StoryScenesDescriptionGenerator {
     readonly name: string = 'InMemorySceneGenerator';
 
     generateStory(): Promise<GeneratedScene[]> {

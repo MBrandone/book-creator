@@ -1,7 +1,8 @@
 import type { CharactersTable, SceneType } from '@/lib/db/schema';
-import type { AISceneResponse } from '../../ai/prompts';
 
-export interface SceneGenerator {
+import {AISceneResponse} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
+
+export interface StoryScenesDescriptionGenerator {
   generateStory(characters: CharactersTable[]): Promise<GeneratedScene[]>;
   isAvailable(): Promise<boolean>;
   readonly name: string;
@@ -25,9 +26,6 @@ export interface StoryGeneratorOptions {
   debug?: boolean;
 }
 
-/**
- * Valeurs par défaut pour les options
- */
 export const DEFAULT_OPTIONS: Required<StoryGeneratorOptions> = {
   timeout: 60000, // 60 secondes
   temperature: 0.7, // Équilibre entre créativité et cohérence
@@ -35,9 +33,6 @@ export const DEFAULT_OPTIONS: Required<StoryGeneratorOptions> = {
   debug: false,
 };
 
-/**
- * Convertit une réponse de l'IA en scènes utilisables
- */
 export function convertAIResponseToScenes(
   aiScenes: AISceneResponse[]
 ): GeneratedScene[] {
@@ -49,9 +44,6 @@ export function convertAIResponseToScenes(
   }));
 }
 
-/**
- * Erreur personnalisée pour les problèmes de génération d'histoire
- */
 export class StoryGenerationError extends Error {
   constructor(
     message: string,
@@ -68,11 +60,7 @@ export class StoryGenerationError extends Error {
   }
 }
 
-/**
- * Classe de base abstraite pour les story generators
- * Fournit des utilitaires communs pour tous les providers
- */
-export abstract class BaseStoryGenerator implements SceneGenerator {
+export abstract class BaseStoryGenerator implements StoryScenesDescriptionGenerator {
   protected options: Required<StoryGeneratorOptions>;
 
   constructor(
@@ -163,11 +151,11 @@ export abstract class BaseStoryGenerator implements SceneGenerator {
 }
 
 export class StoryGeneratorFactory {
-  private static instance: SceneGenerator | null = null;
+  private static instance: StoryScenesDescriptionGenerator | null = null;
 
   static async getGenerator(
     forceProvider?: string
-  ): Promise<SceneGenerator> {
+  ): Promise<StoryScenesDescriptionGenerator> {
     if (this.instance && !forceProvider) {
       return this.instance;
     }
@@ -178,7 +166,7 @@ export class StoryGeneratorFactory {
 
     switch (provider.toLowerCase()) {
       case 'ollama': {
-        const { OllamaStoryGenerator } = await import('@/lib/providers/ollama-story-generator');
+        const { OllamaStoryGenerator } = await import('@/lib/story-scenes-description-generator/ollama-story-generator');
         this.instance = new OllamaStoryGenerator();
         break;
       }

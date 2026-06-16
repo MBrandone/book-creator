@@ -6,12 +6,8 @@
  */
 
 import Replicate from 'replicate';
-import type {
-  ImageGenerator,
-  ImageGenerationOptions,
-  ImageGenerationResult,
-} from '../command-handler/generate-story-book-images/image-generator';
-import { getStorage } from '../storage/storage-factory';
+import type {ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator,} from './scene-image-generator';
+import {getStorage} from '../storage/storage-factory';
 
 // Configuration du modèle SDXL
 const SDXL_MODEL = 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b';
@@ -24,7 +20,7 @@ interface SDXLOutput {
   url?: string;
 }
 
-export class ReplicateImageProvider implements ImageGenerator {
+export class ReplicateSceneImageGenerator implements SceneImageGenerator {
   readonly name = 'replicate-sdxl';
   private client: Replicate;
 
@@ -36,9 +32,6 @@ export class ReplicateImageProvider implements ImageGenerator {
     this.client = new Replicate({ auth: token });
   }
 
-  /**
-   * Convertit l'aspect ratio en dimensions
-   */
   private getDimensions(aspectRatio: string): { width: number; height: number } {
     const ratios: Record<string, { width: number; height: number }> = {
       '1:1': { width: 1024, height: 1024 },
@@ -49,24 +42,14 @@ export class ReplicateImageProvider implements ImageGenerator {
     return ratios[aspectRatio] || ratios['1:1'];
   }
 
-  /**
-   * Upload l'image vers le storage provider configuré (MinIO, AWS S3, Supabase, etc.)
-   */
   private async uploadToStorage(imageBuffer: Buffer, filename: string): Promise<{ bucket: string; key: string }> {
     const storage = getStorage();
-    
-    // Upload l'image avec les métadonnées appropriées
-    const result = await storage.uploadImage(imageBuffer, filename, {
+
+    return await storage.uploadImage(imageBuffer, filename, {
       'Content-Type': 'image/png',
     });
-
-    // Retourner le bucket et la clé
-    return result;
   }
 
-  /**
-   * Génère une image avec SDXL via Replicate
-   */
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult> {
     const {
       prompt,
@@ -78,8 +61,7 @@ export class ReplicateImageProvider implements ImageGenerator {
       negativePrompt,
     } = options;
 
-    // Construire le prompt complet avec le style
-    const fullPrompt = style 
+    const fullPrompt = style
       ? `${prompt}, ${style}`
       : `${prompt}, children's book illustration, colorful, friendly, warm lighting, storybook art style, digital painting`;
 
@@ -114,17 +96,14 @@ export class ReplicateImageProvider implements ImageGenerator {
       console.log('✅ Image generated successfully');
 
 
-      // Use blob() method as recommended by Replicate documentation
       console.log('📥 Retrieving image blob from Replicate...');
       const blob = await output.blob();
       console.log(`✅ Blob retrieved (${blob.size} bytes, type: ${blob.type})`);
       
-      // Convert blob to buffer for MinIO upload
       const arrayBuffer = await blob.arrayBuffer();
       const imageBuffer = Buffer.from(arrayBuffer);
       console.log(`✅ Image buffer created (${imageBuffer.length} bytes)`);
 
-      // Upload vers le storage provider
       const timestamp = Date.now();
       const filename = `images/generated/${timestamp}-${seed || 'random'}.png`;
       
@@ -155,32 +134,11 @@ export class ReplicateImageProvider implements ImageGenerator {
   }
 }
 
-/**
- * Factory function pour créer une instance du provider Replicate
- * Permet de différer la création jusqu'à ce que les variables d'environnement soient chargées
- */
-export function createReplicateProvider(apiToken?: string): ReplicateImageProvider {
-  return new ReplicateImageProvider(apiToken);
-}
+let _replicateProviderInstance: ReplicateSceneImageGenerator | null = null;
 
-/**
- * Instance par défaut du provider Replicate (lazy)
- * Note: Sera créée à la première utilisation pour permettre le chargement des env vars
- */
-let _replicateProviderInstance: ReplicateImageProvider | null = null;
-
-export function getReplicateProvider(): ReplicateImageProvider {
+export function getReplicateProvider(): ReplicateSceneImageGenerator {
   if (!_replicateProviderInstance) {
-    _replicateProviderInstance = new ReplicateImageProvider();
+    _replicateProviderInstance = new ReplicateSceneImageGenerator();
   }
   return _replicateProviderInstance;
 }
-
-/**
- * @deprecated Utilisez getReplicateProvider() à la place pour lazy loading
- */
-export const replicateProvider = {
-  get instance() {
-    return getReplicateProvider();
-  }
-};

@@ -1,35 +1,22 @@
-/**
- * Provider Ollama pour la génération d'histoires
- * Utilise Ollama en local pour générer des histoires en 4 scènes
- */
-
 import {
   BaseStoryGenerator,
-  StoryGenerationError,
   convertAIResponseToScenes,
   type GeneratedScene,
+  StoryGenerationError,
   type StoryGeneratorOptions,
-} from '@/lib/command-handler/generate-story-book-images/scene-generator';
+} from '@/lib/story-scenes-description-generator/story-scenes-description-generator';
+import type {CharactersTable} from '@/lib/db/schema';
 import {
-  SYSTEM_PROMPT,
   generateUserPrompt,
-  validateAIResponse,
-  FALLBACK_SCENES,
-} from '@/lib/ai/prompts';
-import type { CharactersTable } from '@/lib/db/schema';
+  SYSTEM_PROMPT, validateAIResponse
+} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
 
-/**
- * Configuration Ollama depuis les variables d'environnement
- */
 interface OllamaConfig {
   baseUrl: string;
   model: string;
   timeout: number;
 }
 
-/**
- * Format de requête pour l'API Ollama
- */
 interface OllamaGenerateRequest {
   model: string;
   prompt: string;
@@ -41,9 +28,6 @@ interface OllamaGenerateRequest {
   };
 }
 
-/**
- * Format de réponse pour l'API Ollama
- */
 interface OllamaGenerateResponse {
   model: string;
   created_at: string;
@@ -58,9 +42,6 @@ interface OllamaGenerateResponse {
   eval_duration?: number;
 }
 
-/**
- * Format pour vérifier les modèles disponibles
- */
 interface OllamaListResponse {
   models: Array<{
     name: string;
@@ -69,17 +50,12 @@ interface OllamaListResponse {
   }>;
 }
 
-/**
- * Provider Ollama pour la génération d'histoires
- * Communique avec une instance locale d'Ollama via HTTP
- */
 export class OllamaStoryGenerator extends BaseStoryGenerator {
   private config: OllamaConfig;
 
   constructor(options: StoryGeneratorOptions = {}) {
     super('Ollama', options);
 
-    // Configuration depuis les variables d'environnement
     console.log('les variables d\'env Ollama : base url ', process.env.OLLAMA_BASE_URL, ' ollama_model ', process.env.OLLAMA_MODEL)
 
     this.config = {
@@ -91,9 +67,6 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     this.log('Initialized with config:', this.config);
   }
 
-  /**
-   * Vérifie si Ollama est disponible et configuré correctement
-   */
   async isAvailable(): Promise<boolean> {
     try {
       this.log('Checking Ollama availability...');
@@ -113,7 +86,6 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
 
       const data = (await response.json()) as OllamaListResponse;
       
-      // Vérifier que le modèle configuré est disponible
       const modelAvailable = data.models.some((m) =>
         m.name.includes(this.config.model)
       );
@@ -134,16 +106,11 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     }
   }
 
-  /**
-   * Génère une histoire complète avec 4 scènes
-   */
   async generateStory(characters: CharactersTable[]): Promise<GeneratedScene[]> {
     this.log('Starting story generation for', characters.length, 'character(s)');
 
-    // Valider les personnages
     this.validateCharacters(characters);
 
-    // Vérifier que Ollama est disponible
     const available = await this.isAvailable();
     if (!available) {
       throw new StoryGenerationError(
@@ -153,11 +120,9 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     }
 
     try {
-      // Construire les prompts
       const systemPrompt = SYSTEM_PROMPT;
       const userPrompt = generateUserPrompt(characters);
 
-      // Combiner les prompts (Ollama n'a pas de système de messages séparés)
       const fullPrompt = `${systemPrompt}
 
 ---
@@ -169,7 +134,6 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
       this.log('Sending request to Ollama...');
       const startTime = Date.now();
 
-      // Appeler l'API Ollama avec timeout
       const response = await this.withTimeout(
         this.callOllamaAPI(fullPrompt),
         this.config.timeout
@@ -178,17 +142,14 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
       const duration = Date.now() - startTime;
       this.log(`Story generated in ${duration}ms`);
 
-      // Parser et valider la réponse
       const parsedResponse = this.parseJSONResponse(response.response);
       const validatedResponse = validateAIResponse(parsedResponse);
 
-      // Convertir en scènes utilisables
       const scenes = convertAIResponseToScenes(validatedResponse.scenes);
 
       this.log('Successfully generated', scenes.length, 'scenes');
       return scenes;
     } catch (error) {
-      // Log l'erreur et relancer avec plus d'informations
       this.log('Story generation failed:', error);
 
       if (error instanceof StoryGenerationError) {
@@ -203,15 +164,12 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
     }
   }
 
-  /**
-   * Appelle l'API Ollama pour générer du texte
-   */
   private async callOllamaAPI(prompt: string): Promise<OllamaGenerateResponse> {
     const requestBody: OllamaGenerateRequest = {
       model: this.config.model,
       prompt: prompt,
-      stream: false, // Pas de streaming pour simplifier
-      format: 'json', // Demander explicitement du JSON
+      stream: false,
+      format: 'json',
       options: {
         temperature: this.options.temperature,
         num_predict: this.options.maxTokens,
@@ -259,7 +217,6 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
         throw error;
       }
 
-      // Erreur réseau ou autre
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new StoryGenerationError(
           `Cannot connect to Ollama at ${this.config.baseUrl}. Is Ollama running?`,
@@ -276,66 +233,4 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
     }
   }
 
-  /**
-   * Génère une histoire de fallback en cas d'erreur
-   * Utilise les scènes prédéfinies
-   */
-  generateFallbackStory(characters: CharactersTable[]): GeneratedScene[] {
-    this.log('Using fallback scenes');
-
-    return FALLBACK_SCENES.map((scene) => ({
-      scene_number: scene.scene_number,
-      scene_type: scene.scene_type,
-      description: scene.description,
-      prompt: scene.image_prompt,
-    }));
-  }
-
-  /**
-   * Test rapide de connexion à Ollama
-   */
-  async testConnection(): Promise<{
-    connected: boolean;
-    model: string;
-    version?: string;
-    error?: string;
-  }> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}/api/version`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(3000),
-      });
-
-      if (!response.ok) {
-        return {
-          connected: false,
-          model: this.config.model,
-          error: `HTTP ${response.status}`,
-        };
-      }
-
-      const data = await response.json();
-
-      return {
-        connected: true,
-        model: this.config.model,
-        version: data.version || 'unknown',
-      };
-    } catch (error) {
-      return {
-        connected: false,
-        model: this.config.model,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
-  }
-}
-
-/**
- * Factory helper pour créer une instance d'OllamaStoryGenerator
- */
-export function createOllamaGenerator(
-  options?: StoryGeneratorOptions
-): OllamaStoryGenerator {
-  return new OllamaStoryGenerator(options);
 }

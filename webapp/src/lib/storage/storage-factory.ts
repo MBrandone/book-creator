@@ -1,17 +1,10 @@
-import type { StorageProvider } from './storage-interface';
+import type { Storage } from './storage';
 import { MinioStorage } from './minio-storage';
 import { AwsS3Storage } from './aws-s3-storage';
 
-/**
- * Types de storage providers disponibles
- */
 export type StorageProviderType = 'minio' | 'aws-s3';
 
-/**
- * Factory pour créer le storage provider approprié
- * basé sur la configuration d'environnement
- */
-export function createStorageProvider(): StorageProvider {
+export function createStorage(): Storage {
   const providerType = (process.env.STORAGE_PROVIDER || 'aws-s3') as StorageProviderType;
 
   switch (providerType) {
@@ -31,27 +24,11 @@ export function createStorageProvider(): StorageProvider {
   }
 }
 
-/**
- * Instance singleton du storage provider
- * Créée à la première utilisation
- */
-let storageInstance: StorageProvider | null = null;
+let storageInstance: Storage | null = null;
 
-/**
- * Récupère l'instance singleton du storage provider
- * Crée l'instance si elle n'existe pas encore
- */
-export function getStorageProvider(): StorageProvider {
+export function getStorage(): Storage {
   if (!storageInstance) {
-    storageInstance = createStorageProvider();
+    storageInstance = createStorage();
   }
   return storageInstance;
-}
-
-/**
- * Réinitialise l'instance singleton
- * Utile pour les tests ou pour forcer un rechargement de la configuration
- */
-export function resetStorageProvider(): void {
-  storageInstance = null;
 }

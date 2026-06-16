@@ -11,7 +11,7 @@ import type {
   ImageGenerationOptions,
   ImageGenerationResult,
 } from '../command-handler/generate-story-book-images/image-generator';
-import { getStorageProvider } from '../storage/storage-factory';
+import { getStorage } from '../storage/storage-factory';
 
 // Configuration du modèle SDXL
 const SDXL_MODEL = 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b';
@@ -53,7 +53,7 @@ export class ReplicateImageProvider implements ImageGenerator {
    * Upload l'image vers le storage provider configuré (MinIO, AWS S3, Supabase, etc.)
    */
   private async uploadToStorage(imageBuffer: Buffer, filename: string): Promise<{ bucket: string; key: string }> {
-    const storage = getStorageProvider();
+    const storage = getStorage();
     
     // Upload l'image avec les métadonnées appropriées
     const result = await storage.uploadImage(imageBuffer, filename, {

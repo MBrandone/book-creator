@@ -18,9 +18,10 @@ Voici le flow utilisateurs afin de créer une histoire aujourd'hui :
 
 ## Idées futures
 - Téléverser une photo afin que l'IA génère des images de personnages proches de ces photos
-- Avoir autant de personnages que possible
-- Avoir un compte
+- Les planches générés doivent se baser sur la première planche généré
 - Avoir des personnages ré-utilisables dans mes histoires
+- Avoir un compte
 - Choisir le nombre de scène dans mon histoire
 - Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
 - Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
+- Avoir autant de personnages que possible

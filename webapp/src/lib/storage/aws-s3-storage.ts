@@ -2,7 +2,6 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  DeleteObjectCommand,
   DeleteObjectsCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
@@ -11,10 +10,10 @@ import {
   PutBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Readable } from 'stream';
-import type { StorageProvider, ImageMetadata, StorageConfig } from './storage-interface';
+import { Readable } from 'node:stream';
+import {StorageConfig, Storage, ImageMetadata} from "@/lib/storage/storage";
 
-export class AwsS3Storage implements StorageProvider {
+export class AwsS3Storage implements Storage {
   private client: S3Client;
   private config: StorageConfig;
 
@@ -171,29 +170,6 @@ export class AwsS3Storage implements StorageProvider {
     }
   }
 
-  /**
-   * Supprime une image
-   */
-  async deleteImage(key: string): Promise<void> {
-    try {
-      await this.client.send(
-        new DeleteObjectCommand({
-          Bucket: this.config.bucket,
-          Key: key,
-        })
-      );
-      console.log(`✅ Image supprimée avec succès: ${key}`);
-    } catch (error) {
-      console.error(`❌ Erreur lors de la suppression de l'image ${key}:`, error);
-      throw new Error(
-        `Échec de la suppression de l'image: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
-  }
-
-  /**
-   * Supprime plusieurs images
-   */
   async deleteImages(keys: string[]): Promise<void> {
     try {
       await this.client.send(
@@ -267,9 +243,6 @@ export class AwsS3Storage implements StorageProvider {
     }
   }
 
-  /**
-   * Récupère les métadonnées d'une image
-   */
   async getImageMetadata(key: string): Promise<ImageMetadata> {
     try {
       const response = await this.client.send(

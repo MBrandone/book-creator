@@ -4,13 +4,15 @@ import { StoryRepository } from "@/lib/domain/story-repository";
 import { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 import { SceneRepository } from "@/lib/domain/scene-repository";
 import { Scene } from "@/lib/domain/scene";
+import { Storage } from "@/lib/storage/storage";
 
 export class StoryGeneratorService {
   constructor(
     private readonly storyRepository: StoryRepository,
     private readonly scenesGenerator: StoryScenesDescriptionGenerator,
     private readonly sceneImageGenerator: SceneImageGenerator,
-    private readonly sceneRepository: SceneRepository
+    private readonly sceneRepository: SceneRepository,
+    private readonly storage: Storage
   ) {}
 
   async generate(story: Story): Promise<void> {
@@ -21,11 +23,13 @@ export class StoryGeneratorService {
         throw new Error(`Story generator ${this.scenesGenerator.name} is not available`);
       }
 
-      const charactersForGenerator = story.characters.map(char => ({
-        id: char.id,
-        story_id: char.storyId,
-        name: char.name,
-        description: char.description,
+      const charactersForGenerator = story.characters.map(character => ({
+        id: character.id,
+        story_id: character.storyId,
+        name: character.name,
+        description: character.description,
+        photo_storage_bucket: character.photoStorageBucket,
+        photo_storage_key: character.photoStorageKey,
       }));
 
       const generatedScenes = await this.scenesGenerator.generateStory(charactersForGenerator);
@@ -49,11 +53,21 @@ export class StoryGeneratorService {
         await this.sceneRepository.save(scene);
       }
 
+      const referenceImages = story.characters
+        .filter(char => char.photoStorageBucket && char.photoStorageKey)
+        .map(char => ({
+          bucket: char.photoStorageBucket!,
+          key: char.photoStorageKey!
+        }));
+
+      console.log(`📸 Using ${referenceImages.length} reference photos for generation`);
+
       for (const generatedScene of generatedScenes) {
         try {
           const imageResult = await this.sceneImageGenerator.generateImage({
             prompt: generatedScene.prompt,
             aspectRatio: '16:9',
+            referenceImages,
           });
 
           const sceneWithImage: Scene = {

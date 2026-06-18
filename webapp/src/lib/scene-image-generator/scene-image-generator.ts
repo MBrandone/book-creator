@@ -6,6 +6,7 @@ export interface ImageGenerationOptions {
   steps?: number;
   guidance?: number;
   negativePrompt?: string;
+  referenceImages?: Array<{ bucket: string; key: string }>;
 }
 
 export interface ImageGenerationResult {

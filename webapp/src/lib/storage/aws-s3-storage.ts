@@ -148,13 +148,46 @@ export class AwsS3Storage implements Storage {
   }
 
   /**
-   * Récupère une URL présignée pour accéder temporairement à une image
+   * Récupère le contenu d'une image sous forme de Buffer
    */
-  async getPresignedImageUrl(key: string, expirySeconds: number = 86400): Promise<string> {
+  async getImageBuffer(key: string): Promise<Buffer> {
     try {
-      const command = new GetObjectCommand({
+      const response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: key,
+        })
+      );
+
+      if (!response.Body) {
+        throw new Error('No body in response');
+      }
+
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of response.Body as any) {
+        chunks.push(chunk);
+      }
+
+      const buffer = Buffer.concat(chunks);
+      console.log(`✅ Image buffer récupéré: ${key} (${buffer.length} bytes)`);
+      return buffer;
+    } catch (error) {
+      console.error(`❌ Erreur lors de la récupération du buffer pour ${key}:`, error);
+      throw new Error(
+        `Échec de la récupération de l'image: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Récupère une URL présignée pour uploader une image
+   */
+  async getPresignedUploadUrl(key: string, contentType: string, expirySeconds: number = 900): Promise<string> {
+    try {
+      const command = new PutObjectCommand({
         Bucket: this.config.bucket,
         Key: key,
+        ContentType: contentType,
       });
 
       const url = await getSignedUrl(this.client, command, {
@@ -163,9 +196,9 @@ export class AwsS3Storage implements Storage {
 
       return url;
     } catch (error) {
-      console.error(`❌ Erreur lors de la génération de l'URL présignée pour ${key}:`, error);
+      console.error(`❌ Erreur lors de la génération de l'URL présignée d'upload pour ${key}:`, error);
       throw new Error(
-        `Échec de la génération de l'URL: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Échec de la génération de l'URL d'upload: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }

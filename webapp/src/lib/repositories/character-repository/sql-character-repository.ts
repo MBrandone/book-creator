@@ -12,6 +12,8 @@ export class SqlCharacterRepository implements CharacterRepository {
           story_id: character.storyId,
           name: character.name,
           description: character.description,
+          photo_storage_bucket: character.photoStorageBucket,
+          photo_storage_key: character.photoStorageKey,
         })
         .execute();
     } catch (error: any) {
@@ -22,6 +24,16 @@ export class SqlCharacterRepository implements CharacterRepository {
       console.error('Erreur lors de l\'insertion du personnage en base de données:', error);
       throw error;
     }
+  }
+
+  async existsById(characterId: string): Promise<boolean> {
+    const result = await db
+      .selectFrom('characters')
+      .select('id')
+      .where('id', '=', characterId)
+      .executeTakeFirst();
+
+    return result !== undefined;
   }
 
   private isDuplicateKeyError(error: any): boolean {

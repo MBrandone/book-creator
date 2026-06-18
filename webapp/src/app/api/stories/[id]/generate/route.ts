@@ -9,8 +9,9 @@ import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 import { StoryAlreadyGeneratingError } from '@/lib/command-handler/generate-story-book-images/story-already-generating-error';
 import { NoCharactersFoundError } from '@/lib/command-handler/generate-story-book-images/no-characters-found-error';
 import { StoryGeneratorService } from '@/lib/service/story-generator-service';
-import { getReplicateProvider } from '@/lib/scene-image-generator/replicate-scene-image-generator';
+import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-generator';
 import { SqlSceneRepository } from '@/lib/repositories/scene-repository/sql-scene-repository';
+import { getStorage } from '@/lib/storage/storage-factory';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -38,13 +39,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const storyRepository = new SqlStoryRepository();
     const sceneRepository = new SqlSceneRepository();
     const scenesGenerator = new InMemorySceneGenerator();
-    const sceneImageGenerator = getReplicateProvider();
+    const sceneImageGenerator = getReplicateFluxKleinGenerator();
+    const storage = getStorage();
     
     const storyGeneratorService = new StoryGeneratorService(
       storyRepository,
       scenesGenerator,
       sceneImageGenerator,
-      sceneRepository
+      sceneRepository,
+      storage
     );
     
     const commandHandler = new GenerateStoryBookImagesCommandHandler(

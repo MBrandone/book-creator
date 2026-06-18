@@ -13,7 +13,7 @@ export class GenerateStoryBookImagesCommandHandler {
     async execute(storyId: string): Promise<void> {
         const story = await this.storyRepository.get(storyId);
 
-        if (story.status !== 'pending') {
+        if (story.status === 'generating') {
             throw new StoryAlreadyGeneratingError(story.status);
         }
 

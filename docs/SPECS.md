@@ -14,14 +14,5 @@ Voici le flow utilisateurs afin de créer une histoire aujourd'hui :
 5) L'IA génère l'histoire
    - Un modèle de génération de texte génère un scenario en 4 parties
    - Un modèle de génération d'images génère des images basés sur ces personnages et les scenarios générés
-6) Les images générés s'affiches dans l'application
+6) Les images générés s'affichent dans l'application
 
-## Idées futures
-- Téléverser une photo afin que l'IA génère des images de personnages proches de ces photos
-- Les planches générés doivent se baser sur la première planche généré
-- Avoir des personnages ré-utilisables dans mes histoires
-- Avoir un compte
-- Choisir le nombre de scène dans mon histoire
-- Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
-- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
-- Avoir autant de personnages que possible

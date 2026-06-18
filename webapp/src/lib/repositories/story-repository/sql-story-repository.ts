@@ -56,6 +56,8 @@ export class SqlStoryRepository implements StoryRepository {
         storyId: char.story_id,
         name: char.name,
         description: char.description,
+        photoStorageBucket: char.photo_storage_bucket,
+        photoStorageKey: char.photo_storage_key,
       })
     );
 

@@ -112,14 +112,34 @@ export class MinioStorage implements Storage {
     return `${publicBaseUrl}/${bucket}/${key}`;
   }
 
-  async getPresignedImageUrl(key: string, expirySeconds: number = 86400): Promise<string> {
+  async getImageBuffer(key: string): Promise<Buffer> {
     try {
-      const url = await this.client.presignedGetObject(this.config.bucket, key, expirySeconds);
+      const stream = await this.client.getObject(this.config.bucket, key);
+      const chunks: Buffer[] = [];
+      
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      
+      const buffer = Buffer.concat(chunks);
+      console.log(`✅ Image buffer récupéré: ${key} (${buffer.length} bytes)`);
+      return buffer;
+    } catch (error) {
+      console.error(`❌ Erreur lors de la récupération du buffer pour ${key}:`, error);
+      throw new Error(
+        `Échec de la récupération de l'image: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  async getPresignedUploadUrl(key: string, contentType: string, expirySeconds: number = 900): Promise<string> {
+    try {
+      const url = await this.client.presignedPutObject(this.config.bucket, key, expirySeconds);
       return url;
     } catch (error) {
-      console.error(`❌ Erreur lors de la génération de l'URL présignée pour ${key}:`, error);
+      console.error(`❌ Erreur lors de la génération de l'URL présignée d'upload pour ${key}:`, error);
       throw new Error(
-        `Échec de la génération de l'URL: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Échec de la génération de l'URL d'upload: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }

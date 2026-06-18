@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
+import { CharacterPhotoUpload } from "@/components/character-photo-upload"
 
 interface CreateStoryPayload {
   id: string
@@ -128,9 +129,11 @@ export default function CreateStoryPage() {
   const [storyId, setStoryId] = useState<string | null>(null)
   const [characterName, setCharacterName] = useState("")
   const [characterDescription, setCharacterDescription] = useState("")
-  const [characters, setCharacters] = useState<Array<{ id: string, name: string, description: string }>>([])
+  const [characters, setCharacters] = useState<Array<{ id: string, name: string, description: string, photoUrl?: string | null }>>([])
   const [showCharacterForm, setShowCharacterForm] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(null)
+  const [hasUploadedPhoto, setHasUploadedPhoto] = useState(false)
 
   const storyMutation = useMutation({
     mutationFn: createStory,
@@ -147,13 +150,8 @@ export default function CreateStoryPage() {
     mutationFn: ({ storyId, payload }: { storyId: string, payload: CreateCharacterPayload }) => 
       createCharacter(storyId, payload),
     onSuccess: (_, variables) => {
-      // Ajouter le personnage à la liste
       const newCharacter = variables.payload.characters[0]
-      setCharacters(prev => [...prev, newCharacter])
-      // Réinitialiser le formulaire
-      setCharacterName("")
-      setCharacterDescription("")
-      setShowCharacterForm(false)
+      setCharacters(prev => [...prev, { ...newCharacter, photoUrl: null }])
     },
   })
 
@@ -176,6 +174,7 @@ export default function CreateStoryPage() {
     if (!storyId) return
     
     const characterId = crypto.randomUUID()
+    setCurrentCharacterId(characterId)
     
     characterMutation.mutate({
       storyId,
@@ -214,7 +213,28 @@ export default function CreateStoryPage() {
   })
 
   const handleAddAnotherCharacter = () => {
+    setCharacterName("")
+    setCharacterDescription("")
+    setCurrentCharacterId(null)
     setShowCharacterForm(true)
+    setHasUploadedPhoto(false)
+  }
+
+  const handlePhotoUploaded = (characterId: string, photoUrl: string) => {
+    setCharacters(prev => 
+      prev.map(char => 
+        char.id === characterId ? { ...char, photoUrl } : char
+      )
+    )
+    setHasUploadedPhoto(true)
+  }
+
+  const handleContinueWithoutPhoto = () => {
+    setCharacterName("")
+    setCharacterDescription("")
+    setCurrentCharacterId(null)
+    setShowCharacterForm(false)
+    setHasUploadedPhoto(false)
   }
 
   const handleGenerateStory = () => {
@@ -314,7 +334,7 @@ export default function CreateStoryPage() {
       )}
 
       {/* Formulaire de création de personnage */}
-      {storyId && showCharacterForm && (
+      {storyId && showCharacterForm && !currentCharacterId && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Ajouter un Personnage</CardTitle>
@@ -379,8 +399,34 @@ export default function CreateStoryPage() {
         </Card>
       )}
 
+      {/* Étape d'upload de photo après création du personnage */}
+      {storyId && currentCharacterId && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Photo de référence</CardTitle>
+            <CardDescription>
+              Ajoutez une photo pour personnaliser l'apparence de votre personnage (optionnel)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CharacterPhotoUpload
+              characterId={currentCharacterId}
+              onPhotoUploaded={(photoUrl) => handlePhotoUploaded(currentCharacterId, photoUrl)}
+            />
+            <Button 
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleContinueWithoutPhoto}
+            >
+              {hasUploadedPhoto ? "Continuer avec cette photo" : "Continuer sans photo"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Message de succès et bouton pour ajouter un autre personnage */}
-      {storyId && !showCharacterForm && characters.length > 0 && (
+      {storyId && !showCharacterForm && !currentCharacterId && characters.length > 0 && (
         <div className="space-y-4">
           <div className="p-4 rounded-md bg-green-50 border border-green-200">
             <p className="text-sm font-medium text-green-800">
@@ -395,10 +441,26 @@ export default function CreateStoryPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {characters.map((character, index) => (
+                {characters.map((character) => (
                   <div key={character.id} className="p-4 border rounded-md">
-                    <h3 className="font-semibold text-lg">{character.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{character.description}</p>
+                    <div className="flex gap-4">
+                      {character.photoUrl && (
+                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                          <img
+                            src={character.photoUrl}
+                            alt={character.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">{character.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{character.description}</p>
+                        {character.photoUrl && (
+                          <p className="text-xs text-green-600 mt-2">✓ Photo de référence ajoutée</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

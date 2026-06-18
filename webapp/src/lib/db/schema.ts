@@ -17,6 +17,8 @@ export interface CharactersTable {
   story_id: string;
   name: string;
   description: string;
+  photo_storage_bucket: string | null;
+  photo_storage_key: string | null;
 }
 
 export interface ScenesTable {

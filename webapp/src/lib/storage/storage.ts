@@ -11,7 +11,9 @@ export interface Storage {
 
   getImageUrl(bucket: string, key: string): string;
 
-  getPresignedImageUrl(key: string, expirySeconds?: number): Promise<string>;
+  getImageBuffer(key: string): Promise<Buffer>;
+
+  getPresignedUploadUrl(key: string, contentType: string, expirySeconds?: number): Promise<string>;
 
   deleteImages(keys: string[]): Promise<void>;
 

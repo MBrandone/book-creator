@@ -16,7 +16,7 @@ export class SqlStoryReadModel implements StoryReadModel {
       
       db
         .selectFrom('characters')
-        .select(['id', 'name', 'description'])
+        .select(['id', 'name', 'description', 'photo_storage_bucket', 'photo_storage_key'])
         .where('story_id', '=', storyId)
         .execute(),
       

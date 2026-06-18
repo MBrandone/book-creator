@@ -1,0 +1,361 @@
+{
+  "title": "Creer une histoire",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1063,
+      "height": 951,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "change",
+      "value": "L'aventure MA",
+      "selectors": [
+        [
+          "aria/Nom de l'histoire *"
+        ],
+        [
+          "#title"
+        ],
+        [
+          "xpath///*[@id=\"title\"]"
+        ],
+        [
+          "pierce/#title"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "keyUp",
+      "key": "m",
+      "target": "main"
+    },
+    {
+      "type": "keyUp",
+      "key": "a",
+      "target": "main"
+    },
+    {
+      "type": "change",
+      "value": "Un dragon de Feu et de coeur",
+      "selectors": [
+        [
+          "aria/Nom de l'histoire *"
+        ],
+        [
+          "#title"
+        ],
+        [
+          "xpath///*[@id=\"title\"]"
+        ],
+        [
+          "pierce/#title"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Description *"
+        ],
+        [
+          "#description"
+        ],
+        [
+          "xpath///*[@id=\"description\"]"
+        ],
+        [
+          "pierce/#description"
+        ]
+      ],
+      "offsetY": 30,
+      "offsetX": 74.5
+    },
+    {
+      "type": "change",
+      "value": "Deux amis sont dans la forêt et rencontrent un dragon. Ils veulent sauver leur famille et partent le combattre. Ils se rendent compte de sa gentillesse et décide de le sauver.",
+      "selectors": [
+        [
+          "aria/Description *"
+        ],
+        [
+          "#description"
+        ],
+        [
+          "xpath///*[@id=\"description\"]"
+        ],
+        [
+          "pierce/#description"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Créer l'histoire"
+        ],
+        [
+          "button"
+        ],
+        [
+          "xpath//html/body/div[2]/div[2]/div[2]/form/button"
+        ],
+        [
+          "pierce/button"
+        ],
+        [
+          "text/Créer l'histoire"
+        ]
+      ],
+      "offsetY": 18,
+      "offsetX": 216.5
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Nom du personnage *"
+        ],
+        [
+          "#character-name"
+        ],
+        [
+          "xpath///*[@id=\"character-name\"]"
+        ],
+        [
+          "pierce/#character-name"
+        ]
+      ],
+      "offsetY": 21,
+      "offsetX": 130.5
+    },
+    {
+      "type": "change",
+      "value": "Brandone",
+      "selectors": [
+        [
+          "aria/Nom du personnage *"
+        ],
+        [
+          "#character-name"
+        ],
+        [
+          "xpath///*[@id=\"character-name\"]"
+        ],
+        [
+          "pierce/#character-name"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Description du personnage *"
+        ],
+        [
+          "#character-description"
+        ],
+        [
+          "xpath///*[@id=\"character-description\"]"
+        ],
+        [
+          "pierce/#character-description"
+        ]
+      ],
+      "offsetY": 23,
+      "offsetX": 111.5
+    },
+    {
+      "type": "change",
+      "value": "Un jeune garçon beau gosse, mais qui manque de confiance en lui.",
+      "selectors": [
+        [
+          "aria/Description du personnage *"
+        ],
+        [
+          "#character-description"
+        ],
+        [
+          "xpath///*[@id=\"character-description\"]"
+        ],
+        [
+          "pierce/#character-description"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Créer le personnage"
+        ],
+        [
+          "button"
+        ],
+        [
+          "xpath//html/body/div[2]/div[3]/div[2]/form/button"
+        ],
+        [
+          "pierce/button"
+        ],
+        [
+          "text/Créer le personnage"
+        ]
+      ],
+      "offsetY": 24,
+      "offsetX": 220.5
+    },
+    {
+      "type": "waitForElement",
+      "target": "main",
+      "selectors": [
+        "aria/Ajouter un autre personnage",
+        "button",
+        "xpath//html/body/div[2]/div[3]/button",
+        "pierce/button",
+        "text/Ajouter un autre"
+      ],
+      "visible": true
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Ajouter un autre personnage"
+        ],
+        [
+          "button"
+        ],
+        [
+          "xpath//html/body/div[2]/div[3]/button"
+        ],
+        [
+          "pierce/button"
+        ],
+        [
+          "text/Ajouter un autre"
+        ]
+      ],
+      "offsetY": 21,
+      "offsetX": 199.5
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Nom du personnage *"
+        ],
+        [
+          "#character-name"
+        ],
+        [
+          "xpath///*[@id=\"character-name\"]"
+        ],
+        [
+          "pierce/#character-name"
+        ]
+      ],
+      "offsetY": 15,
+      "offsetX": 127.5
+    },
+    {
+      "type": "change",
+      "value": "Rémi",
+      "selectors": [
+        [
+          "aria/Nom du personnage *"
+        ],
+        [
+          "#character-name"
+        ],
+        [
+          "xpath///*[@id=\"character-name\"]"
+        ],
+        [
+          "pierce/#character-name"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Description du personnage *"
+        ],
+        [
+          "#character-description"
+        ],
+        [
+          "xpath///*[@id=\"character-description\"]"
+        ],
+        [
+          "pierce/#character-description"
+        ]
+      ],
+      "offsetY": 37,
+      "offsetX": 92.5
+    },
+    {
+      "type": "change",
+      "value": "Un jeune garçon, tout feu tout flamme très fort et impuslif, mais avec un grand coeur.",
+      "selectors": [
+        [
+          "aria/Description du personnage *"
+        ],
+        [
+          "#character-description"
+        ],
+        [
+          "xpath///*[@id=\"character-description\"]"
+        ],
+        [
+          "pierce/#character-description"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Créer le personnage"
+        ],
+        [
+          "button"
+        ],
+        [
+          "xpath//html/body/div[2]/div[3]/div[2]/form/button"
+        ],
+        [
+          "pierce/button"
+        ],
+        [
+          "text/Créer le personnage"
+        ]
+      ],
+      "offsetY": 20,
+      "offsetX": 232.5
+    }
+  ]
+}

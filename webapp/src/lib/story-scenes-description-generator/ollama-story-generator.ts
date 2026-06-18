@@ -106,10 +106,11 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     }
   }
 
-  async generateStory(characters: CharactersTable[]): Promise<GeneratedScene[]> {
-    this.log('Starting story generation for', characters.length, 'character(s)');
+  async generateStory(context: import('./story-scenes-description-generator').StoryContext): Promise<GeneratedScene[]> {
+    this.log('Starting story generation for story:', context.title);
+    this.log('Characters:', context.characters.length);
 
-    this.validateCharacters(characters);
+    this.validateStoryContext(context);
 
     const available = await this.isAvailable();
     if (!available) {
@@ -121,7 +122,7 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
 
     try {
       const systemPrompt = SYSTEM_PROMPT;
-      const userPrompt = generateUserPrompt(characters);
+      const userPrompt = generateUserPrompt(context.title, context.description, context.characters);
 
       const fullPrompt = `${systemPrompt}
 

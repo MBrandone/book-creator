@@ -55,7 +55,13 @@ export class StoryGeneratorService {
         photo_storage_key: character.photoStorageKey,
       }));
 
-      const generatedScenes = await this.scenesGenerator.generateStory(charactersForGenerator);
+      const storyContext = {
+        title: story.title,
+        description: story.description,
+        characters: charactersForGenerator,
+      };
+
+      const generatedScenes = await this.scenesGenerator.generateStory(storyContext);
 
       if (generatedScenes.length !== 4) {
         throw new Error(`Expected 4 scenes, got ${generatedScenes.length}`);

@@ -21,9 +21,9 @@ Tu dois générer exactement 4 scènes pour chaque histoire :
 4. Résolution : Le problème est résolu, fin heureuse`;
 
 /**
- * Génère le prompt utilisateur avec les descriptions des personnages
+ * Génère le prompt utilisateur avec le contexte de l'histoire
  */
-export function generateUserPrompt(characters: CharactersTable[]): string {
+export function generateUserPrompt(title: string, description: string, characters: CharactersTable[]): string {
     const characterDescriptions = characters
         .map((char, index) => {
             return `Personnage ${index + 1} : ${char.name}
@@ -31,11 +31,16 @@ Description : ${char.description}`;
         })
         .join('\n\n');
 
-    return `Crée une histoire pour enfants mettant en scène ces personnages :
+    return `Crée une histoire pour enfants avec les informations suivantes :
 
+TITRE : ${title}
+THÈME/CONTEXTE : ${description}
+
+PERSONNAGES :
 ${characterDescriptions}
 
 L'histoire doit :
+- Respecter le thème/contexte défini ci-dessus
 - Être divisée en exactement 4 scènes
 - Durer environ 2-3 minutes de lecture
 - Être adaptée aux enfants de 3 à 8 ans
@@ -105,6 +110,20 @@ export function getStylePrefix(style: ArtStyle = DEFAULT_ART_STYLE): string {
     return `${styleConfig.basePrompt}, ${styleConfig.colorPalette}, ${styleConfig.qualityModifiers}`;
 }
 
+/**
+ * Normalise une chaîne en supprimant les accents
+ */
+function removeAccents(str: string): string {
+    return str.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+/**
+ * Normalise le scene_type en enlevant les accents et en le mettant en minuscules
+ */
+function normalizeSceneType(sceneType: string): string {
+    return removeAccents(sceneType.toLowerCase().trim());
+}
+
 export function validateAIResponse(response: unknown): AIStoryResponse {
     if (!response || typeof response !== 'object') {
         throw new Error('Invalid AI response: not an object');
@@ -136,8 +155,19 @@ export function validateAIResponse(response: unknown): AIStoryResponse {
             throw new Error(`Invalid scene at index ${i}: scene_number is not a number`);
         }
 
-        if (!validSceneTypes.includes(sceneObj.scene_type as SceneType)) {
-            throw new Error(`Invalid scene at index ${i}: invalid scene_type`);
+        // Normaliser le scene_type en enlevant les accents
+        if (typeof sceneObj.scene_type === 'string') {
+            const normalizedType = normalizeSceneType(sceneObj.scene_type);
+
+            // Vérifier si le type normalisé est valide
+            if (!validSceneTypes.includes(normalizedType as SceneType)) {
+                throw new Error(`Invalid scene at index ${i}: invalid scene_type '${sceneObj.scene_type}' (normalized: '${normalizedType}')`);
+            }
+
+            // Remplacer par le type normalisé
+            sceneObj.scene_type = normalizedType;
+        } else {
+            throw new Error(`Invalid scene at index ${i}: scene_type is not a string`);
         }
 
         if (typeof sceneObj.description !== 'string' || sceneObj.description.length < 10) {

@@ -12,6 +12,7 @@ import { StoryGeneratorService } from '@/lib/story-generator-service/story-gener
 import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-scene-image-generator';
 import { SqlSceneRepository } from '@/lib/infrastructure/repositories/scene-repository/sql-scene-repository';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
+import {OllamaStoryGenerator} from "@/lib/story-scenes-description-generator/ollama-story-generator";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const storyRepository = new SqlStoryRepository();
     const sceneRepository = new SqlSceneRepository();
-    const scenesGenerator = new InMemorySceneGenerator();
+    const scenesGenerator = new OllamaStoryGenerator();
     const sceneImageGenerator = getReplicateFluxKleinGenerator();
     const storage = getStorage();
     

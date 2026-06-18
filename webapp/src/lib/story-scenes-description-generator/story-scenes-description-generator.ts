@@ -2,8 +2,14 @@ import type { CharactersTable, SceneType } from '@/lib/infrastructure/db/schema'
 
 import {AISceneResponse} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
 
+export interface StoryContext {
+  title: string;
+  description: string;
+  characters: CharactersTable[];
+}
+
 export interface StoryScenesDescriptionGenerator {
-  generateStory(characters: CharactersTable[]): Promise<GeneratedScene[]>;
+  generateStory(context: StoryContext): Promise<GeneratedScene[]>;
   isAvailable(): Promise<boolean>;
   readonly name: string;
 }
@@ -27,7 +33,7 @@ export interface StoryGeneratorOptions {
 }
 
 export const DEFAULT_OPTIONS: Required<StoryGeneratorOptions> = {
-  timeout: 60000, // 60 secondes
+  timeout: 600000, // 60 secondes
   temperature: 0.7, // Équilibre entre créativité et cohérence
   maxTokens: 2000, // Suffisant pour 4 scènes détaillées
   debug: false,
@@ -70,29 +76,45 @@ export abstract class BaseStoryGenerator implements StoryScenesDescriptionGenera
     this.options = { ...DEFAULT_OPTIONS, ...options };
   }
 
-  abstract generateStory(characters: CharactersTable[]): Promise<GeneratedScene[]>;
+  abstract generateStory(context: StoryContext): Promise<GeneratedScene[]>;
   abstract isAvailable(): Promise<boolean>;
 
   protected log(...args: unknown[]): void {
     console.log(`[${this.name}]`, ...args);
   }
 
-  protected validateCharacters(characters: CharactersTable[]): void {
-    if (!Array.isArray(characters) || characters.length === 0) {
+  protected validateStoryContext(context: StoryContext): void {
+    // Validation du titre et de la description
+    if (!context.title || context.title.trim().length === 0) {
+      throw new StoryGenerationError(
+        'Story title is required',
+        this.name
+      );
+    }
+
+    if (!context.description || context.description.trim().length < 10) {
+      throw new StoryGenerationError(
+        'Story description needs to be at least 10 characters',
+        this.name
+      );
+    }
+
+    // Validation des personnages
+    if (!Array.isArray(context.characters) || context.characters.length === 0) {
       throw new StoryGenerationError(
         'At least one character is required',
         this.name
       );
     }
 
-    if (characters.length > 5) {
+    if (context.characters.length > 5) {
       throw new StoryGenerationError(
         'Too many characters (maximum 5)',
         this.name
       );
     }
 
-    for (const char of characters) {
+    for (const char of context.characters) {
       if (!char.name || char.name.trim().length === 0) {
         throw new StoryGenerationError(
           'Character name is required',

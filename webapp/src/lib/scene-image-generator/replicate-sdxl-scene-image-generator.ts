@@ -20,7 +20,7 @@ interface SDXLOutput {
   url?: string;
 }
 
-export class ReplicateSceneImageGenerator implements SceneImageGenerator {
+export class ReplicateSdxlSceneImageGenerator implements SceneImageGenerator {
   readonly name = 'replicate-sdxl';
   private client: Replicate;
 
@@ -134,11 +134,11 @@ export class ReplicateSceneImageGenerator implements SceneImageGenerator {
   }
 }
 
-let _replicateProviderInstance: ReplicateSceneImageGenerator | null = null;
+let _replicateProviderInstance: ReplicateSdxlSceneImageGenerator | null = null;
 
-export function getReplicateProvider(): ReplicateSceneImageGenerator {
+export function getReplicateProvider(): ReplicateSdxlSceneImageGenerator {
   if (!_replicateProviderInstance) {
-    _replicateProviderInstance = new ReplicateSceneImageGenerator();
+    _replicateProviderInstance = new ReplicateSdxlSceneImageGenerator();
   }
   return _replicateProviderInstance;
 }

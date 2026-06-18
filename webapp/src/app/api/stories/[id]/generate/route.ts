@@ -9,7 +9,7 @@ import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 import { StoryAlreadyGeneratingError } from '@/lib/application/handlers/command/generate-story-book-images/story-already-generating-error';
 import { NoCharactersFoundError } from '@/lib/application/handlers/command/generate-story-book-images/no-characters-found-error';
 import { StoryGeneratorService } from '@/lib/story-generator-service/story-generator-service';
-import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-generator';
+import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-scene-image-generator';
 import { SqlSceneRepository } from '@/lib/infrastructure/repositories/scene-repository/sql-scene-repository';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
 

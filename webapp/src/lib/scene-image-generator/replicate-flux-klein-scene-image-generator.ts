@@ -8,7 +8,7 @@ const DEFAULT_ASPECT_RATIO = '1:1';
 const DEFAULT_OUTPUT_MEGAPIXELS = '1';
 const DEFAULT_OUTPUT_FORMAT = 'jpg';
 
-export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
+export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerator {
   readonly name = 'replicate-flux-klein';
   private client: Replicate;
 
@@ -18,30 +18,6 @@ export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
       throw new Error('REPLICATE_API_TOKEN is required');
     }
     this.client = new Replicate({ auth: token });
-  }
-
-  private async convertImageToDataUri(key: string): Promise<string> {
-    try {
-      const storage = getStorage();
-      const buffer = await storage.getImageBuffer(key);
-      
-      let mimeType = 'image/jpeg';
-      if (key.endsWith('.png')) {
-        mimeType = 'image/png';
-      } else if (key.endsWith('.webp')) {
-        mimeType = 'image/webp';
-      }
-      
-      const base64 = buffer.toString('base64');
-      const dataUri = `data:${mimeType};base64,${base64}`;
-      
-      console.log(`✅ Image convertie en data URI: ${key} (${buffer.length} bytes -> ${dataUri.length} chars)`);
-      
-      return dataUri;
-    } catch (error) {
-      console.error(`❌ Erreur lors de la conversion de l'image ${key} en data URI:`, error);
-      throw error;
-    }
   }
 
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult> {
@@ -68,12 +44,8 @@ export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
       };
 
       if (referenceImages.length > 0) {
-        console.log('🔄 Conversion des images de référence en data URIs...');
-        const referenceDataUris = await Promise.all(
-          referenceImages.map(img => this.convertImageToDataUri(img.key))
-        );
-        console.log(`✅ ${referenceDataUris.length} images converties en data URIs`);
-        input.images = referenceDataUris;
+        console.log(`📸 Using ${referenceImages.length} pre-converted reference images`);
+        input.images = referenceImages.map(img => img.dataUri);
       }
 
       if (seed) {
@@ -85,7 +57,7 @@ export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
       console.log('✅ Image generated successfully');
 
       const imageUrl = Array.isArray(output) ? output[0] : output;
-      
+
       console.log('📥 Retrieving image from Replicate...');
       const response = await fetch(imageUrl);
       const arrayBuffer = await response.arrayBuffer();
@@ -94,7 +66,7 @@ export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
 
       const timestamp = Date.now();
       const filename = `images/generated/${timestamp}-${seed || 'random'}.${DEFAULT_OUTPUT_FORMAT}`;
-      
+
       console.log('📤 Uploading to storage...');
       const storage = getStorage();
       const { bucket, key } = await storage.uploadImage(imageBuffer, filename, {
@@ -117,17 +89,18 @@ export class ReplicateFluxKleinGenerator implements SceneImageGenerator {
     } catch (error) {
       console.error('❌ Error generating image:', error);
       throw new Error(
-        `Failed to generate image with Replicate Flux Klein: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `Failed to generate image with Replicate Flux Klein: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
+
 }
 
-let _fluxKleinProviderInstance: ReplicateFluxKleinGenerator | null = null;
+let _fluxKleinProviderInstance: ReplicateFluxKleinSceneImageGenerator | null = null;
 
-export function getReplicateFluxKleinGenerator(): ReplicateFluxKleinGenerator {
+export function getReplicateFluxKleinGenerator(): ReplicateFluxKleinSceneImageGenerator {
   if (!_fluxKleinProviderInstance) {
-    _fluxKleinProviderInstance = new ReplicateFluxKleinGenerator();
+    _fluxKleinProviderInstance = new ReplicateFluxKleinSceneImageGenerator();
   }
   return _fluxKleinProviderInstance;
 }

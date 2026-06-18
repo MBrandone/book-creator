@@ -1,29 +1,8 @@
 import { CharacterRepository } from '@/lib/domain/character-repository';
 import { CharacterPhotoRepository } from '@/lib/domain/character-photo-repository';
-import { Storage } from '@/lib/storage/storage';
+import { Storage } from '@/lib/infrastructure/storage/storage';
 import { CharacterNotFoundError } from './character-not-found-error';
 import { InvalidContentTypeError } from './invalid-content-type-error';
-
-export interface GetPhotoUploadUrlCommand {
-  characterId: string;
-  contentType: string;
-}
-
-export interface GetPhotoUploadUrlResult {
-  uploadUrl: string;
-  photoUrl: string;
-  storageKey: string;
-  expiresIn: number;
-}
-
-const ALLOWED_CONTENT_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-];
-
-const UPLOAD_URL_EXPIRY_SECONDS = 900;
 
 export class GetPhotoUploadUrlCommandHandler {
   constructor(
@@ -83,3 +62,24 @@ export class GetPhotoUploadUrlCommandHandler {
     return extension;
   }
 }
+
+export interface GetPhotoUploadUrlCommand {
+  characterId: string;
+  contentType: string;
+}
+
+export interface GetPhotoUploadUrlResult {
+  uploadUrl: string;
+  photoUrl: string;
+  storageKey: string;
+  expiresIn: number;
+}
+
+const ALLOWED_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+];
+
+const UPLOAD_URL_EXPIRY_SECONDS = 900;

@@ -5,7 +5,7 @@ import {
   StoryGenerationError,
   type StoryGeneratorOptions,
 } from '@/lib/story-scenes-description-generator/story-scenes-description-generator';
-import type {CharactersTable} from '@/lib/db/schema';
+import type {CharactersTable} from '@/lib/infrastructure/db/schema';
 import {
   generateUserPrompt,
   SYSTEM_PROMPT, validateAIResponse

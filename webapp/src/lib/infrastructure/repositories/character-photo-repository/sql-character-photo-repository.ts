@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/infrastructure/db';
 import { CharacterPhoto, CharacterPhotoRepository } from '@/lib/domain/character-photo-repository';
-import { Storage } from '@/lib/storage/storage';
+import { Storage } from '@/lib/infrastructure/storage/storage';
 
 export class SqlCharacterPhotoRepository implements CharacterPhotoRepository {
   constructor(private readonly storage: Storage) {}

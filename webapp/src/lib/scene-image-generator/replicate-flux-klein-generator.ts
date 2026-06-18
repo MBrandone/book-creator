@@ -1,6 +1,6 @@
 import Replicate from 'replicate';
 import type { ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator } from './scene-image-generator';
-import { getStorage } from '../storage/storage-factory';
+import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
 
 const FLUX_KLEIN_MODEL = 'black-forest-labs/flux-2-klein-4b';
 

@@ -7,8 +7,6 @@
   - Renommer /status en generation
 - Les générations de photos se basent sur la première.
 - Automatiser le deploiement avec une cli
--
-## Idées futures
 - Téléverser une photo afin que l'IA génère des images de personnages proches de ces photos
 - Les planches générés doivent se baser sur la première planche généré
 - Avoir des personnages ré-utilisables dans mes histoires
@@ -20,7 +18,19 @@
 
 
 # Doing
-- [ ] Je peux associer une photo à mon personnage
+- [ ] Améliorations de je peux associer une photo à mon personnage
+  - [Story Generator] Les images sont téléchargés et transformés en bases 64 à chaque génération
+    - Elle ne devrait l'être qu'un seule fois
+  - Supprimer la demo page des composants
+  - l'upload de photo se fait en même temps que les infos des personnages
+  - Pas besoin d'endpoint pour supprimer la photo d'un personnage
+  - En terme de sécurité, on checke le type de l'image par rapport à ce qu'il y a dans le body
+    - L'utilisateur peut nous mentir ... Comment faire mieux ?
+      - Verif côté navigateur ? Mais l'utilisateur aura toujours une url pré-signé
+      - Configuration du storage pour bloquer certains types et avoir une taille maximum ?
+  - Les process.env dans les fichier de libs, c'est pas ouf.
+    - Comment faire mieux ?
+ 
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -35,3 +45,4 @@
   - StoryRepository (save, get)
   - CharacterRepository (save, get)
   - SceneRepository
+- [X] Je peux associer une photo à mon personnage

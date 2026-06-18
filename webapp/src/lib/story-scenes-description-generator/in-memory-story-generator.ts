@@ -1,5 +1,5 @@
 import {GeneratedScene, StoryScenesDescriptionGenerator} from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
-import {type SceneType} from "@/lib/db";
+import {type SceneType} from "@/lib/infrastructure/db";
 
 import {getStylePrefix} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
 

@@ -4,7 +4,7 @@ import { StoryRepository } from "@/lib/domain/story-repository";
 import { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 import { SceneRepository } from "@/lib/domain/scene-repository";
 import { Scene } from "@/lib/domain/scene";
-import { Storage } from "@/lib/storage/storage";
+import { Storage } from "@/lib/infrastructure/storage/storage";
 
 export class StoryGeneratorService {
   constructor(

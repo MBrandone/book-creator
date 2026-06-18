@@ -1,6 +1,6 @@
 import * as Minio from 'minio';
 import { Readable } from 'stream';
-import {StorageConfig, Storage, ImageMetadata} from "@/lib/storage/storage";
+import {StorageConfig, Storage, ImageMetadata} from "@/lib/infrastructure/storage/storage";
 
 export class MinioStorage implements Storage {
   private client: Minio.Client;

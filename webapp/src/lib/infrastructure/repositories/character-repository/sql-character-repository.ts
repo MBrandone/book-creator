@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/infrastructure/db';
 import { Character } from '@/lib/domain/character';
-import { CharacterRepository } from '../../domain/character-repository';
+import { CharacterRepository } from '../../../domain/character-repository';
 
 export class SqlCharacterRepository implements CharacterRepository {
   async save(character: Character): Promise<void> {

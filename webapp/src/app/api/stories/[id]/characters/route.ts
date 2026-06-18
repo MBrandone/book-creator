@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { CreateACharacterForStoryCommandHandler } from '@/lib/command-handler/create-a-character-for-story/create-a-character-for-story-command-handler';
-import { SqlStoryRepository } from '@/lib/repositories/story-repository/sql-story-repository';
-import { SqlCharacterRepository, DuplicateCharacterError } from '@/lib/repositories/character-repository/sql-character-repository';
+import { CreateACharacterForStoryCommandHandler } from '@/lib/application/handlers/command/create-a-character-for-story/create-a-character-for-story-command-handler';
+import { SqlStoryRepository } from '@/lib/infrastructure/repositories/story-repository/sql-story-repository';
+import { SqlCharacterRepository, DuplicateCharacterError } from '@/lib/infrastructure/repositories/character-repository/sql-character-repository';
 import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
-import { MaxCharactersReachedError } from '@/lib/command-handler/create-a-character-for-story/max-characters-reached-error';
+import { MaxCharactersReachedError } from '@/lib/application/handlers/command/create-a-character-for-story/max-characters-reached-error';
 
 interface RouteContext {
   params: Promise<{ id: string }>;

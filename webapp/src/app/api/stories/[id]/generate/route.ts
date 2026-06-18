@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
   GenerateStoryBookImagesCommandHandler
-} from "@/lib/command-handler/generate-story-book-images/generate-story-book-images-command-handler";
+} from "@/lib/application/handlers/command/generate-story-book-images/generate-story-book-images-command-handler";
 import {InMemorySceneGenerator} from "@/lib/story-scenes-description-generator/in-memory-story-generator";
-import { SqlStoryRepository } from '@/lib/repositories/story-repository/sql-story-repository';
+import { SqlStoryRepository } from '@/lib/infrastructure/repositories/story-repository/sql-story-repository';
 import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
-import { StoryAlreadyGeneratingError } from '@/lib/command-handler/generate-story-book-images/story-already-generating-error';
-import { NoCharactersFoundError } from '@/lib/command-handler/generate-story-book-images/no-characters-found-error';
-import { StoryGeneratorService } from '@/lib/service/story-generator-service';
+import { StoryAlreadyGeneratingError } from '@/lib/application/handlers/command/generate-story-book-images/story-already-generating-error';
+import { NoCharactersFoundError } from '@/lib/application/handlers/command/generate-story-book-images/no-characters-found-error';
+import { StoryGeneratorService } from '@/lib/story-generator-service/story-generator-service';
 import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-generator';
-import { SqlSceneRepository } from '@/lib/repositories/scene-repository/sql-scene-repository';
-import { getStorage } from '@/lib/storage/storage-factory';
+import { SqlSceneRepository } from '@/lib/infrastructure/repositories/scene-repository/sql-scene-repository';
+import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
 
 interface RouteContext {
   params: Promise<{ id: string }>;

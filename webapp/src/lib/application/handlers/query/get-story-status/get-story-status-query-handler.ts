@@ -1,5 +1,5 @@
-import { StoryReadModel } from '@/lib/read-model/story-read-model';
-import { StoryStatusView } from '@/lib/read-model/story-status-view';
+import { StoryReadModel } from '@/lib/domain/story-read-model';
+import { StoryStatusView } from '@/lib/domain/story-status-view';
 import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 
 export class GetStoryStatusQueryHandler {

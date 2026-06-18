@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { GetStoryQueryHandler } from '@/lib/query-handler/get-story/get-story-query-handler';
-import { SqlStoryReadModel } from '@/lib/read-model/sql-story-read-model';
+import { GetStoryQueryHandler } from '@/lib/application/handlers/query/get-story/get-story-query-handler';
+import { SqlStoryReadModel } from '@/lib/infrastructure/read-model/sql-story-read-model';
 import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 
 interface RouteContext {

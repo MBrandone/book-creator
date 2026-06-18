@@ -1,7 +1,7 @@
-import { db } from '@/lib/db';
-import { StoryReadModel } from './story-read-model';
-import { StoryDetailsView } from './story-details-view';
-import { StoryStatusView } from './story-status-view';
+import { db } from '@/lib/infrastructure/db';
+import { StoryReadModel } from '../../domain/story-read-model';
+import { StoryDetailsView } from '../../domain/story-details-view';
+import { StoryStatusView } from '../../domain/story-status-view';
 
 export class SqlStoryReadModel implements StoryReadModel {
   constructor(private readonly publicBaseUrl: string) {}

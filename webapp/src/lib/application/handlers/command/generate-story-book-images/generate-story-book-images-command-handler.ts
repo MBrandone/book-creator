@@ -1,7 +1,7 @@
 import { StoryRepository } from "@/lib/domain/story-repository";
 import { StoryAlreadyGeneratingError } from "./story-already-generating-error";
 import { NoCharactersFoundError } from "./no-characters-found-error";
-import { StoryGeneratorService } from "@/lib/service/story-generator-service";
+import { StoryGeneratorService } from "@/lib/story-generator-service/story-generator-service";
 
 export class GenerateStoryBookImagesCommandHandler {
     constructor(

@@ -1,4 +1,4 @@
-import type { CharactersTable, SceneType } from '@/lib/db/schema';
+import type { CharactersTable, SceneType } from '@/lib/infrastructure/db/schema';
 
 import {AISceneResponse} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
 

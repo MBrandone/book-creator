@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/infrastructure/db';
 import { Scene } from '@/lib/domain/scene';
-import { SceneRepository } from '../../domain/scene-repository';
+import { SceneRepository } from '../../../domain/scene-repository';
 
 export class SqlSceneRepository implements SceneRepository {
   async save(scene: Scene): Promise<void> {

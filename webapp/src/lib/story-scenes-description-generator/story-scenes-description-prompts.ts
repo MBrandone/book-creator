@@ -1,4 +1,4 @@
-import type {CharactersTable, SceneType} from "@/lib/db";
+import type {CharactersTable, SceneType} from "@/lib/infrastructure/db";
 
 /**
  * Prompt système définissant le contexte et le rôle de l'IA

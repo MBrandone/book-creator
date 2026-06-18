@@ -1,8 +1,8 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/infrastructure/db';
 import { Story } from '@/lib/domain/story';
 import { Character } from '@/lib/domain/character';
-import { StoryRepository } from '../../domain/story-repository';
-import { DuplicateStoryError } from '@/lib/command-handler/create-a-story/duplicate-story-error';
+import { StoryRepository } from '../../../domain/story-repository';
+import { DuplicateStoryError } from '@/lib/application/handlers/command/create-a-story/duplicate-story-error';
 import {StoryNotFoundError} from "@/lib/domain/story-not-found-error";
 
 export class SqlStoryRepository implements StoryRepository {

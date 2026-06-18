@@ -1,8 +1,8 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {z} from 'zod';
-import {CreateAStoryCommandHandler} from '@/lib/command-handler/create-a-story/create-a-story-command-handler';
-import {DuplicateStoryError} from "@/lib/command-handler/create-a-story/duplicate-story-error";
-import {SqlStoryRepository} from '@/lib/repositories/story-repository/sql-story-repository';
+import {CreateAStoryCommandHandler} from '@/lib/application/handlers/command/create-a-story/create-a-story-command-handler';
+import {DuplicateStoryError} from "@/lib/application/handlers/command/create-a-story/duplicate-story-error";
+import {SqlStoryRepository} from '@/lib/infrastructure/repositories/story-repository/sql-story-repository';
 
 export async function POST(request: NextRequest) {
     try {

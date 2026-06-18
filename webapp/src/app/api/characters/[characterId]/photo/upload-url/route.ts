@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { GetPhotoUploadUrlCommandHandler } from '@/lib/command-handler/get-photo-upload-url/get-photo-upload-url-command-handler';
-import { SqlCharacterRepository } from '@/lib/repositories/character-repository/sql-character-repository';
-import { SqlCharacterPhotoRepository } from '@/lib/repositories/character-photo-repository/sql-character-photo-repository';
-import { getStorage } from '@/lib/storage/storage-factory';
-import { CharacterNotFoundError } from '@/lib/command-handler/get-photo-upload-url/character-not-found-error';
-import { InvalidContentTypeError } from '@/lib/command-handler/get-photo-upload-url/invalid-content-type-error';
+import { GetPhotoUploadUrlCommandHandler } from '@/lib/application/handlers/command/get-photo-upload-url/get-photo-upload-url-command-handler';
+import { SqlCharacterRepository } from '@/lib/infrastructure/repositories/character-repository/sql-character-repository';
+import { SqlCharacterPhotoRepository } from '@/lib/infrastructure/repositories/character-photo-repository/sql-character-photo-repository';
+import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
+import { CharacterNotFoundError } from '@/lib/application/handlers/command/get-photo-upload-url/character-not-found-error';
+import { InvalidContentTypeError } from '@/lib/application/handlers/command/get-photo-upload-url/invalid-content-type-error';
 
 interface RouteContext {
   params: Promise<{ characterId: string }>;

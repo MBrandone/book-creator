@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useState, SubmitEvent} from "react"
+import {useEffect, useState} from "react"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
@@ -9,11 +9,12 @@ import {Label} from "@/components/ui/label"
 import {Textarea} from "@/components/ui/textarea"
 import {Progress} from "@/components/ui/progress"
 import {CharacterPhotoUpload} from "@/components/character-photo-upload"
-import {createStory} from "@/app/_app-http-requests/create-story";
-import {createCharacter, CreateCharacterPayload} from "@/app/_app-http-requests/create-character";
-import {generateStory} from "@/app/_app-http-requests/generate-story";
-import {fetchStatus} from "@/app/_app-http-requests/fetch-status";
-import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data";
+import {createStory} from "@/app/_app-http-requests/create-story"
+import {createCharacter, type CreateCharacterPayload} from "@/app/_app-http-requests/create-character"
+import {generateStory} from "@/app/_app-http-requests/generate-story"
+import {fetchStatus} from "@/app/_app-http-requests/fetch-status"
+import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data"
+import Link from "next/link"
 
 export default function CreateStoryPage() {
   const [title, setTitle] = useState("")
@@ -49,7 +50,7 @@ export default function CreateStoryPage() {
   }
 
   const characterMutation = useMutation({
-    mutationFn: ({ storyId, payload }: { storyId: string, payload: CreateCharacterPayload }) => 
+    mutationFn: ({ storyId, payload }: { storyId: string, payload: CreateCharacterPayload }) =>
       createCharacter(storyId, payload),
     onSuccess: (_, variables) => {
       const newCharacter = variables.payload.characters[0]
@@ -125,11 +126,16 @@ export default function CreateStoryPage() {
 
   return (
     <div className="container mx-auto py-10 max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Créer une Histoire</h1>
-        <p className="text-muted-foreground">
-          Remplissez le formulaire ci-dessous pour créer une nouvelle histoire
-        </p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Créer une Histoire</h1>
+          <p className="text-muted-foreground">
+            Remplissez le formulaire ci-dessous pour créer une nouvelle histoire
+          </p>
+        </div>
+        <Link href="/stories">
+          <Button variant="outline">📚 Mes histoires</Button>
+        </Link>
       </div>
 
       {/* Formulaire de création d'histoire */}
@@ -265,7 +271,7 @@ export default function CreateStoryPage() {
                 onPhotoRemoved={() => setPhotoData(null)}
               />
 
-              <Button 
+              <Button
                 type="submit" 
                 className="w-full" 
                 disabled={characterMutation.isPending}

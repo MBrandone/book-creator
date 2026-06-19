@@ -3,6 +3,22 @@ import {z} from 'zod';
 import {CreateAStoryCommandHandler} from '@/lib/application/handlers/command/create-a-story/create-a-story-command-handler';
 import {DuplicateStoryError} from "@/lib/application/handlers/command/create-a-story/duplicate-story-error";
 import {SqlStoryRepository} from '@/lib/infrastructure/repositories/story-repository/sql-story-repository';
+import {ListStoriesQueryHandler} from '@/lib/application/handlers/query/list-stories/list-stories-query-handler';
+import {SqlStoryReadModel} from '@/lib/infrastructure/read-model/sql-story-read-model';
+
+export async function GET() {
+    try {
+        const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL || '';
+        const storyReadModel = new SqlStoryReadModel(publicBaseUrl);
+        const queryHandler = new ListStoriesQueryHandler(storyReadModel);
+        const stories = await queryHandler.execute();
+
+        return NextResponse.json({ stories });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des histoires:', error);
+        return new NextResponse(null, { status: 500 });
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {

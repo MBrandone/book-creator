@@ -1,4 +1,4 @@
-interface Scene {
+export interface Scene {
     id: string
     scene_number: number
     scene_type: string
@@ -7,7 +7,7 @@ interface Scene {
     prompt: string
 }
 
-interface StoryData {
+export interface StoryData {
     story: {
         id: string
         title: string

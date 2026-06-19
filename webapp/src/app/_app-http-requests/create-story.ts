@@ -1,4 +1,4 @@
-interface CreateStoryPayload {
+export interface CreateStoryPayload {
     id: string
     title: string
     description: string

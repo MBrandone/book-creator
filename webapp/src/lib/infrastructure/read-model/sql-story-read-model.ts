@@ -2,6 +2,7 @@ import { db } from '@/lib/infrastructure/db';
 import { StoryReadModel } from '../../domain/story-read-model';
 import { StoryDetailsView } from '../../domain/story-details-view';
 import { StoryStatusView } from '../../domain/story-status-view';
+import { StoryListView } from '../../domain/story-list-view';
 
 export class SqlStoryReadModel implements StoryReadModel {
   constructor(private readonly publicBaseUrl: string) {}
@@ -73,5 +74,45 @@ export class SqlStoryReadModel implements StoryReadModel {
     return {
       status: story.status,
     };
+  }
+
+  async listAll(): Promise<StoryListView> {
+    // Récupérer toutes les histoires
+    const stories = await db
+      .selectFrom('stories')
+      .selectAll()
+      .orderBy('created_at', 'desc')
+      .execute();
+
+    // Récupérer les counts en parallèle
+    return await Promise.all(
+      stories.map(async (story) => {
+        const [characterCount, sceneCount] = await Promise.all([
+          db
+            .selectFrom('characters')
+            .select(db.fn.count('id').as('count'))
+            .where('story_id', '=', story.id)
+            .executeTakeFirst()
+            .then((result) => Number(result?.count || 0)),
+          db
+            .selectFrom('scenes')
+            .select(db.fn.count('id').as('count'))
+            .where('story_id', '=', story.id)
+            .executeTakeFirst()
+            .then((result) => Number(result?.count || 0)),
+        ]);
+
+        return {
+          id: story.id,
+          title: story.title || 'Sans titre',
+          description: story.description || '',
+          status: story.status,
+          created_at: story.created_at.toISOString(),
+          updated_at: story.updated_at.toISOString(),
+          character_count: characterCount,
+          scene_count: sceneCount,
+        };
+      })
+    );
   }
 }

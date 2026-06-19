@@ -1,34 +1,21 @@
-import { CharacterRepository } from '@/lib/domain/character-repository';
-import { CharacterPhotoRepository } from '@/lib/domain/character-photo-repository';
 import { Storage } from '@/lib/infrastructure/storage/storage';
-import { CharacterNotFoundError } from './character-not-found-error';
 import { InvalidContentTypeError } from './invalid-content-type-error';
+import { randomUUID } from 'crypto';
 
 export class GetPhotoUploadUrlCommandHandler {
   constructor(
-    private readonly characterRepository: CharacterRepository,
-    private readonly characterPhotoRepository: CharacterPhotoRepository,
     private readonly storage: Storage
   ) {}
 
   async execute(command: GetPhotoUploadUrlCommand): Promise<GetPhotoUploadUrlResult> {
-    const characterExists = await this.characterRepository.existsById(command.characterId);
-    if (!characterExists) {
-      throw new CharacterNotFoundError(command.characterId);
-    }
-
     if (!ALLOWED_CONTENT_TYPES.includes(command.contentType)) {
       throw new InvalidContentTypeError(command.contentType);
     }
 
     const extension = this.getFileExtension(command.contentType);
-    const storageKey = `characters/${command.characterId}/reference-photo.${extension}`;
+    const uuid = randomUUID();
+    const storageKey = `character-photos/${uuid}.${extension}`;
     const bucket = process.env.STORAGE_BUCKET || 'book-images';
-
-    await this.characterPhotoRepository.updatePhoto(command.characterId, {
-      storageBucket: bucket,
-      storageKey: storageKey,
-    });
 
     const uploadUrl = await this.storage.getPresignedUploadUrl(
       storageKey,
@@ -36,12 +23,10 @@ export class GetPhotoUploadUrlCommandHandler {
       UPLOAD_URL_EXPIRY_SECONDS
     );
 
-    const photoUrl = this.storage.getImageUrl(bucket, storageKey);
-
     return {
       uploadUrl,
-      photoUrl,
       storageKey,
+      storageBucket: bucket,
       expiresIn: UPLOAD_URL_EXPIRY_SECONDS,
     };
   }
@@ -64,14 +49,13 @@ export class GetPhotoUploadUrlCommandHandler {
 }
 
 export interface GetPhotoUploadUrlCommand {
-  characterId: string;
   contentType: string;
 }
 
 export interface GetPhotoUploadUrlResult {
   uploadUrl: string;
-  photoUrl: string;
   storageKey: string;
+  storageBucket: string;
   expiresIn: number;
 }
 
@@ -82,4 +66,4 @@ const ALLOWED_CONTENT_TYPES = [
   'image/webp',
 ];
 
-const UPLOAD_URL_EXPIRY_SECONDS = 900;
+const UPLOAD_URL_EXPIRY_SECONDS = 300;

@@ -7,6 +7,10 @@ export type CreateCharacterCommand = {
   id: string;
   name: string;
   description: string;
+  photo?: {
+    storageKey: string;
+    storageBucket: string;
+  };
 };
 
 export type CreateACharacterForStoryCommand = {
@@ -33,6 +37,8 @@ export class CreateACharacterForStoryCommandHandler {
         storyId: command.storyId,
         name: characterData.name,
         description: characterData.description,
+        photoStorageBucket: characterData.photo?.storageBucket,
+        photoStorageKey: characterData.photo?.storageKey,
       });
 
       await this.characterRepository.save(character);

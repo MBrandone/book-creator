@@ -7,17 +7,15 @@ import { Label } from "@/components/ui/label"
 import { Upload, X, Image as ImageIcon } from "lucide-react"
 
 interface CharacterPhotoUploadProps {
-  characterId: string
-  currentPhotoUrl?: string | null
-  onPhotoUploaded?: (photoUrl: string) => void
-  onPhotoDeleted?: () => void
+  onPhotoUploaded?: (data: { storageKey: string; storageBucket: string; previewUrl: string }) => void
+  onPhotoRemoved?: () => void
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
-async function getUploadUrl(characterId: string, contentType: string) {
-  const response = await fetch(`/api/characters/${characterId}/photo/upload-url`, {
+async function getUploadUrl(contentType: string) {
+  const response = await fetch('/api/characters/photo/upload-url', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -30,7 +28,12 @@ async function getUploadUrl(characterId: string, contentType: string) {
     throw new Error(error.error || 'Erreur lors de la génération de l\'URL d\'upload')
   }
 
-  return response.json() as Promise<{ uploadUrl: string; photoUrl: string }>
+  return response.json() as Promise<{ 
+    uploadUrl: string; 
+    storageKey: string; 
+    storageBucket: string;
+    expiresIn: number;
+  }>
 }
 
 async function uploadFileToStorage(uploadUrl: string, file: File) {
@@ -47,54 +50,35 @@ async function uploadFileToStorage(uploadUrl: string, file: File) {
   }
 }
 
-async function deletePhoto(characterId: string) {
-  const response = await fetch(`/api/characters/${characterId}/photo`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la suppression de la photo')
-  }
-}
-
 export function CharacterPhotoUpload({
-  characterId,
-  currentPhotoUrl,
   onPhotoUploaded,
-  onPhotoDeleted,
+  onPhotoRemoved,
 }: CharacterPhotoUploadProps) {
-  const [photoUrl, setPhotoUrl] = useState<string | null>(currentPhotoUrl || null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [uploadedData, setUploadedData] = useState<{ storageKey: string; storageBucket: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const { uploadUrl, photoUrl: newPhotoUrl } = await getUploadUrl(characterId, file.type)
+      const { uploadUrl, storageKey, storageBucket } = await getUploadUrl(file.type)
       await uploadFileToStorage(uploadUrl, file)
-      return newPhotoUrl
+      return { storageKey, storageBucket }
     },
-    onSuccess: (newPhotoUrl) => {
-      setPhotoUrl(newPhotoUrl)
-      setPreviewUrl(null)
-      onPhotoUploaded?.(newPhotoUrl)
+    onSuccess: (data, file) => {
+      const preview = URL.createObjectURL(file)
+      setPreviewUrl(preview)
+      setUploadedData(data)
+      onPhotoUploaded?.({ ...data, previewUrl: preview })
     },
     onError: () => {
       setPreviewUrl(null)
+      setUploadedData(null)
     },
     onSettled: () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
-    },
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePhoto(characterId),
-    onSuccess: () => {
-      setPhotoUrl(null)
-      onPhotoDeleted?.()
     },
   })
 
@@ -114,14 +98,16 @@ export function CharacterPhotoUpload({
       return
     }
 
-    const preview = URL.createObjectURL(file)
-    setPreviewUrl(preview)
     uploadMutation.mutate(file)
   }
 
-  const handleDelete = () => {
-    if (!photoUrl) return
-    deleteMutation.mutate()
+  const handleRemove = () => {
+    setPreviewUrl(null)
+    setUploadedData(null)
+    onPhotoRemoved?.()
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const handleButtonClick = () => {
@@ -129,8 +115,7 @@ export function CharacterPhotoUpload({
   }
 
   const error = validationError || 
-    (uploadMutation.isError ? uploadMutation.error.message : null) ||
-    (deleteMutation.isError ? deleteMutation.error.message : null)
+    (uploadMutation.isError ? uploadMutation.error.message : null)
 
   return (
     <div className="space-y-2">
@@ -143,7 +128,7 @@ export function CharacterPhotoUpload({
       )}
 
       <div className="border-2 border-dashed rounded-lg p-4">
-        {!photoUrl && !previewUrl ? (
+        {!previewUrl ? (
           <div className="flex flex-col items-center justify-center py-6">
             <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground mb-3 text-center">
@@ -174,7 +159,7 @@ export function CharacterPhotoUpload({
           <div className="space-y-3">
             <div className="relative w-full aspect-square rounded-lg overflow-hidden">
               <img
-                src={previewUrl || photoUrl || ''}
+                src={previewUrl}
                 alt="Photo de référence"
                 className="w-full h-full object-cover"
               />
@@ -190,7 +175,7 @@ export function CharacterPhotoUpload({
                 variant="outline"
                 size="sm"
                 onClick={handleButtonClick}
-                disabled={uploadMutation.isPending || deleteMutation.isPending}
+                disabled={uploadMutation.isPending}
                 className="flex-1"
               >
                 <Upload className="w-4 h-4 mr-2" />
@@ -200,11 +185,11 @@ export function CharacterPhotoUpload({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleDelete}
-                disabled={uploadMutation.isPending || deleteMutation.isPending}
+                onClick={handleRemove}
+                disabled={uploadMutation.isPending}
               >
                 <X className="w-4 h-4 mr-2" />
-                {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+                Supprimer
               </Button>
             </div>
             <input

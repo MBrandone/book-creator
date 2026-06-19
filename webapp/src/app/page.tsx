@@ -21,6 +21,10 @@ interface CreateCharacterPayload {
     id: string
     name: string
     description: string
+    photo?: {
+      storageKey: string
+      storageBucket: string
+    }
   }>
 }
 
@@ -132,8 +136,7 @@ export default function CreateStoryPage() {
   const [characters, setCharacters] = useState<Array<{ id: string, name: string, description: string, photoUrl?: string | null }>>([])
   const [showCharacterForm, setShowCharacterForm] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(null)
-  const [hasUploadedPhoto, setHasUploadedPhoto] = useState(false)
+  const [photoData, setPhotoData] = useState<{ storageKey: string; storageBucket: string; previewUrl: string } | null>(null)
 
   const storyMutation = useMutation({
     mutationFn: createStory,
@@ -151,7 +154,11 @@ export default function CreateStoryPage() {
       createCharacter(storyId, payload),
     onSuccess: (_, variables) => {
       const newCharacter = variables.payload.characters[0]
-      setCharacters(prev => [...prev, { ...newCharacter, photoUrl: null }])
+      setCharacters(prev => [...prev, { ...newCharacter, photoUrl: photoData?.previewUrl || null }])
+      setCharacterName("")
+      setCharacterDescription("")
+      setPhotoData(null)
+      setShowCharacterForm(false)
     },
   })
 
@@ -174,7 +181,6 @@ export default function CreateStoryPage() {
     if (!storyId) return
     
     const characterId = crypto.randomUUID()
-    setCurrentCharacterId(characterId)
     
     characterMutation.mutate({
       storyId,
@@ -183,6 +189,10 @@ export default function CreateStoryPage() {
           id: characterId,
           name: characterName,
           description: characterDescription,
+          photo: photoData ? {
+            storageKey: photoData.storageKey,
+            storageBucket: photoData.storageBucket,
+          } : undefined,
         }]
       }
     })
@@ -215,26 +225,8 @@ export default function CreateStoryPage() {
   const handleAddAnotherCharacter = () => {
     setCharacterName("")
     setCharacterDescription("")
-    setCurrentCharacterId(null)
+    setPhotoData(null)
     setShowCharacterForm(true)
-    setHasUploadedPhoto(false)
-  }
-
-  const handlePhotoUploaded = (characterId: string, photoUrl: string) => {
-    setCharacters(prev => 
-      prev.map(char => 
-        char.id === characterId ? { ...char, photoUrl } : char
-      )
-    )
-    setHasUploadedPhoto(true)
-  }
-
-  const handleContinueWithoutPhoto = () => {
-    setCharacterName("")
-    setCharacterDescription("")
-    setCurrentCharacterId(null)
-    setShowCharacterForm(false)
-    setHasUploadedPhoto(false)
   }
 
   const handleGenerateStory = () => {
@@ -334,7 +326,7 @@ export default function CreateStoryPage() {
       )}
 
       {/* Formulaire de création de personnage */}
-      {storyId && showCharacterForm && !currentCharacterId && (
+      {storyId && showCharacterForm && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Ajouter un Personnage</CardTitle>
@@ -387,46 +379,25 @@ export default function CreateStoryPage() {
                 </p>
               </div>
 
+              <CharacterPhotoUpload
+                onPhotoUploaded={setPhotoData}
+                onPhotoRemoved={() => setPhotoData(null)}
+              />
+
               <Button 
                 type="submit" 
                 className="w-full" 
                 disabled={characterMutation.isPending}
               >
-                {characterMutation.isPending ? "Création en cours..." : "Créer le personnage"}
+                {characterMutation.isPending ? "Création en cours..." : "Ajouter le personnage"}
               </Button>
             </form>
           </CardContent>
         </Card>
       )}
 
-      {/* Étape d'upload de photo après création du personnage */}
-      {storyId && currentCharacterId && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Photo de référence</CardTitle>
-            <CardDescription>
-              Ajoutez une photo pour personnaliser l'apparence de votre personnage (optionnel)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <CharacterPhotoUpload
-              characterId={currentCharacterId}
-              onPhotoUploaded={(photoUrl) => handlePhotoUploaded(currentCharacterId, photoUrl)}
-            />
-            <Button 
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleContinueWithoutPhoto}
-            >
-              {hasUploadedPhoto ? "Continuer avec cette photo" : "Continuer sans photo"}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Message de succès et bouton pour ajouter un autre personnage */}
-      {storyId && !showCharacterForm && !currentCharacterId && characters.length > 0 && (
+      {storyId && !showCharacterForm && characters.length > 0 && (
         <div className="space-y-4">
           <div className="p-4 rounded-md bg-green-50 border border-green-200">
             <p className="text-sm font-medium text-green-800">

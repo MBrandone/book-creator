@@ -85,10 +85,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 }
 
+const photoSchema = z.object({
+  storageKey: z.string()
+    .regex(/^character-photos\/[a-f0-9-]+\.(jpg|png|gif|webp)$/, 'Le storageKey doit suivre le format character-photos/{uuid}.{extension}'),
+  storageBucket: z.string().min(1, 'Le storageBucket ne peut pas être vide'),
+});
+
 const characterSchema = z.object({
   id: z.string().uuid('L\'ID du personnage doit être un UUID valide'),
   name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères'),
   description: z.string().min(10, 'La description doit contenir au moins 10 caractères'),
+  photo: photoSchema.optional(),
 });
 
 const createCharactersSchema = z.object({

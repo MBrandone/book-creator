@@ -60,8 +60,6 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
   constructor(options: StoryGeneratorOptions = {}) {
     super('Ollama', options);
 
-    console.log('les variables d\'env Ollama : base url ', process.env.OLLAMA_BASE_URL, ' ollama_model ', process.env.OLLAMA_MODEL)
-
     this.config = {
       baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
       model: process.env.OLLAMA_MODEL || 'llama3',

@@ -1,131 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { CharacterPhotoUpload } from "@/components/character-photo-upload"
-
-interface CreateStoryPayload {
-  id: string
-  title: string
-  description: string
-}
-
-interface CreateCharacterPayload {
-  characters: Array<{
-    id: string
-    name: string
-    description: string
-    photo?: {
-      storageKey: string
-      storageBucket: string
-    }
-  }>
-}
-
-interface Scene {
-  id: string
-  scene_number: number
-  scene_type: string
-  description: string
-  image_url: string | null
-  prompt: string
-}
-
-interface StoryData {
-  story: {
-    id: string
-    title: string
-    description: string
-    status: string
-    created_at: string
-    updated_at: string
-  }
-  characters: Array<{
-    id: string
-    name: string
-    description: string
-    image_url: string | null
-  }>
-  scenes: Scene[]
-}
-
-async function createStory(payload: CreateStoryPayload) {
-  const response = await fetch('/api/stories', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la création de l\'histoire')
-  }
-
-  return response
-}
-
-async function createCharacter(storyId: string, payload: CreateCharacterPayload) {
-  const response = await fetch(`/api/stories/${storyId}/characters`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la création du personnage')
-  }
-
-  return response
-}
-
-async function generateStory(storyId: string) {
-  const response = await fetch(`/api/stories/${storyId}/generate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors du lancement de la génération')
-  }
-
-  return response.json()
-}
-
-async function fetchStatus(storyId: string): Promise<{ status: string }> {
-  const response = await fetch(`/api/stories/${storyId}/status`)
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la vérification du statut')
-  }
-
-  return response.json()
-}
-
-async function fetchStoryData(storyId: string): Promise<StoryData> {
-  const response = await fetch(`/api/stories/${storyId}`)
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la récupération de l\'histoire')
-  }
-
-  return response.json()
-}
+import {useEffect, useState, SubmitEvent} from "react"
+import {useMutation, useQuery} from "@tanstack/react-query"
+import {Button} from "@/components/ui/button"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Textarea} from "@/components/ui/textarea"
+import {Progress} from "@/components/ui/progress"
+import {CharacterPhotoUpload} from "@/components/character-photo-upload"
+import {createStory} from "@/app/_app-http-requests/create-story";
+import {createCharacter, CreateCharacterPayload} from "@/app/_app-http-requests/create-character";
+import {generateStory} from "@/app/_app-http-requests/generate-story";
+import {fetchStatus} from "@/app/_app-http-requests/fetch-status";
+import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data";
 
 export default function CreateStoryPage() {
   const [title, setTitle] = useState("")
@@ -141,13 +29,24 @@ export default function CreateStoryPage() {
   const storyMutation = useMutation({
     mutationFn: createStory,
     onSuccess: (_, variables) => {
-      // Stocker l'ID de l'histoire créée et afficher le formulaire de personnage
       setStoryId(variables.id)
       setShowCharacterForm(true)
       setTitle("")
       setDescription("")
     },
   })
+
+  const handleStorySubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const id = crypto.randomUUID()
+
+    storyMutation.mutate({
+      id,
+      title,
+      description,
+    })
+  }
 
   const characterMutation = useMutation({
     mutationFn: ({ storyId, payload }: { storyId: string, payload: CreateCharacterPayload }) => 
@@ -162,20 +61,7 @@ export default function CreateStoryPage() {
     },
   })
 
-  const handleStorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    
-    // Générer un UUID v4
-    const id = crypto.randomUUID()
-    
-    storyMutation.mutate({
-      id,
-      title,
-      description,
-    })
-  }
-
-  const handleCharacterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCharacterSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!storyId) return
@@ -198,7 +84,6 @@ export default function CreateStoryPage() {
     })
   }
 
-  // Polling du statut de la génération (toutes les 10 secondes)
   const { data: statusData } = useQuery({
     queryKey: ['story-status', storyId],
     queryFn: () => fetchStatus(storyId!),
@@ -207,14 +92,12 @@ export default function CreateStoryPage() {
     refetchIntervalInBackground: true,
   })
 
-  // Récupération des données complètes quand la génération est terminée
   const { data: storyData } = useQuery({
     queryKey: ['story-data', storyId],
     queryFn: () => fetchStoryData(storyId!),
     enabled: statusData?.status === 'completed',
   })
 
-  // Mutation pour lancer la génération
   const generateMutation = useMutation({
     mutationFn: generateStory,
     onSuccess: () => {
@@ -234,7 +117,6 @@ export default function CreateStoryPage() {
     generateMutation.mutate(storyId)
   }
 
-  // Arrêter le polling quand la génération est terminée ou a échoué
   useEffect(() => {
     if (isGenerating && statusData && (statusData.status === 'completed' || statusData.status === 'failed')) {
       setIsGenerating(false)
@@ -336,7 +218,6 @@ export default function CreateStoryPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCharacterSubmit} className="space-y-6">
-              {/* Message d'erreur */}
               {characterMutation.isError && (
                 <div className="p-4 rounded-md bg-red-50 border border-red-200">
                   <p className="text-sm font-medium text-red-800">
@@ -396,7 +277,7 @@ export default function CreateStoryPage() {
         </Card>
       )}
 
-      {/* Message de succès et bouton pour ajouter un autre personnage */}
+      {/* Message de succès */}
       {storyId && !showCharacterForm && characters.length > 0 && (
         <div className="space-y-4">
           <div className="p-4 rounded-md bg-green-50 border border-green-200">

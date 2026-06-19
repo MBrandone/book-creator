@@ -1,5 +1,5 @@
 # Todo
-- Un personnage est décorellé à une histoire, 
+- Un personnage est décorellé d'une histoire, 
   - je peux associer jusque 5 personnages à l'histoire
   - Je peux utiliser des personnages crée précédemment
   - Avoir des personnages ré-utilisables dans mes histoires
@@ -16,13 +16,8 @@
   - Comment faire mieux ?
 
 # Doing
-- [ ] Améliorations de je peux associer une photo à mon personnage
-  - [ ] l'upload de photo se fait en même temps que les infos des personnages
-  - [ ] En terme de sécurité, on checke le type de l'image par rapport à ce qu'il y a dans le body
-    - L'utilisateur peut nous mentir ... Comment faire mieux ?
-      - Verif côté navigateur ? Mais l'utilisateur aura toujours une url pré-signé
-      - Configuration du storage pour bloquer certains types et avoir une taille maximum ?
- 
+
+
 # Done
 - [X] Déployer sur Vercel et Supabase
 - [X] Expliciter un service de creation d'image
@@ -41,3 +36,4 @@
   - [X] [Story Generator] Amélioration Les images sont téléchargés et transformés en bases 64 à chaque génération
     - Elle ne devrait l'être qu'un seule fois
   - [X] Supprimer la demo page des composants
+  - [X] l'upload de photo se fait en même temps que les infos des personnages

@@ -15,7 +15,6 @@
 - [ ] Les process.env dans les fichier de libs, c'est pas ouf.
   - Comment faire mieux ?
 
-
 # Doing
 - [ ] Améliorations de je peux associer une photo à mon personnage
   - [ ] l'upload de photo se fait en même temps que les infos des personnages

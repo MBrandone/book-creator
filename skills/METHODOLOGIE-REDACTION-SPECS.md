@@ -290,20 +290,6 @@ Response [code]:
 
 ---
 
-## Évolutions futures
-
-### Court terme
-- Évolution 1
-- Évolution 2
-
-### Moyen terme
-- Évolution 1
-
-### Long terme
-- Évolution 1
-
----
-
 ## Questions ouvertes / À décider
 1. Question 1
 2. Question 2

@@ -40,13 +40,14 @@ export const DEFAULT_OPTIONS: Required<StoryGeneratorOptions> = {
 };
 
 export function convertAIResponseToScenes(
-  aiScenes: AISceneResponse[]
+  aiScenes: AISceneResponse[],
+  stylePrefix?: string
 ): GeneratedScene[] {
   return aiScenes.map((scene) => ({
     scene_number: scene.scene_number,
     scene_type: scene.scene_type,
     description: scene.description,
-    prompt: scene.image_prompt,
+    prompt: stylePrefix ? `${stylePrefix}, ${scene.image_prompt}` : scene.image_prompt,
   }));
 }
 

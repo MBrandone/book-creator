@@ -1,4 +1,8 @@
-import {GeneratedScene, StoryScenesDescriptionGenerator} from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
+import {
+    GeneratedScene,
+    StoryContext,
+    StoryScenesDescriptionGenerator
+} from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 import {type SceneType} from "@/lib/infrastructure/db/schema";
 
 import {getStylePrefix} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
@@ -6,7 +10,7 @@ import {getStylePrefix} from "@/lib/story-scenes-description-generator/story-sce
 export class InMemorySceneGenerator implements StoryScenesDescriptionGenerator {
     readonly name: string = 'InMemorySceneGenerator';
 
-    generateStory(): Promise<GeneratedScene[]> {
+    generateStory(context: StoryContext): Promise<GeneratedScene[]> {
         return Promise.resolve(IN_MEMORY_SCENES);
     }
 

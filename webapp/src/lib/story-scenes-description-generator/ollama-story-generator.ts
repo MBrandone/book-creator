@@ -4,11 +4,15 @@ import {
   type GeneratedScene,
   StoryGenerationError,
   type StoryGeneratorOptions,
+  type StoryContext,
 } from '@/lib/story-scenes-description-generator/story-scenes-description-generator';
 import type {CharactersTable} from '@/lib/infrastructure/db/schema';
 import {
   generateUserPrompt,
-  SYSTEM_PROMPT, validateAIResponse
+  SYSTEM_PROMPT,
+  validateAIResponse,
+  getStylePrefix,
+  DEFAULT_ART_STYLE
 } from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
 
 interface OllamaConfig {
@@ -106,7 +110,7 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     }
   }
 
-  async generateStory(context: import('./story-scenes-description-generator').StoryContext): Promise<GeneratedScene[]> {
+  async generateStory(context: StoryContext): Promise<GeneratedScene[]> {
     this.log('Starting story generation for story:', context.title);
     this.log('Characters:', context.characters.length);
 
@@ -146,9 +150,11 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
       const parsedResponse = this.parseJSONResponse(response.response);
       const validatedResponse = validateAIResponse(parsedResponse);
 
-      const scenes = convertAIResponseToScenes(validatedResponse.scenes);
+      // Ajouter le préfixe de style watercolor aux prompts d'image
+      const stylePrefix = getStylePrefix(DEFAULT_ART_STYLE);
+      const scenes = convertAIResponseToScenes(validatedResponse.scenes, stylePrefix);
 
-      this.log('Successfully generated', scenes.length, 'scenes');
+      this.log('Successfully generated', scenes.length, 'scenes with style:', DEFAULT_ART_STYLE);
       return scenes;
     } catch (error) {
       this.log('Story generation failed:', error);

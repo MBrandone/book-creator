@@ -37,7 +37,7 @@ export default function CreateStoryPage() {
     },
   })
 
-  const handleStorySubmit = (e: SubmitEvent<HTMLFormElement>) => {
+  const handleStorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const id = crypto.randomUUID()
@@ -62,7 +62,7 @@ export default function CreateStoryPage() {
     },
   })
 
-  const handleCharacterSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+  const handleCharacterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!storyId) return

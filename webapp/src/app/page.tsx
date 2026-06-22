@@ -1,424 +1,259 @@
-"use client"
-
-import {useEffect, useState} from "react"
-import {useMutation, useQuery} from "@tanstack/react-query"
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Textarea} from "@/components/ui/textarea"
-import {Progress} from "@/components/ui/progress"
-import {CharacterPhotoUpload} from "@/components/character-photo-upload"
-import {createStory} from "@/app/_app-http-requests/create-story"
-import {createCharacter, type CreateCharacterPayload} from "@/app/_app-http-requests/create-character"
-import {generateStory} from "@/app/_app-http-requests/generate-story"
-import {fetchStatus} from "@/app/_app-http-requests/fetch-status"
-import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function CreateStoryPage() {
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [storyId, setStoryId] = useState<string | null>(null)
-  const [characterName, setCharacterName] = useState("")
-  const [characterDescription, setCharacterDescription] = useState("")
-  const [characters, setCharacters] = useState<Array<{ id: string, name: string, description: string, photoUrl?: string | null }>>([])
-  const [showCharacterForm, setShowCharacterForm] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [photoData, setPhotoData] = useState<{ storageKey: string; storageBucket: string; previewUrl: string } | null>(null)
-
-  const storyMutation = useMutation({
-    mutationFn: createStory,
-    onSuccess: (_, variables) => {
-      setStoryId(variables.id)
-      setShowCharacterForm(true)
-      setTitle("")
-      setDescription("")
-    },
-  })
-
-  const handleStorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const id = crypto.randomUUID()
-
-    storyMutation.mutate({
-      id,
-      title,
-      description,
-    })
-  }
-
-  const characterMutation = useMutation({
-    mutationFn: ({ storyId, payload }: { storyId: string, payload: CreateCharacterPayload }) =>
-      createCharacter(storyId, payload),
-    onSuccess: (_, variables) => {
-      const newCharacter = variables.payload.characters[0]
-      setCharacters(prev => [...prev, { ...newCharacter, photoUrl: photoData?.previewUrl || null }])
-      setCharacterName("")
-      setCharacterDescription("")
-      setPhotoData(null)
-      setShowCharacterForm(false)
-    },
-  })
-
-  const handleCharacterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    
-    if (!storyId) return
-    
-    const characterId = crypto.randomUUID()
-    
-    characterMutation.mutate({
-      storyId,
-      payload: {
-        characters: [{
-          id: characterId,
-          name: characterName,
-          description: characterDescription,
-          photo: photoData ? {
-            storageKey: photoData.storageKey,
-            storageBucket: photoData.storageBucket,
-          } : undefined,
-        }]
-      }
-    })
-  }
-
-  const { data: statusData } = useQuery({
-    queryKey: ['story-status', storyId],
-    queryFn: () => fetchStatus(storyId!),
-    enabled: isGenerating && !!storyId,
-    refetchInterval: 10000, // 10 secondes
-    refetchIntervalInBackground: true,
-  })
-
-  const { data: storyData } = useQuery({
-    queryKey: ['story-data', storyId],
-    queryFn: () => fetchStoryData(storyId!),
-    enabled: statusData?.status === 'completed',
-  })
-
-  const generateMutation = useMutation({
-    mutationFn: generateStory,
-    onSuccess: () => {
-      setIsGenerating(true)
-    },
-  })
-
-  const handleAddAnotherCharacter = () => {
-    setCharacterName("")
-    setCharacterDescription("")
-    setPhotoData(null)
-    setShowCharacterForm(true)
-  }
-
-  const handleGenerateStory = () => {
-    if (!storyId) return
-    generateMutation.mutate(storyId)
-  }
-
-  useEffect(() => {
-    if (isGenerating && statusData && (statusData.status === 'completed' || statusData.status === 'failed')) {
-      setIsGenerating(false)
-    }
-  }, [isGenerating, statusData])
-
+export default function LandingPage() {
   return (
-    <div className="container mx-auto py-10 max-w-2xl">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Créer une Histoire</h1>
-          <p className="text-muted-foreground">
-            Remplissez le formulaire ci-dessous pour créer une nouvelle histoire
-          </p>
-        </div>
-        <Link href="/stories">
-          <Button variant="outline">📚 Mes histoires</Button>
-        </Link>
-      </div>
+    <div className="min-h-screen">
 
-      {/* Formulaire de création d'histoire */}
-      {!storyId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Nouvelle Histoire</CardTitle>
-            <CardDescription>
-              Entrez le nom et la description de votre histoire
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleStorySubmit} className="space-y-6">
-              {/* Message d'erreur */}
-              {storyMutation.isError && (
-                <div className="p-4 rounded-md bg-red-50 border border-red-200">
-                  <p className="text-sm font-medium text-red-800">
-                    ✗ {storyMutation.error.message}
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="title">Nom de l'histoire *</Label>
-                <Input
-                  id="title"
-                  type="text"
-                  placeholder="Ex: L'Aventure Magique"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  minLength={3}
-                  disabled={storyMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 3 caractères
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Décrivez votre histoire..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  minLength={10}
-                  rows={6}
-                  disabled={storyMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 10 caractères
-                </p>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={storyMutation.isPending}
-              >
-                {storyMutation.isPending ? "Création en cours..." : "Créer l'histoire"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Message de succès de la création de l'histoire */}
-      {storyId && (
-        <div className="mb-6 p-4 rounded-md bg-green-50 border border-green-200">
-          <p className="text-sm font-medium text-green-800">
-            ✓ Histoire créée avec succès !
-          </p>
-        </div>
-      )}
-
-      {/* Formulaire de création de personnage */}
-      {storyId && showCharacterForm && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Ajouter un Personnage</CardTitle>
-            <CardDescription>
-              Créez un personnage pour votre histoire ({characters.length}/2)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCharacterSubmit} className="space-y-6">
-              {characterMutation.isError && (
-                <div className="p-4 rounded-md bg-red-50 border border-red-200">
-                  <p className="text-sm font-medium text-red-800">
-                    ✗ {characterMutation.error.message}
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="character-name">Nom du personnage *</Label>
-                <Input
-                  id="character-name"
-                  type="text"
-                  placeholder="Ex: Alice"
-                  value={characterName}
-                  onChange={(e) => setCharacterName(e.target.value)}
-                  required
-                  minLength={3}
-                  disabled={characterMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 3 caractères
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="character-description">Description du personnage *</Label>
-                <Textarea
-                  id="character-description"
-                  placeholder="Décrivez le personnage..."
-                  value={characterDescription}
-                  onChange={(e) => setCharacterDescription(e.target.value)}
-                  required
-                  minLength={10}
-                  rows={4}
-                  disabled={characterMutation.isPending}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 10 caractères
-                </p>
-              </div>
-
-              <CharacterPhotoUpload
-                onPhotoUploaded={setPhotoData}
-                onPhotoRemoved={() => setPhotoData(null)}
-              />
-
-              <Button
-                type="submit" 
-                className="w-full" 
-                disabled={characterMutation.isPending}
-              >
-                {characterMutation.isPending ? "Création en cours..." : "Ajouter le personnage"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Message de succès */}
-      {storyId && !showCharacterForm && characters.length > 0 && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-md bg-green-50 border border-green-200">
-            <p className="text-sm font-medium text-green-800">
-              ✓ Personnage créé avec succès !
-            </p>
-          </div>
-
-          {/* Afficher la liste des personnages créés */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personnages créés ({characters.length}/2)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {characters.map((character) => (
-                  <div key={character.id} className="p-4 border rounded-md">
-                    <div className="flex gap-4">
-                      {character.photoUrl && (
-                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={character.photoUrl}
-                            alt={character.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{character.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{character.description}</p>
-                        {character.photoUrl && (
-                          <p className="text-xs text-green-600 mt-2">✓ Photo de référence ajoutée</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Bouton pour ajouter un autre personnage (seulement si moins de 2) */}
-          {characters.length < 2 && (
-            <Button 
-              onClick={handleAddAnotherCharacter} 
-              className="w-full"
-            >
-              Ajouter un autre personnage
-            </Button>
-          )}
-
-          {/* Bouton pour générer l'histoire (apparaît quand 2 personnages sont créés) */}
-          {characters.length === 2 && !isGenerating && !storyData && (
-            <Button 
-              onClick={handleGenerateStory} 
-              className="w-full"
-              disabled={generateMutation.isPending}
-            >
-              {generateMutation.isPending ? "Lancement..." : "Générer l'histoire"}
-            </Button>
-          )}
-
-          {/* Message d'erreur de génération */}
-          {generateMutation.isError && (
-            <div className="p-4 rounded-md bg-red-50 border border-red-200">
-              <p className="text-sm font-medium text-red-800">
-                ✗ {generateMutation.error.message}
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-white">
+        <div className="container mx-auto px-4 py-20 lg:py-24">
+          <div className="flex items-center justify-between gap-8">
+            {/* Left Column - Content */}
+            <div className="space-y-8 lg:flex-shrink-0 lg:max-w-xl">
+              <Badge className="gap-2 text-sm py-1.5 px-4 bg-[#F3F0FF] text-[#635BFF] hover:bg-[#F3F0FF] font-medium">
+                ✨ Des histoires uniques, créées par l'IA
+              </Badge>
+              
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight font-[family-name:var(--font-jakarta)]">
+                Transformez
+                <br />
+                vos proches en
+                <br />
+                héros d'une histoire{" "}
+                <span className="text-[#635BFF]">inoubliable.</span>
+              </h1>
+              
+              <p className="text-lg text-muted-foreground max-w-xl">
+                Créez en quelques minutes un livre illustré personnalisé où vos enfants, votre couple ou vos proches vivent une aventure magique.
               </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Section de génération en cours */}
-      {isGenerating && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Génération en cours...</CardTitle>
-            <CardDescription>
-              Veuillez patienter pendant que nous créons votre histoire
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Statut: {statusData?.status || 'initialisation'}</span>
-                <span>⏳</span>
+              
+              <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
+                <Link href="/create-story">
+                  <Button size="lg" className="gap-2">
+                    ✨ Créer ma première histoire
+                  </Button>
+                </Link>
+                <Link href="/stories">
+                  <Button variant="ghost" size="lg" className="gap-2">
+                    Voir des exemples
+                  </Button>
+                </Link>
               </div>
-              <Progress value={undefined} className="w-full" />
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Vérification automatique toutes les 10 secondes...
-            </p>
-          </CardContent>
-        </Card>
-      )}
+            
+            {/* Right Column - Illustration */}
+            <div className="hidden lg:flex relative flex-shrink-0 -mr-4">
+              <img 
+                src="/livre.png"
+                alt="Livre ouvert illustré" 
+                className="h-[600px] w-auto object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* Affichage des images générées */}
-      {storyData && (
-        <div className="space-y-6">
-          <div className="p-4 rounded-md bg-green-50 border border-green-200">
-            <p className="text-sm font-medium text-green-800">
-              ✓ Histoire générée avec succès !
+      {/* How It Works Section */}
+      <section id="comment-ca-marche" className="py-20 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 font-[family-name:var(--font-jakarta)]">Comment ça marche ?</h2>
+            <p className="text-lg text-muted-foreground font-[family-name:var(--font-inter)]">
+              3 étapes simples pour créer une histoire unique
             </p>
           </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto">
+            {/* Step 1 */}
+            <div className="relative pt-6">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                <Badge className="w-12 h-12 rounded-full flex items-center justify-center text-lg bg-[#635BFF] text-white hover:bg-[#635BFF]">
+                  1
+                </Badge>
+              </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{storyData.story.title}</CardTitle>
-              <CardDescription>{storyData.story.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Scènes avec images */}
-              {storyData.scenes.map((scene) => (
-                <div key={scene.id} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Scène {scene.scene_number}:</span>
-                    <span className="text-sm text-muted-foreground">{scene.scene_type}</span>
+              <Card className="h-full bg-white border border-gray-300 pt-10 pb-8 px-6">
+                <CardContent className="flex flex-col items-center text-center p-0">
+                  <div className="mb-8 flex items-center justify-center">
+                    <img
+                      src="/editer.png"
+                      alt="Icône éditer"
+                      className="w-24 h-24 object-contain"
+                    />
                   </div>
-                  <p className="text-sm">{scene.description}</p>
-                  {scene.image_url && (
-                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-                      <img
-                        src={scene.image_url}
-                        alt={`Scène ${scene.scene_number}: ${scene.scene_type}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+
+                  <h3 className="text-xl font-semibold mb-3 font-[family-name:var(--font-jakarta)]">Décrivez votre histoire</h3>
+                  <p className="text-muted-foreground font-[family-name:var(--font-inter)] max-w-[200px]">
+                    Parlez-nous de vos personnages et de l'aventure que vous souhaitez raconter.
+                  </p>
+                </CardContent>
+              </Card>
+
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative pt-6">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                <Badge className="w-12 h-12 rounded-full flex items-center justify-center text-lg bg-[#635BFF] text-white hover:bg-[#635BFF]">
+                  2
+                </Badge>
+              </div>
+
+              <Card className="h-full bg-white border border-gray-300 pt-10 pb-8 px-6">
+                <CardContent className="flex flex-col items-center text-center p-0">
+                  <div className="mb-8 flex items-center justify-center">
+                    <img
+                      src="/baguette_magique.png"
+                      alt="Icône baguette magique"
+                      className="w-24 h-24 object-contain"
+                    />
+                  </div>
+
+                  <h3 className="text-xl font-semibold mb-3 font-[family-name:var(--font-jakarta)]">Notre IA crée la magie</h3>
+                  <p className="text-muted-foreground font-[family-name:var(--font-inter)] max-w-[200px]">
+                    Nous écrivons votre histoire en 4 scènes et générons des illustrations uniques.
+                  </p>
+                </CardContent>
+              </Card>
+
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative pt-6">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                <Badge className="w-12 h-12 rounded-full flex items-center justify-center text-lg bg-[#635BFF] text-white hover:bg-[#635BFF]">
+                  3
+                </Badge>
+              </div>
+
+              <Card className="h-full bg-white border border-gray-300 pt-10 pb-8 px-6">
+                <CardContent className="flex flex-col items-center text-center p-0">
+                  <div className="mb-8 flex items-center justify-center">
+                    <img 
+                      src="/livre2.png"
+                      alt="Icône livre" 
+                      className="w-24 h-24 object-contain"
+                    />
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold mb-3 font-[family-name:var(--font-jakarta)]">Recevez votre livre</h3>
+                  <p className="text-muted-foreground font-[family-name:var(--font-inter)] max-w-[200px]">
+                    Téléchargez votre livre et partagez ce moment magique avec vos proches.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Occasions Section */}
+      <section id="occasions" className="py-20 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 font-[family-name:var(--font-jakarta)]">Parfait pour toutes les occasions</h2>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* Anniversaires */}
+            <Card className="text-center hover:shadow-lg transition-shadow border-none bg-[#FAFAFC]">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <img 
+                    src="/gateau_anniversaire.png"
+                    alt="Gâteau d'anniversaire" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <CardTitle className="font-[family-name:var(--font-jakarta)]">Anniversaires</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="font-[family-name:var(--font-inter)]">
+                  Un cadeau unique qui reste gravé.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            {/* Couples */}
+            <Card className="text-center hover:shadow-lg transition-shadow border-none bg-[#FAFAFC]">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <img 
+                    src="/coeur.png"
+                    alt="Coeur" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <CardTitle className="font-[family-name:var(--font-jakarta)]">Couples</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="font-[family-name:var(--font-inter)]">
+                  Racontez votre histoire d'amour autrement.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            {/* Famille */}
+            <Card className="text-center hover:shadow-lg transition-shadow border-none bg-[#FAFAFC]">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <img 
+                    src="/cadeau.png"
+                    alt="Cadeau" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <CardTitle className="font-[family-name:var(--font-jakarta)]">Famille</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="font-[family-name:var(--font-inter)]">
+                  Créez des souvenirs à transmettre.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            {/* Autres occasions */}
+            <Card className="text-center hover:shadow-lg transition-shadow border-none bg-[#FAFAFC]">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <img 
+                    src="/etoile.png"
+                    alt="Étoile" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <CardTitle className="font-[family-name:var(--font-jakarta)]">Autres occasions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="font-[family-name:var(--font-inter)]">
+                  Noël, fêtes, naissance ou juste pour faire plaisir.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden bg-[#EDE9FE]">
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-6 font-[family-name:var(--font-jakarta)]">
+            Prêt à créer une histoire qui restera à jamais ?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto font-[family-name:var(--font-inter)]">
+            Rejoignez des milliers de familles qui créent déjà des souvenirs uniques.
+          </p>
+          <Link href="/create-story">
+            <Button size="lg" className="gap-2 text-base">
+              Commencer maintenant ✨
+            </Button>
+          </Link>
+        </div>
+      </section>
+
     </div>
   )
 }

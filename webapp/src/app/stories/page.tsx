@@ -55,7 +55,7 @@ export default function StoriesPage() {
             Retrouvez toutes vos histoires générées
           </p>
         </div>
-        <Link href="/">
+        <Link href="/create-story">
           <Button>Créer une nouvelle histoire</Button>
         </Link>
       </div>

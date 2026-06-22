@@ -193,8 +193,12 @@ export class StoryGeneratorFactory {
         this.instance = new OllamaStoryGenerator();
         break;
       }
-      default:
-        throw new Error(`Unknown story provider: ${provider}`);
+      default: {
+        const { InMemorySceneGenerator } = await import('@/lib/story-scenes-description-generator/in-memory-story-generator');
+        this.instance = new InMemorySceneGenerator();
+        console.log(`Provider "${provider}" not recognized, using InMemorySceneGenerator as fallback`);
+        break;
+      }
     }
 
     return this.instance;

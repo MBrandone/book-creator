@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Couleurs de base - background en transparent pour éviter un fond sur le header */
+  /* Couleurs de base  */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   
@@ -70,15 +70,7 @@
   /* Couleur secondaire */
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  
-  /* Couleur muted */
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  
-  /* Couleur accent */
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  
+
   /* Couleurs de statut */
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));

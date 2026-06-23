@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { use } from "react"
+import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data";
 
 interface Scene {
   id: string
@@ -14,35 +15,6 @@ interface Scene {
   description: string
   image_url: string | null
   prompt: string
-}
-
-interface StoryData {
-  story: {
-    id: string
-    title: string
-    description: string
-    status: string
-    created_at: string
-    updated_at: string
-  }
-  characters: Array<{
-    id: string
-    name: string
-    description: string
-    image_url: string | null
-  }>
-  scenes: Scene[]
-}
-
-async function fetchStoryData(storyId: string): Promise<StoryData> {
-  const response = await fetch(`/api/stories/${storyId}`)
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la récupération de l\'histoire')
-  }
-
-  return response.json()
 }
 
 function StatusBadge({ status }: { status: string }) {

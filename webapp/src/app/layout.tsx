@@ -18,8 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Book creator",
-  description: "Generate stories that last",
+  title: "Book Creator - Créez des Histoires Personnalisées",
+  description: "Créez des livres illustrés personnalisés avec l'IA. Transformez vos proches en héros d'histoires inoubliables.",
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={`${plusJakartaSans.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-screen flex flex-col">

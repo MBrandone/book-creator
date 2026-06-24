@@ -1,22 +1,22 @@
 # Todo
+- Remettre des logs sur la génération d'images
+- Avoir un vrai provider de scène qui se base sur un LLM en prod (pas du in-memory)
+- Mettre une photo de couverture servant de base à la suite
+- Les générations de photos se basent sur la première génération.
+- documenter les endpoints (y a pas de swagger comment faire mieux ?)
+- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
+- Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
 - Un personnage est décorellé d'une histoire, 
   - je peux associer jusque 5 personnages à l'histoire
   - Je peux utiliser des personnages crée précédemment
   - Avoir des personnages ré-utilisables dans mes histoires
-- Les générations de photos se basent sur la première génération.
-- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
-- Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
-- Mettre un swagger
 - Avoir un compte
-- Choisir le nombre de scène dans mon histoire
 - Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
   - Par les variables d'environnement ?
-- Avoir autant de personnages que possible
-- [ ] Les process.env dans les fichier de libs, c'est pas ouf.
-  - Comment faire mieux ?
+- Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-
+- Mieux gérer les variables d'environnements
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -37,3 +37,4 @@
     - Elle ne devrait l'être qu'un seule fois
   - [X] Supprimer la demo page des composants
   - [X] l'upload de photo se fait en même temps que les infos des personnages
+- [X] Landing Page

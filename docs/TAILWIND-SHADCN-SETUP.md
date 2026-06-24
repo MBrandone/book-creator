@@ -31,11 +31,6 @@ Les breakpoints sont configurés dans `src/app/globals.css` :
 --breakpoint-xl: 1280px;
 --breakpoint-2xl: 1536px;
 ```
-
-### Mode Sombre
-
-Le support du mode sombre est automatiquement géré via `prefers-color-scheme`.
-
 ---
 
 ## 🧩 Composants shadcn/ui Installés

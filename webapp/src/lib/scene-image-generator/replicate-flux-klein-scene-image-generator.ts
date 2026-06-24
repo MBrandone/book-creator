@@ -2,7 +2,7 @@ import Replicate from 'replicate';
 import type { ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator } from './scene-image-generator';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
 import { env } from '@/config/env';
-//import { withExponentialBackoff } from './replicate-retry-utils';
+import { withExponentialBackoff } from './replicate-retry-utils';
 
 const FLUX_KLEIN_MODEL = 'black-forest-labs/flux-2-klein-4b';
 
@@ -50,7 +50,15 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
         input.seed = seed;
       }
 
-      const output = await this.client.run(FLUX_KLEIN_MODEL, { input });
+      const output = await withExponentialBackoff(
+        () => this.client.run(FLUX_KLEIN_MODEL, { input }),
+        {
+          maxRetries: 5,
+          initialDelayMs: 2000, // 2 secondes pour la première retry
+          maxDelayMs: 120000, // 2 minutes max
+          backoffMultiplier: 2,
+        }
+      );
 
       console.log('✅ Image generated successfully');
 

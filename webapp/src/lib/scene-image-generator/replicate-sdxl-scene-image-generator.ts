@@ -9,7 +9,7 @@ import Replicate from 'replicate';
 import type {ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator,} from './scene-image-generator';
 import {getStorage} from '@/lib/infrastructure/storage/storage-factory';
 import { env } from '@/config/env';
-//import { withExponentialBackoff } from './replicate-retry-utils';
+import { withExponentialBackoff } from './replicate-retry-utils';
 
 const SDXL_MODEL = 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b';
 
@@ -74,21 +74,29 @@ export class ReplicateSdxlSceneImageGenerator implements SceneImageGenerator {
     try {
       // Lancer la génération d'image
       // @ts-ignore
-      const [output] = await this.client.run(SDXL_MODEL, {
-        input: {
-          prompt: fullPrompt,
-          negative_prompt: negativePrompt || 
-            'scary, frightening, dark, violent, inappropriate, photorealistic, blurry, low quality',
-          width: dimensions.width,
-          height: dimensions.height,
-          num_inference_steps: steps,
-          guidance_scale: guidance,
-          ...(seed ? { seed } : {}),
-          scheduler: 'K_EULER',
-          refine: 'expert_ensemble_refiner',
-          refine_steps: 10,
-        },
-      });
+      const [output] = await withExponentialBackoff(
+        () => this.client.run(SDXL_MODEL, {
+          input: {
+            prompt: fullPrompt,
+            negative_prompt: negativePrompt || 
+              'scary, frightening, dark, violent, inappropriate, photorealistic, blurry, low quality',
+            width: dimensions.width,
+            height: dimensions.height,
+            num_inference_steps: steps,
+            guidance_scale: guidance,
+            ...(seed ? { seed } : {}),
+            scheduler: 'K_EULER',
+            refine: 'expert_ensemble_refiner',
+            refine_steps: 10,
+          },
+        }),
+        {
+          maxRetries: 5,
+          initialDelayMs: 2000, // 2 secondes pour la première retry
+          maxDelayMs: 120000, // 2 minutes max
+          backoffMultiplier: 2,
+        }
+      );
 
       console.log('✅ Image generated successfully');
 

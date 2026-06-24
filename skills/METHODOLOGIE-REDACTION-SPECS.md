@@ -284,12 +284,6 @@ Response [code]:
 
 ---
 
-## Métriques de succès
-- Métrique 1
-- Métrique 2
-
----
-
 ## Questions ouvertes / À décider
 1. Question 1
 2. Question 2

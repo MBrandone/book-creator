@@ -1,6 +1,4 @@
 # Todo
-- Remettre des logs sur la génération d'images
-- Avoir un vrai provider de scène qui se base sur un LLM en prod (pas du in-memory)
 - Mettre une photo de couverture servant de base à la suite
 - Les générations de photos se basent sur la première génération.
 - documenter les endpoints (y a pas de swagger comment faire mieux ?)
@@ -11,12 +9,13 @@
   - Je peux utiliser des personnages crée précédemment
   - Avoir des personnages ré-utilisables dans mes histoires
 - Avoir un compte
+- Vercel Skills, on en fait quoi ?
 - Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
   - Par les variables d'environnement ?
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- Mieux gérer les variables d'environnements
+- Avoir un vrai provider de scène qui se base sur un LLM en prod (pas du in-memory)
 
 # Done
 - [X] Déployer sur Vercel et Supabase

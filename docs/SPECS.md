@@ -7,9 +7,10 @@ Ce logiciel a pour but de créer des livres d'histoires personnalisés.
 Afin de produire ces histoires, le logiciel utilise l'intelligence artificielle
 
 Voici le flow utilisateurs afin de créer une histoire aujourd'hui : 
-1) L'utilisateur renseigne le nom de son histoire et fournit une description
-2) L'utilisateur ajoute un personnage avec un nom et une description
-3) L'utilisateur ajoute un deuxième personnage avec un nom et une description
+1) L'utilisateur arrive sur le site et comprend le produit. Il clique sur "Créer une histoire" 
+2) L'utilisateur renseigne le nom de son histoire et fournit une description
+3) L'utilisateur ajoute un personnage avec un nom et une description
+4) L'utilisateur ajoute un deuxième personnage avec un nom et une description
 4) L'utilisateur clique sur générer une histoire
 5) L'IA génère l'histoire
    - Un modèle de génération de texte génère un scenario en 4 parties

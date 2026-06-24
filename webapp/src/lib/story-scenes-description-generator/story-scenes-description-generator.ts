@@ -192,6 +192,11 @@ export class StoryGeneratorFactory {
         this.instance = new OllamaStoryGenerator();
         break;
       }
+      case 'replicate': {
+        const { ReplicateStoryGenerator } = await import('@/lib/story-scenes-description-generator/replicate-story-generator');
+        this.instance = new ReplicateStoryGenerator();
+        break;
+      }
       default: {
         const { InMemorySceneGenerator } = await import('@/lib/story-scenes-description-generator/in-memory-story-generator');
         this.instance = new InMemorySceneGenerator();

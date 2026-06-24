@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const publicEnvSchema = z.object({
-  NEXT_PUBLIC_APP_URL: z.string().url("NEXT_PUBLIC_APP_URL doit être une URL valide"),
 });
 
 export const envSchema = z.object({

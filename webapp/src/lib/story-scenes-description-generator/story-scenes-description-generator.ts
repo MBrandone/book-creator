@@ -1,6 +1,7 @@
 import type { CharactersTable, SceneType } from '@/lib/infrastructure/db/schema';
 
 import {AISceneResponse} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
+import { env } from '@/config/env';
 
 export interface StoryContext {
   title: string;
@@ -176,14 +177,12 @@ export abstract class BaseStoryGenerator implements StoryScenesDescriptionGenera
 export class StoryGeneratorFactory {
   private static instance: StoryScenesDescriptionGenerator | null = null;
 
-  static async getGenerator(
-    forceProvider?: string
-  ): Promise<StoryScenesDescriptionGenerator> {
-    if (this.instance && !forceProvider) {
+  static async getGenerator(): Promise<StoryScenesDescriptionGenerator> {
+    if (this.instance) {
       return this.instance;
     }
 
-    const provider = forceProvider || process.env.STORY_PROVIDER || 'ollama';
+    const provider = env.STORY_PROVIDER;
 
     console.log('Story Generator provider : ', provider.toLowerCase())
 

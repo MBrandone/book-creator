@@ -27,8 +27,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
-    const storyReadModel = new SqlStoryReadModel(publicBaseUrl);
+    const storyReadModel = new SqlStoryReadModel();
     const queryHandler = new GetStoryQueryHandler(storyReadModel);
 
     const storyDetails = await queryHandler.execute(storyId);

@@ -38,3 +38,4 @@
   - [X] Supprimer la demo page des composants
   - [X] l'upload de photo se fait en même temps que les infos des personnages
 - [X] Landing Page
+- [X] Mieux gérer les variables d'environnements

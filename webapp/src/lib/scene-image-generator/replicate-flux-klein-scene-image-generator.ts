@@ -1,6 +1,8 @@
 import Replicate from 'replicate';
 import type { ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator } from './scene-image-generator';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
+import { env } from '@/config/env';
+//import { withExponentialBackoff } from './replicate-retry-utils';
 
 const FLUX_KLEIN_MODEL = 'black-forest-labs/flux-2-klein-4b';
 
@@ -12,12 +14,8 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
   readonly name = 'replicate-flux-klein';
   private client: Replicate;
 
-  constructor(apiToken?: string) {
-    const token = apiToken || process.env.REPLICATE_API_TOKEN;
-    if (!token) {
-      throw new Error('REPLICATE_API_TOKEN is required');
-    }
-    this.client = new Replicate({ auth: token });
+  constructor() {
+    this.client = new Replicate({ auth: env.REPLICATE_API_TOKEN });
   }
 
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult> {

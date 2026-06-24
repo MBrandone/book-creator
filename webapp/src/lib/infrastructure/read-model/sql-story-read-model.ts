@@ -3,9 +3,10 @@ import { StoryReadModel } from '../../domain/story-read-model';
 import { StoryDetailsView } from '../../domain/story-details-view';
 import { StoryStatusView } from '../../domain/story-status-view';
 import { StoryListView } from '../../domain/story-list-view';
+import { env } from '@/config/env';
 
 export class SqlStoryReadModel implements StoryReadModel {
-  constructor(private readonly publicBaseUrl: string) {}
+  constructor(private readonly publicBaseUrl: string = env.STORAGE_PUBLIC_BASE_URL) {}
 
   async viewDetails(storyId: string): Promise<StoryDetailsView | null> {
     const [story, characters, scenes] = await Promise.all([

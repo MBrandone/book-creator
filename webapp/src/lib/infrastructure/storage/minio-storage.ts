@@ -1,6 +1,7 @@
 import * as Minio from 'minio';
 import { Readable } from 'stream';
 import {StorageConfig, Storage, ImageMetadata} from "@/lib/infrastructure/storage/storage";
+import { env } from '@/config/env';
 
 export class MinioStorage implements Storage {
   private client: Minio.Client;
@@ -13,13 +14,13 @@ export class MinioStorage implements Storage {
 
   private loadConfig(): StorageConfig {
     return {
-      endpoint: process.env.STORAGE_ENDPOINT || 'localhost',
-      port: process.env.STORAGE_PORT ? Number.parseInt(process.env.STORAGE_PORT) : 9000,
-      useSSL: process.env.STORAGE_USE_SSL === 'true',
-      accessKey: process.env.STORAGE_ACCESS_KEY || 'minioadmin',
-      secretKey: process.env.STORAGE_SECRET_KEY || 'minioadmin',
-      bucket: process.env.STORAGE_BUCKET || 'book-images',
-      region: process.env.STORAGE_REGION || 'us-east-1',
+      endpoint: env.STORAGE_ENDPOINT,
+      port: env.STORAGE_PORT,
+      useSSL: env.STORAGE_USE_SSL,
+      accessKey: env.STORAGE_ACCESS_KEY,
+      secretKey: env.STORAGE_SECRET_KEY,
+      bucket: env.STORAGE_BUCKET,
+      region: env.STORAGE_REGION,
     };
   }
 
@@ -108,8 +109,7 @@ export class MinioStorage implements Storage {
   }
 
   getImageUrl(bucket: string, key: string): string {
-    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
-    return `${publicBaseUrl}/${bucket}/${key}`;
+    return `${env.STORAGE_PUBLIC_BASE_URL}/${bucket}/${key}`;
   }
 
   async getImageBuffer(key: string): Promise<Buffer> {

@@ -1,6 +1,7 @@
 import { Storage } from '@/lib/infrastructure/storage/storage';
 import { InvalidContentTypeError } from './invalid-content-type-error';
 import { randomUUID } from 'crypto';
+import { env } from '@/config/env'
 
 export class GetPhotoUploadUrlCommandHandler {
   constructor(
@@ -15,7 +16,7 @@ export class GetPhotoUploadUrlCommandHandler {
     const extension = this.getFileExtension(command.contentType);
     const uuid = randomUUID();
     const storageKey = `character-photos/${uuid}.${extension}`;
-    const bucket = process.env.STORAGE_BUCKET || 'book-images';
+    const bucket = env.STORAGE_BUCKET;
 
     const uploadUrl = await this.storage.getPresignedUploadUrl(
       storageKey,

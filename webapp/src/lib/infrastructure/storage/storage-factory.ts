@@ -1,11 +1,10 @@
 import type { Storage } from './storage';
 import { MinioStorage } from './minio-storage';
 import { AwsS3Storage } from './aws-s3-storage';
-
-export type StorageProviderType = 'minio' | 'aws-s3';
+import { env } from '@/config/env';
 
 export function createStorage(): Storage {
-  const providerType = (process.env.STORAGE_PROVIDER || 'aws-s3') as StorageProviderType;
+  const providerType = env.STORAGE_PROVIDER;
 
   switch (providerType) {
     case 'minio':

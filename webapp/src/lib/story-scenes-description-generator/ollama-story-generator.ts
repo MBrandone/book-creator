@@ -6,6 +6,7 @@ import {
   type StoryGeneratorOptions,
   type StoryContext,
 } from '@/lib/story-scenes-description-generator/story-scenes-description-generator';
+import { env } from '@/config/env';
 import type {CharactersTable} from '@/lib/infrastructure/db/schema';
 import {
   generateUserPrompt,
@@ -61,9 +62,9 @@ export class OllamaStoryGenerator extends BaseStoryGenerator {
     super('Ollama', options);
 
     this.config = {
-      baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-      model: process.env.OLLAMA_MODEL || 'llama3',
-      timeout: parseInt(process.env.STORY_GENERATION_TIMEOUT || '60000', 10),
+      baseUrl: env.OLLAMA_BASE_URL,
+      model: env.OLLAMA_MODEL,
+      timeout: env.STORY_GENERATION_TIMEOUT,
     };
 
     this.log('Initialized with config:', this.config);

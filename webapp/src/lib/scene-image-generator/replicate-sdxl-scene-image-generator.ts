@@ -8,8 +8,9 @@
 import Replicate from 'replicate';
 import type {ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator,} from './scene-image-generator';
 import {getStorage} from '@/lib/infrastructure/storage/storage-factory';
+import { env } from '@/config/env';
+//import { withExponentialBackoff } from './replicate-retry-utils';
 
-// Configuration du modèle SDXL
 const SDXL_MODEL = 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b';
 
 // Paramètres par défaut optimisés pour les illustrations de livres enfants
@@ -24,12 +25,8 @@ export class ReplicateSdxlSceneImageGenerator implements SceneImageGenerator {
   readonly name = 'replicate-sdxl';
   private client: Replicate;
 
-  constructor(apiToken?: string) {
-    const token = apiToken || process.env.REPLICATE_API_TOKEN;
-    if (!token) {
-      throw new Error('REPLICATE_API_TOKEN is required');
-    }
-    this.client = new Replicate({ auth: token });
+  constructor() {
+    this.client = new Replicate({ auth: env.REPLICATE_API_TOKEN });
   }
 
   private getDimensions(aspectRatio: string): { width: number; height: number } {

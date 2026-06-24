@@ -8,8 +8,7 @@ import {SqlStoryReadModel} from '@/lib/infrastructure/read-model/sql-story-read-
 
 export async function GET() {
     try {
-        const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL || '';
-        const storyReadModel = new SqlStoryReadModel(publicBaseUrl);
+        const storyReadModel = new SqlStoryReadModel();
         const queryHandler = new ListStoriesQueryHandler(storyReadModel);
         const stories = await queryHandler.execute();
 

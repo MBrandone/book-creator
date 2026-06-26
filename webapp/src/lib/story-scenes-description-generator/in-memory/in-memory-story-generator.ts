@@ -5,7 +5,7 @@ import {
 } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 import {type SceneType} from "@/lib/infrastructure/db/schema";
 
-import {getStylePrefix} from "@/lib/story-scenes-description-generator/story-scenes-description-prompts";
+import {getStylePrefix} from "@/lib/story-scenes-description-generator/prompts";
 
 export class InMemorySceneGenerator implements StoryScenesDescriptionGenerator {
     readonly name: string = 'InMemorySceneGenerator';

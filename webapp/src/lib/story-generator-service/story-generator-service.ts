@@ -43,7 +43,7 @@ export class StoryGeneratorService {
       const isAvailable = await this.scenesGenerator.isAvailable();
 
       if (!isAvailable) {
-        throw new Error(`Story generator ${this.scenesGenerator.name} is not available`);
+        throw new Error(`Story generator is not available`);
       }
 
       const charactersForGenerator = story.characters.map(character => ({

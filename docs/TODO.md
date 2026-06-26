@@ -1,21 +1,29 @@
 # Todo
+- L'utilisateur peut modifier les scènes
 - Mettre une photo de couverture servant de base à la suite
-- Les générations de photos se basent sur la première génération.
-- documenter les endpoints (y a pas de swagger comment faire mieux ?)
-- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
+  - Les générations de photos se basent sur la première génération.
+- Faire une première génération avec la tête des personnages
+  - et proposer à l'utilisateur de changer si besoin
+- C'est quoi la stratégie de log. injecter un logger propre dans l'application
+- Comment combattre l'injection de prompt ?
+- Avoir un rate limiter applicatif
+- **Memory Management - Image Loading** - Triple copie des images en mémoire (fetch buffer + arrayBuffer + Buffer) - Pour 10 images de 5MB: 150MB de RAM - **Fix**: Utiliser streaming vers storage
 - Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
+- API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
+============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
+- Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
 - Un personnage est décorellé d'une histoire, 
   - je peux associer jusque 5 personnages à l'histoire
   - Je peux utiliser des personnages crée précédemment
   - Avoir des personnages ré-utilisables dans mes histoires
 - Avoir un compte
+- documenter les endpoints (y a pas de swagger comment faire mieux ?)
 - Vercel Skills, on en fait quoi ?
 - Brancher/débrancher facilement les modèles de génération d'histoire (Mock, Ollama, Replicate)
   - Par les variables d'environnement ?
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- Avoir un vrai provider de scène qui se base sur un LLM en prod (pas du in-memory)
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -38,3 +46,12 @@
   - [X] l'upload de photo se fait en même temps que les infos des personnages
 - [X] Landing Page
 - [X] Mieux gérer les variables d'environnements
+- [X] Avoir un vrai provider de scène qui se base sur un LLM en prod (pas du in-memory)
+- [X] Revue de code sur le nouveau provider replicate
+  - [X] Utiliser un agent-skill de Addy pour la revue de code
+  - [X] Parse du json renvoyé par l'IA doit être fait à un seul endroit
+  - [X] **Problème**: Le withTimeout n'annule pas la requête en cours, elle continue en arrière-plan.
+    - WithBackoff, une bonne solution ? Vaut mieux étendre une classe ?
+- Retour des gens : "les histoires sur mobiles sont moches“
+  - [X] Padding sur les pages
+  - [X] Upload photo pas bon en mobile

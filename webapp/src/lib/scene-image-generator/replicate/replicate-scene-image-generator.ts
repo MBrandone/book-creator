@@ -1,21 +1,23 @@
 import Replicate from 'replicate';
-import type { ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator } from './scene-image-generator';
-import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
-import { env } from '@/config/env';
-import { withExponentialBackoff } from './replicate-retry-utils';
+import type {ImageGenerationOptions, ImageGenerationResult, SceneImageGenerator} from '../scene-image-generator';
+import {getStorage} from '@/lib/infrastructure/storage/storage-factory';
+import {env} from '@/config/env';
+import {RetryStrategy} from '@/lib/infrastructure/http-request-retry-strategy/retry-strategy';
+import {
+  DEFAULT_ASPECT_RATIO,
+  DEFAULT_OUTPUT_FORMAT,
+  DEFAULT_OUTPUT_MEGAPIXELS,
+  FLUX_KLEIN_MODEL
+} from "@/lib/scene-image-generator/replicate/config";
 
-const FLUX_KLEIN_MODEL = 'black-forest-labs/flux-2-klein-4b';
-
-const DEFAULT_ASPECT_RATIO = '1:1';
-const DEFAULT_OUTPUT_MEGAPIXELS = '1';
-const DEFAULT_OUTPUT_FORMAT = 'jpg';
-
-export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerator {
+export class ReplicateSceneImageGenerator implements SceneImageGenerator {
   readonly name = 'replicate-flux-klein';
-  private client: Replicate;
+  private readonly client: Replicate;
+  private readonly retryStrategy: RetryStrategy;
 
-  constructor() {
+  constructor(retryStrategy: RetryStrategy) {
     this.client = new Replicate({ auth: env.REPLICATE_API_TOKEN });
+    this.retryStrategy = retryStrategy;
   }
 
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult> {
@@ -26,7 +28,7 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
       referenceImages = [],
     } = options;
 
-    console.log('🎨 Generating image with Replicate Flux Klein...');
+    console.log('Generating image with Replicate Flux Klein...');
     console.log('Prompt:', prompt);
     console.log('Aspect ratio:', aspectRatio);
     console.log('Reference images:', referenceImages.length);
@@ -42,7 +44,7 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
       };
 
       if (referenceImages.length > 0) {
-        console.log(`📸 Using ${referenceImages.length} pre-converted reference images`);
+        console.log(`Using ${referenceImages.length} pre-converted reference images`);
         input.images = referenceImages.map(img => img.dataUri);
       }
 
@@ -50,35 +52,27 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
         input.seed = seed;
       }
 
-      const output = await withExponentialBackoff(
-        () => this.client.run(FLUX_KLEIN_MODEL, { input }),
-        {
-          maxRetries: 5,
-          initialDelayMs: 2000, // 2 secondes pour la première retry
-          maxDelayMs: 120000, // 2 minutes max
-          backoffMultiplier: 2,
-        }
-      );
+      const output = await this.retryStrategy.execute(() => this.client.run(FLUX_KLEIN_MODEL, { input }));
 
-      console.log('✅ Image generated successfully');
+      console.log('Image generated successfully');
 
       const imageUrl = Array.isArray(output) ? output[0] : output;
 
-      console.log('📥 Retrieving image from Replicate...');
+      console.log('Retrieving image from Replicate...');
       const response = await fetch(imageUrl);
       const arrayBuffer = await response.arrayBuffer();
       const imageBuffer = Buffer.from(arrayBuffer);
-      console.log(`✅ Image buffer created (${imageBuffer.length} bytes)`);
+      console.log(`Image buffer created (${imageBuffer.length} bytes)`);
 
       const timestamp = Date.now();
       const filename = `images/generated/${timestamp}-${seed || 'random'}.${DEFAULT_OUTPUT_FORMAT}`;
 
-      console.log('📤 Uploading to storage...');
+      console.log('Uploading to storage...');
       const storage = getStorage();
       const { bucket, key } = await storage.uploadImage(imageBuffer, filename, {
         'Content-Type': `image/${DEFAULT_OUTPUT_FORMAT}`,
       });
-      console.log('✅ Image uploaded to storage');
+      console.log('Image uploaded to storage');
 
       return {
         bucket,
@@ -93,20 +87,11 @@ export class ReplicateFluxKleinSceneImageGenerator implements SceneImageGenerato
         },
       };
     } catch (error) {
-      console.error('❌ Error generating image:', error);
+      console.error('Error generating image:', error);
       throw new Error(
           `Failed to generate image with Replicate Flux Klein: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
 
-}
-
-let _fluxKleinProviderInstance: ReplicateFluxKleinSceneImageGenerator | null = null;
-
-export function getReplicateFluxKleinGenerator(): ReplicateFluxKleinSceneImageGenerator {
-  if (!_fluxKleinProviderInstance) {
-    _fluxKleinProviderInstance = new ReplicateFluxKleinSceneImageGenerator();
-  }
-  return _fluxKleinProviderInstance;
 }

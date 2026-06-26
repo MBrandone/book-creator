@@ -8,10 +8,16 @@ import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
 import { StoryAlreadyGeneratingError } from '@/lib/application/handlers/command/generate-story-book-images/story-already-generating-error';
 import { NoCharactersFoundError } from '@/lib/application/handlers/command/generate-story-book-images/no-characters-found-error';
 import { StoryGeneratorService } from '@/lib/story-generator-service/story-generator-service';
-import { getReplicateFluxKleinGenerator } from '@/lib/scene-image-generator/replicate-flux-klein-scene-image-generator';
+import {
+  ReplicateSceneImageGenerator
+} from '@/lib/scene-image-generator/replicate/replicate-scene-image-generator';
 import { SqlSceneRepository } from '@/lib/infrastructure/repositories/scene-repository/sql-scene-repository';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
-import { StoryGeneratorFactory } from '@/lib/story-scenes-description-generator/story-scenes-description-generator';
+import { ExponentialBackoffRetryStrategy } from '@/lib/infrastructure/http-request-retry-strategy/exponential-backoff/exponential-backoff-retry-strategy';
+
+import {
+  StoryScenesDescriptionGeneratorFactory
+} from "@/lib/story-scenes-description-generator/factory";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -38,8 +44,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const storyRepository = new SqlStoryRepository();
     const sceneRepository = new SqlSceneRepository();
-    const scenesGenerator = await StoryGeneratorFactory.getGenerator();
-    const sceneImageGenerator = getReplicateFluxKleinGenerator();
+    const scenesGenerator = await StoryScenesDescriptionGeneratorFactory.getGenerator();
+    const retryStrategy = new ExponentialBackoffRetryStrategy();
+    const sceneImageGenerator = new ReplicateSceneImageGenerator(retryStrategy);
     const storage = getStorage();
     
     const storyGeneratorService = new StoryGeneratorService(

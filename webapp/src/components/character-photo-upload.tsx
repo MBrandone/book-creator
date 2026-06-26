@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useMutation } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Upload, X, Image as ImageIcon } from "lucide-react"
+import {useRef, useState} from "react"
+import {useMutation} from "@tanstack/react-query"
+import {Button} from "@/components/shadcn-ui/button"
+import {Label} from "@/components/shadcn-ui/label"
+import {Image as ImageIcon, Upload, X} from "lucide-react"
+import {uploadFileToStorage} from "@/app/_app-http-requests/upload-file-to-storage";
+import {getUploadUrl} from "@/app/_app-http-requests/get-upload-url";
 
 interface CharacterPhotoUploadProps {
   onPhotoUploaded?: (data: { storageKey: string; storageBucket: string; previewUrl: string }) => void
@@ -14,49 +16,12 @@ interface CharacterPhotoUploadProps {
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
-async function getUploadUrl(contentType: string) {
-  const response = await fetch('/api/characters/photo/upload-url', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ contentType }),
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Erreur lors de la génération de l\'URL d\'upload')
-  }
-
-  return response.json() as Promise<{ 
-    uploadUrl: string; 
-    storageKey: string; 
-    storageBucket: string;
-    expiresIn: number;
-  }>
-}
-
-async function uploadFileToStorage(uploadUrl: string, file: File) {
-  const response = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': file.type,
-    },
-    body: file,
-  })
-
-  if (!response.ok) {
-    throw new Error('Erreur lors de l\'upload du fichier')
-  }
-}
-
 export function CharacterPhotoUpload({
   onPhotoUploaded,
   onPhotoRemoved,
 }: CharacterPhotoUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [uploadedData, setUploadedData] = useState<{ storageKey: string; storageBucket: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const uploadMutation = useMutation({
@@ -68,12 +33,10 @@ export function CharacterPhotoUpload({
     onSuccess: (data, file) => {
       const preview = URL.createObjectURL(file)
       setPreviewUrl(preview)
-      setUploadedData(data)
       onPhotoUploaded?.({ ...data, previewUrl: preview })
     },
     onError: () => {
       setPreviewUrl(null)
-      setUploadedData(null)
     },
     onSettled: () => {
       if (fileInputRef.current) {
@@ -103,7 +66,6 @@ export function CharacterPhotoUpload({
 
   const handleRemove = () => {
     setPreviewUrl(null)
-    setUploadedData(null)
     onPhotoRemoved?.()
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -169,14 +131,13 @@ export function CharacterPhotoUpload({
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col ">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleButtonClick}
                 disabled={uploadMutation.isPending}
-                className="flex-1"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Remplacer

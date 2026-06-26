@@ -2,12 +2,12 @@
 
 import {useEffect, useState} from "react"
 import {useMutation, useQuery} from "@tanstack/react-query"
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Textarea} from "@/components/ui/textarea"
-import {Progress} from "@/components/ui/progress"
+import {Button} from "@/components/shadcn-ui/button"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/shadcn-ui/card"
+import {Input} from "@/components/shadcn-ui/input"
+import {Label} from "@/components/shadcn-ui/label"
+import {Textarea} from "@/components/shadcn-ui/textarea"
+import {Progress} from "@/components/shadcn-ui/progress"
 import {CharacterPhotoUpload} from "@/components/character-photo-upload"
 import {createStory} from "@/app/_app-http-requests/create-story"
 import {createCharacter, type CreateCharacterPayload} from "@/app/_app-http-requests/create-character"
@@ -125,20 +125,16 @@ export default function CreateStoryPage() {
   }, [isGenerating, statusData])
 
   return (
-    <div className="container mx-auto py-10 max-w-2xl">
+    <div className="container mx-auto py-10 max-w-2xl px-8 md:px-0">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Créer une Histoire</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl mb-2">Créer une histoire</h1>
           <p className="text-muted-foreground">
             Remplissez le formulaire ci-dessous pour créer une nouvelle histoire
           </p>
         </div>
-        <Link href="/stories">
-          <Button variant="outline">📚 Mes histoires</Button>
-        </Link>
       </div>
 
-      {/* Formulaire de création d'histoire */}
       {!storyId && (
         <Card>
           <CardHeader>
@@ -293,7 +289,7 @@ export default function CreateStoryPage() {
           </div>
 
           {/* Afficher la liste des personnages créés */}
-          <Card>
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle>Personnages créés ({characters.length}/2)</CardTitle>
             </CardHeader>
@@ -419,6 +415,12 @@ export default function CreateStoryPage() {
           </Card>
         </div>
       )}
+
+      <div className="my-8 mb-0 flex justify-center">
+        <Link href="/stories">
+          <Button variant="outline">📚 Mes histoires</Button>
+        </Link>
+      </div>
     </div>
   )
 }

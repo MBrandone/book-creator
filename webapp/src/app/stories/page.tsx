@@ -1,44 +1,11 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {useQuery} from "@tanstack/react-query"
+import {Button} from "@/components/shadcn-ui/button"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/shadcn-ui/card"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-
-interface StoryListItem {
-  id: string
-  title: string
-  description: string
-  status: string
-  created_at: string
-  updated_at: string
-  character_count: number
-  scene_count: number
-}
-
-async function fetchStories(): Promise<{ stories: StoryListItem[] }> {
-  const response = await fetch('/api/stories')
-
-  if (!response.ok) {
-    throw new Error('Erreur lors de la récupération des histoires')
-  }
-
-  return response.json()
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", label: string }> = {
-    pending: { variant: "secondary", label: "En attente" },
-    generating: { variant: "outline", label: "En génération..." },
-    completed: { variant: "default", label: "Terminée" },
-    failed: { variant: "destructive", label: "Échec" },
-  }
-
-  const config = variants[status] || { variant: "outline", label: status }
-
-  return <Badge variant={config.variant}>{config.label}</Badge>
-}
+import {Badge} from "@/components/shadcn-ui/badge"
+import {fetchStories} from "@/app/_app-http-requests/fetch-stories";
 
 export default function StoriesPage() {
   const { data, isLoading, error } = useQuery({
@@ -47,17 +14,14 @@ export default function StoriesPage() {
   })
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
+    <div className="container mx-auto py-10 max-w-4xl px-8 md:px-0">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Mes Histoires</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl mb-2">Mes histoires</h1>
           <p className="text-muted-foreground">
             Retrouvez toutes vos histoires générées
           </p>
         </div>
-        <Link href="/create-story">
-          <Button>Créer une nouvelle histoire</Button>
-        </Link>
       </div>
 
       {isLoading && (
@@ -93,7 +57,7 @@ export default function StoriesPage() {
         <div className="space-y-4">
           {data.stories.map((story) => (
             <Link key={story.id} href={`/stories/${story.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer mb-4">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -119,4 +83,17 @@ export default function StoriesPage() {
       )}
     </div>
   )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", label: string }> = {
+    pending: { variant: "secondary", label: "En attente" },
+    generating: { variant: "outline", label: "En génération..." },
+    completed: { variant: "default", label: "Terminée" },
+    failed: { variant: "destructive", label: "Échec" },
+  }
+
+  const config = variants[status] || { variant: "outline", label: status }
+
+  return <Badge variant={config.variant}>{config.label}</Badge>
 }

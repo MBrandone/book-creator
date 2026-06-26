@@ -1,45 +1,12 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/shadcn-ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn-ui/card"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/shadcn-ui/badge"
 import { use } from "react"
 import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data";
-
-interface Scene {
-  id: string
-  scene_number: number
-  scene_type: string
-  description: string
-  image_url: string | null
-  prompt: string
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", label: string }> = {
-    pending: { variant: "secondary", label: "En attente" },
-    generating: { variant: "outline", label: "En génération..." },
-    completed: { variant: "default", label: "Terminée" },
-    failed: { variant: "destructive", label: "Échec" },
-  }
-
-  const config = variants[status] || { variant: "outline", label: status }
-
-  return <Badge variant={config.variant}>{config.label}</Badge>
-}
-
-function SceneTypeBadge({ type }: { type: string }) {
-  const labels: Record<string, string> = {
-    introduction: "Introduction",
-    conflict: "Conflit",
-    action: "Action",
-    resolution: "Résolution",
-  }
-
-  return <Badge variant="outline">{labels[type] || type}</Badge>
-}
 
 export default function StoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -54,8 +21,8 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
   })
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
-      <div className="mb-8">
+    <div className="container mx-auto py-10 max-w-4xl px-8 md:px-0">
+      <div>
         <Link href="/stories">
           <Button variant="ghost" className="mb-4">← Retour aux histoires</Button>
         </Link>
@@ -191,4 +158,29 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
       )}
     </div>
   )
+}
+
+
+function StatusBadge({ status }: { status: string }) {
+  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", label: string }> = {
+    pending: { variant: "secondary", label: "En attente" },
+    generating: { variant: "outline", label: "En génération..." },
+    completed: { variant: "default", label: "Terminée" },
+    failed: { variant: "destructive", label: "Échec" },
+  }
+
+  const config = variants[status] || { variant: "outline", label: status }
+
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}
+
+function SceneTypeBadge({ type }: { type: string }) {
+  const labels: Record<string, string> = {
+    introduction: "Introduction",
+    conflict: "Conflit",
+    action: "Action",
+    resolution: "Résolution",
+  }
+
+  return <Badge variant="outline">{labels[type] || type}</Badge>
 }

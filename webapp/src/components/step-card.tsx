@@ -1,4 +1,4 @@
-import {Badge, Card, CardContent} from "@/components/ui";
+import {Badge, Card, CardContent} from "@/components/shadcn-ui";
 import Image from "next/image";
 
 interface StepCardProps {

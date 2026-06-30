@@ -1,0 +1,41 @@
+{
+  "PreCommit": [
+    {
+      "matcher": "*.ts",
+      "command": "npm run lint --fix ${file}"
+    },
+    {
+      "matcher": "*.tsx",
+      "command": "npm run lint --fix ${file}"
+    },
+    {
+      "matcher": "*.js",
+      "command": "npm run lint --fix ${file}"
+    },
+    {
+      "matcher": "*.json",
+      "command": "npm run lint --fix ${file}"
+    }
+  ],
+  "PostFileWrite": [
+    {
+      "matcher": "*.js",
+      "command": "npm run lint --fix ${file}"
+    },
+    {
+      "matcher": "*.ts",
+      "command": "npm run lint --fix ${file}"
+    },
+    {
+      "matcher": "*.tsx",
+      "command": "npm run lint --fix ${file}"
+    }
+  ],
+  "OnTaskComplete": [
+    {
+      "description": "Desktop notification on build completion",
+      "matcher": "build",
+      "command": "osascript -e 'display notification \"Build complete\" with title \"Claude Code\"' || notify-send 'Build complete'"
+    }
+  ]
+}

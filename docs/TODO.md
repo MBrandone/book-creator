@@ -1,15 +1,21 @@
 # Todo
-- L'utilisateur peut modifier les scènes
-- Mettre une photo de couverture servant de base à la suite
+- [PARCOURS CREATION] L'utilisateur peut modifier les scènes
+- [PARCOURS CREATION] Ajouter une image de couverture
+- [AMELIORATION GENERATION] Mettre une photo de couverture servant de base à la suite
   - Les générations de photos se basent sur la première génération.
-- Faire une première génération avec la tête des personnages
+- [PARCOURS CREATION] Faire une première génération avec la tête des personnages
   - et proposer à l'utilisateur de changer si besoin
-- C'est quoi la stratégie de log. injecter un logger propre dans l'application
-- Comment combattre l'injection de prompt ?
-- Avoir un rate limiter applicatif
-- **Memory Management - Image Loading** - Triple copie des images en mémoire (fetch buffer + arrayBuffer + Buffer) - Pour 10 images de 5MB: 150MB de RAM - **Fix**: Utiliser streaming vers storage
-- Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
-- API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
+- [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
+- [TECH] Comment combattre l'injection de prompt ?
+- [TECH] Avoir un rate limiter applicatif
+- [LANDING] Améliorer la landing page
+  - Animations (subtil, apparition, mouvement au hover, couleurs, micro-interaction)
+  - Faire une revue de design (est-ce-que les espacement sont cohérents, les couleurs)
+  - Voir le skill front-design dans mastering ai 2.1
+- [TECH] **Memory Management - Image Loading** - Triple copie des images en mémoire (fetch buffer + arrayBuffer + Buffer) - Pour 10 images de 5MB: 150MB de RAM - **Fix**: Utiliser streaming vers storage
+- [ACHAT] Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
+- [ACHAT] API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
+- [ACHAT] Paiement et Livraison
 ============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
 - Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
 - Un personnage est décorellé d'une histoire, 

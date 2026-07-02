@@ -52,7 +52,7 @@ When `render` changes an element to a non-button (`<a>`, `<span>`), add `nativeB
 **Incorrect (base):** missing `nativeButton={false}`.
 
 ```tsx
-<Button render={<a href="/docs" />}>Read the docs</Button>
+<Button render={<a href="/docs"/>}>Read the docs</Button>
 ```
 
 **Correct (base):**

@@ -497,7 +497,7 @@ Aucune modification nécessaire. Les champs `photoStorageBucket` et `photoStorag
 ## Références
 
 - [Documentation précédente](./cadrage-associer-une-photo-a-un-personnage.md)
-- [Méthodologie de rédaction de specs](../../skills/METHODOLOGIE-REDACTION-SPECS.md)
+- [Méthodologie de rédaction de specs](../../webapp/.claude/skills/METHODOLOGIE-REDACTION-SPECS.md)
 - [Spécifications fonctionnelles](../SPECS.md)
 - [AWS S3 Pre-signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 - [React Query Documentation](https://tanstack.com/query/latest)

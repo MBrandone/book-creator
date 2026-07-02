@@ -61,3 +61,4 @@
 - Retour des gens : "les histoires sur mobiles sont moches“
   - [X] Padding sur les pages
   - [X] Upload photo pas bon en mobile
+- [X] PWA

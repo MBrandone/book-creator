@@ -45,7 +45,7 @@ export class ReplicateStoryScenesDescriptionGenerator implements StoryScenesDesc
         const prompt = new StorySceneDescriptionPromptBuilder().setUserPrompt(context).getPrompt()
         const output = await this.retryStrategy.execute(() => this.callReplicateAPI(prompt));
 
-        let responseText: string = StoryScenesDescriptionGeneratorValidator.convertDifferentOutputFormatToString(output)
+        const responseText: string = StoryScenesDescriptionGeneratorValidator.convertDifferentOutputFormatToString(output)
         const parsedResponse = StoryScenesDescriptionGeneratorValidator.parseJSONResponse(responseText);
         const validatedResponse = StoryScenesDescriptionGeneratorValidator.validateAIResponse(parsedResponse);
 

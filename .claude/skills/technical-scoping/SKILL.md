@@ -55,7 +55,6 @@ Ask the user these questions systematically:
 
 #### Methodology & Inspiration
 - What methodology, pattern, or practice inspires this change?
-- What literature, articles, or books guide this approach?
 - Are there industry standards or best practices we should follow?
 - Have other teams or companies solved this problem? How?
 
@@ -63,11 +62,9 @@ Ask the user these questions systematically:
 - What specific tools, libraries, or frameworks will be used?
 - What are the alternatives? Why choose this one over others?
 - What are the dependencies or prerequisites?
-- What is the estimated effort and timeline?
 
 #### Impact & Constraints
 - What technical constraints apply? (performance, compatibility, scalability)
-- What is the impact on the development team? (learning time, skills needed, disruption)
 - What are the measurable success criteria? (metrics, thresholds, KPIs)
 - What does "done" look like?
 
@@ -97,7 +94,6 @@ What is broken or inefficient with the current approach?
 
 ## Context & Constraints
 
-- Team size and skill level
 - Timeline constraints
 - Performance requirements
 - Compatibility requirements
@@ -107,7 +103,6 @@ What is broken or inefficient with the current approach?
 
 What guides this approach?
 - Methodology (e.g., TDD, Domain-Driven Design, Microservices)
-- Books, articles, or blog posts
 - Industry standards or frameworks
 - Examples from other teams/companies
 
@@ -125,6 +120,29 @@ High-level steps. Not detailed code, but architectural phases.
 
 ### Dependencies & Prerequisites
 What must be in place before starting?
+
+## Implementation Tasks
+
+Liste détaillée et actionnable des tâches nécessaires à l'implémentation. Chaque tâche doit être :
+- **Concrète** : un développeur (ou un agent) peut la prendre et savoir quoi faire
+- **Vérifiable** : critère clair pour dire "c'est fait"
+- **Ordonnée** : respecter les dépendances entre tâches
+
+### Phase 1: [Nom de la phase, ex: Préparation]
+- [ ] **T1.1** - [Description de la tâche] — *Dépend de: -*
+  - Critère de complétion : [ce qui doit être vrai]
+  - Fichiers/zones concernés : [chemins]
+- [ ] **T1.2** - [Description] — *Dépend de: T1.1*
+  - Critère de complétion : [...]
+
+### Phase 2: [Nom de la phase, ex: Implémentation cœur]
+- [ ] **T2.1** - [Description] — *Dépend de: T1.2*
+- [ ] **T2.2** - [Description] — *Dépend de: -*
+
+### Phase 3: [Nom de la phase, ex: Validation & rollout]
+- [ ] **T3.1** - Écrire les tests couvrant [...] 
+- [ ] **T3.2** - Mettre à jour la documentation ([fichiers])
+- [ ] **T3.3** - Vérifier les critères de succès (voir section Success Criteria) 
 
 ## Impact Analysis
 
@@ -216,6 +234,25 @@ npm security audits show vulnerabilities. Scripts fail in CI due to missing deps
 3. Update CI pipeline
 4. Document migration guide for remaining scripts
 
+## Implementation Tasks
+
+### Phase 1: Préparation
+- [ ] **T1.1** - Inventorier tous les scripts dans `/scripts` et lister leurs dépendances npm — *Dépend de: -*
+  - Critère de complétion : tableau `scripts × deps` publié dans le doc
+- [ ] **T1.2** - Installer Deno 2.x sur l'environnement de dev et documenter le setup — *Dépend de: -*
+  - Critère de complétion : `deno --version` fonctionne pour toute l'équipe
+
+### Phase 2: Migration
+- [ ] **T2.1** - Réécrire `build.js` en `build.ts` (Deno) — *Dépend de: T1.2*
+  - Fichiers/zones : `/scripts/build.*`
+- [ ] **T2.2** - Réécrire `deploy.js` en `deploy.ts` (Deno) — *Dépend de: T1.2*
+- [ ] **T2.3** - Mettre à jour le pipeline CI pour utiliser `deno task` — *Dépend de: T2.1, T2.2*
+
+### Phase 3: Validation & rollout
+- [ ] **T3.1** - Vérifier que le CI passe sans étape `npm install` pour les scripts — *Dépend de: T2.3*
+- [ ] **T3.2** - Écrire un guide de migration pour les scripts restants dans `docs/technical/` — *Dépend de: T2.3*
+- [ ] **T3.3** - Valider les critères de succès (voir section Success Criteria) — *Dépend de: T3.1*
+
 ## Success Criteria
 - [ ] Zero npm dependencies for build scripts
 - [ ] CI passes without dependency installation step
@@ -252,12 +289,12 @@ Before finalizing the technical scoping document:
 - [ ] **Alternatives documented** - At least 2 alternatives with rejection rationale
 - [ ] **Methodology cited** - References to books, articles, or frameworks
 - [ ] **Tools specified** - Exact versions and configuration approach
+- [ ] **Implementation tasks listed** - Tâches concrètes, vérifiables, ordonnées, regroupées en phases
 - [ ] **Success criteria measurable** - Specific metrics, not vague goals
 - [ ] **Team impact assessed** - Learning curve, skills, disruption quantified
 - [ ] **Risks identified** - With mitigation strategies
 - [ ] **Rollback plan exists** - Clear steps to revert if needed
 - [ ] **Cost analysis complete** - Adoption cost vs. status quo cost
-- [ ] **Timeline estimated** - Realistic phases with durations
 - [ ] **Document placed in `docs/technical/`** - Dated and named clearly
 - [ ] **Status set** - Proposed, Accepted, In Progress, or Completed
 
@@ -268,8 +305,6 @@ After the document is created and approved:
 1. **Create an ADR** if this is an architectural decision (use documentation-and-adrs skill)
 2. **Update CLAUDE.md** with new conventions or standards
 3. **Create implementation tasks** based on the timeline
-4. **Schedule team review** if team impact is medium or high
-5. **Set up success metrics tracking** before starting implementation
 
 ## Common Anti-Patterns
 

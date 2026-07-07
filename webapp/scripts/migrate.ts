@@ -8,9 +8,9 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const envFile = process.env.NODE_ENV === 'production'
-  ? '.env.prod' 
+  ? '.env.prod'
   : '.env.local';
-  
+
 config({ path: path.join(__dirname, '..', envFile) });
 
 console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);

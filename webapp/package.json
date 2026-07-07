@@ -11,7 +11,9 @@
     "db:migrate:up": "tsx scripts/migrate.ts up",
     "db:migrate:down": "tsx scripts/migrate.ts down",
     "db:migrate:create": "tsx scripts/create-migration.ts",
-    "deploy": "NODE_ENV=production tsx scripts/migrate.ts latest"
+    "deploy": "NODE_ENV=production tsx scripts/migrate.ts latest",
+    "test:e2e": "docker-compose -f ../docker-compose.test.yml up -d && npx playwright test && docker-compose -f ../docker-compose.test.yml down",
+    "test:e2e:ui": "docker-compose -f ../docker-compose.test.yml up -d && npx playwright test --ui && docker-compose -f ../docker-compose.test.yml down"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1067.0",
@@ -41,6 +43,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/minio": "^7.1.0",
     "@types/node": "^20.19.43",
@@ -48,6 +51,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
     "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",

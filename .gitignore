@@ -29,6 +29,7 @@ yarn-error.log*
 .env*.local
 .env
 !.env.example
+!.env.test
 
 # vercel
 .vercel
@@ -47,3 +48,8 @@ next-env.d.ts
 # Docker volumes
 postgres_data/
 minio_data/
+
+# Playwright
+/webapp/test-results/
+/webapp/playwright-report/
+/webapp/playwright/.cache/

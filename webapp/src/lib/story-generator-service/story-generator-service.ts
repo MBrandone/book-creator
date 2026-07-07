@@ -7,6 +7,8 @@ import { Scene } from "@/lib/domain/scene";
 import { Storage } from "@/lib/infrastructure/storage/storage";
 
 export class StoryGeneratorService {
+  private readonly SECONDS_TO_WAIT = 2;
+
   constructor(
     private readonly storyRepository: StoryRepository,
     private readonly scenesGenerator: StoryScenesDescriptionGenerator,
@@ -14,29 +16,6 @@ export class StoryGeneratorService {
     private readonly sceneRepository: SceneRepository,
     private readonly storage: Storage
   ) {}
-
-  private async convertImageToDataUri(key: string): Promise<string> {
-    try {
-      const buffer = await this.storage.getImageBuffer(key);
-      
-      let mimeType = 'image/jpeg';
-      if (key.endsWith('.png')) {
-        mimeType = 'image/png';
-      } else if (key.endsWith('.webp')) {
-        mimeType = 'image/webp';
-      }
-      
-      const base64 = buffer.toString('base64');
-      const dataUri = `data:${mimeType};base64,${base64}`;
-      
-      console.log(`✅ Image converted to data URI: ${key} (${buffer.length} bytes -> ${dataUri.length} chars)`);
-      
-      return dataUri;
-    } catch (error) {
-      console.error(`❌ Error converting image ${key} to data URI:`, error);
-      throw error;
-    }
-  }
 
   async generate(story: Story): Promise<void> {
     try {
@@ -78,7 +57,7 @@ export class StoryGeneratorService {
           storageBucket: null,
           storageKey: null,
         };
-        
+
         await this.sceneRepository.save(scene);
       }
 
@@ -89,16 +68,17 @@ export class StoryGeneratorService {
           key: char.photoStorageKey!
         }));
 
-      console.log(`📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`);
-      
+      console.log(`[${story.id}] 📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`);
+
       const referenceImages = await Promise.all(
         referenceImageKeys.map(async ({ key }) => {
           const dataUri = await this.convertImageToDataUri(key);
           return { dataUri };
         })
       );
-      
-      console.log(`✅ ${referenceImages.length} reference photos converted successfully`);
+
+      console.log(`[${story.id}] ✅ ${referenceImages.length} reference photos converted successfully`);
+      console.log(`[${story.id}] 🖼️  Starting image generation for ${generatedScenes.length} scenes...`);
 
       for (const generatedScene of generatedScenes) {
         try {
@@ -121,8 +101,7 @@ export class StoryGeneratorService {
 
           await this.sceneRepository.save(sceneWithImage);
 
-          const seconds_to_wait = 10;
-          await new Promise(resolve => setTimeout(resolve, seconds_to_wait * 1000));
+          await new Promise(resolve => setTimeout(resolve, this.SECONDS_TO_WAIT * 1000));
 
         } catch (imageError) {
           console.error(`[${story.id}] ❌ Failed to generate image for scene ${generatedScene.scene_number}:`, imageError);
@@ -150,4 +129,28 @@ export class StoryGeneratorService {
       }
     }
   }
+
+  private async convertImageToDataUri(key: string): Promise<string> {
+    try {
+      const buffer = await this.storage.getImageBuffer(key);
+
+      let mimeType = 'image/jpeg';
+      if (key.endsWith('.png')) {
+        mimeType = 'image/png';
+      } else if (key.endsWith('.webp')) {
+        mimeType = 'image/webp';
+      }
+
+      const base64 = buffer.toString('base64');
+      const dataUri = `data:${mimeType};base64,${base64}`;
+
+      console.log(`✅ Image converted to data URI: ${key} (${buffer.length} bytes -> ${dataUri.length} chars)`);
+
+      return dataUri;
+    } catch (error) {
+      console.error(`❌ Error converting image ${key} to data URI:`, error);
+      throw error;
+    }
+  }
+
 }

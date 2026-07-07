@@ -25,8 +25,9 @@ export const envSchema = z.object({
   STORAGE_PUBLIC_BASE_URL: z.string().url("STORAGE_PUBLIC_BASE_URL doit être une URL valide"),
 
   REPLICATE_API_TOKEN: z.string().min(1, "REPLICATE_API_TOKEN est requis"),
-  
-  STORY_PROVIDER: z.enum(['ollama', 'replicate']),
+
+  STORY_PROVIDER: z.enum(['ollama', 'replicate', 'mock']),
+  IMAGE_GENERATION_PROVIDER: z.enum(['replicate', 'mock']),
   OLLAMA_BASE_URL: z.string().url(),
   OLLAMA_MODEL: z.string().min(1, "OLLAMA_MODEL est requis"),
 

@@ -226,8 +226,11 @@ docker-compose up -d     # Démarrer les services
 docker-compose down      # Arrêter les services
 docker-compose logs -f   # Voir les logs
 
-# Tests
-npm run test             # Lancer les tests (à venir)
+# Tests E2E
+npm run test:e2e         # Lancer les tests E2E (démarre automatiquement l'infrastructure test)
+npm run test:e2e:ui      # Lancer les tests E2E en mode UI interactif
+
+# Autres
 npm run lint             # Linter le code
 npm run type-check       # Vérifier les types TypeScript
 ```

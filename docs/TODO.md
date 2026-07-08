@@ -1,6 +1,13 @@
 # Todo
-- [PARCOURS CREATION] L'utilisateur peut modifier les scènes
+- [AGENTIC] Hooks
+  - de build
+  - de tests 
+  - de lint (biome plutot que eslint et prettier) 
+- [BUG] La dernière scène n'arrive pas à être crée
 - [PARCOURS CREATION] Ajouter une image de couverture
+- [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
+  - Quel élément de description de l'histoire donné ?
+  - Quel élément de description des personnages donner ? Comment fournir un bon personnage ?
 - [AMELIORATION GENERATION] Mettre une photo de couverture servant de base à la suite
   - Les générations de photos se basent sur la première génération.
 - [PARCOURS CREATION] Faire une première génération avec la tête des personnages
@@ -27,6 +34,7 @@
 - Arrêter le promise.then pour générer une histoire et faire une vraie queue rejouable pour la creation d'histoire
   - redis-mq pour lancer une génération
   - Si fail, rejeu automatique
+  - Vercel Workflow pourrait faire le job ?
 - Spécialiser autour de thème : Fete des mères, fete des pères, Noël, Paques
 - Un personnage est décorellé d'une histoire, 
   - je peux associer jusque 5 personnages à l'histoire
@@ -40,19 +48,7 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [TECH] Il faut des tests pour laisser des agents coder
-  - Playwright peut suffire aujourd'hui sur le parcours, mais il va falloir stub les appels IA
-  - Il faut des tests d'architecture deterministe
-  - Problèmes
-    - [X] In-memory fonctionne pas vraiment ? ça prend plus de 30 secondes? 40 secondes pour être précis
-      - ça devrait en prendre 10 max
-      - => C'est un temps de configuration, baissé à 2 secondes
-    - [X] Les images sont pas au bon endroit
-      - Mettre les images de bases dans le docker-compose
-      - Mettre les bons liens dans le mock
-      - => Suppression des numeros de scene pour l'instant et toujours la meme photo pour la scene
-    - [ ] Les bonnes pratiques de test ne vont pas dans le readme, mais dans un skill
-    - [ ] Supprimer les consoles logs pour les durées
+- [PARCOURS CREATION] L'utilisateur peut modifier les scènes
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -85,3 +81,16 @@
   - [X] Padding sur les pages
   - [X] Upload photo pas bon en mobile
 - [X] PWA
+- [TECH] Il faut des tests pour laisser des agents coder
+  - Playwright peut suffire aujourd'hui sur le parcours, mais il va falloir stub les appels IA
+  - Il faut des tests d'architecture deterministe
+  - Problèmes
+    - [X] In-memory fonctionne pas vraiment ? ça prend plus de 30 secondes? 40 secondes pour être précis
+      - ça devrait en prendre 10 max
+      - => C'est un temps de configuration, baissé à 2 secondes
+    - [X] Les images sont pas au bon endroit
+      - Mettre les images de bases dans le docker-compose
+      - Mettre les bons liens dans le mock
+      - => Suppression des numeros de scene pour l'instant et toujours la meme photo pour la scene
+    - [X] Les bonnes pratiques de test ne vont pas dans le readme, mais dans un skill
+    - [X] Supprimer les consoles logs pour les durées

@@ -1,62 +1,63 @@
-# Méthodologie : Rédaction de spécifications techniques
+# Product Scoping — Spécifications Techniques
 
-Ce guide décrit la méthodologie à suivre pour cadrer et spécifier de nouvelles fonctionnalités de manière collaborative et structurée.
+Méthodologie de cadrage et de rédaction de spécifications techniques pour le projet Book Creator.
 
----
+## Quand Utiliser
 
-## Objectif
+- Démarrage d'une nouvelle fonctionnalité
+- Changement architectural significatif
+- Besoin de clarifier des exigences ambiguës
+- Tâche nécessitant plus de 30 minutes d'implémentation
+- Décisions techniques structurantes (nouveaux services, nouveaux agrégats, nouveaux endpoints)
 
-Produire des spécifications techniques complètes et actionnables en posant les bonnes questions au bon moment, tout en explorant le contexte technique existant.
-
----
-
-## Processus en 5 étapes
-
-### 📖 Étape 1 : Exploration du contexte
-
-**Objectif** : Comprendre l'architecture existante et le domaine métier
-
-**Actions** :
-1. Lire les documents de référence (`SPECS.md`, `README.md`, etc.)
-2. Explorer le code existant pertinent :
-   - Modèles de domaine
-   - Repositories
-   - Services/Command Handlers
-   - API endpoints
-   - Schéma de base de données
-3. Identifier les patterns architecturaux utilisés
-
-**Questions à se poser** :
-- Quelle est l'architecture actuelle ? (DDD, CQRS, layered, etc.)
-- Quels sont les concepts métier clés ?
-- Quelles sont les conventions de nommage et d'organisation du code ?
-- Quelles technologies sont utilisées ? (frameworks, bibliothèques, services externes)
-
-**Outils** :
-- `read_file` pour lire la documentation et le code
-- `list_code_definition_names` pour avoir une vue d'ensemble
-- `search_files` pour trouver des patterns spécifiques
-
-**Livrable** : Compréhension solide du contexte technique et métier
+**Ne PAS utiliser pour** : corrections de typos, modifications d'une ligne, changements triviaux où les exigences sont évidentes.
 
 ---
 
-### 🎯 Étape 2 : Clarification des besoins
+## Workflow en 4 Phases
 
-**Objectif** : Obtenir une compréhension claire et non ambiguë de ce que l'utilisateur souhaite
+```
+SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
+   │          │        │          │
+   ▼          ▼        ▼          ▼
+ User       User     User       User
+ validates  validates validates  validates
+```
 
-**Approche** : Poser des questions ciblées **une par une** pour éviter de submerger l'utilisateur
+**Ne pas passer à la phase suivante sans validation utilisateur.**
 
-**Framework de questions** :
+---
+
+## Phase 1 : Specify — Rédiger la Spécification
+
+### 1. Exposer les Hypothèses
+
+**Toujours lister explicitement les hypothèses AVANT d'écrire la spec** :
+
+```
+HYPOTHÈSES :
+1. L'utilisateur est authentifié (pas d'accès anonyme)
+2. On utilise PostgreSQL (pas de migration vers un autre SGBD)
+3. Les images sont stockées dans MinIO (pas de changement de storage)
+4. Le frontend utilise React 19 + Next.js 16
+→ Confirmer ou corriger ces hypothèses avant de continuer.
+```
+
+**Pourquoi ?** Éviter de spécifier pendant des heures sur la mauvaise base. Les hypothèses sont la forme la plus dangereuse de malentendu.
+
+### 2. Poser les Questions de Clarification
+
+**Approche** : Poser des questions ciblées **une par une** pour éviter de submerger l'utilisateur.
 
 #### A. Questions sur le flux utilisateur
-- Comment l'utilisateur va-t-il accéder à cette fonctionnalité ?
+- Comment l'utilisateur accède-t-il à cette fonctionnalité ?
 - Quelles sont les étapes du parcours utilisateur ?
 - Quelles validations ou contraintes doivent être respectées ?
+- Que se passe-t-il en cas d'erreur ?
 
 #### B. Questions sur l'intégration technique
 - Comment cette fonctionnalité s'intègre-t-elle avec l'existant ?
-- Quelles API externes ou services tiers sont nécessaires ?
+- Quels agrégats du domaine sont impactés ?
 - Y a-t-il des contraintes techniques à respecter ?
 
 #### C. Questions sur les données
@@ -70,386 +71,399 @@ Produire des spécifications techniques complètes et actionnables en posant les
 - Quelles sont leurs limites/contraintes ?
 
 #### E. Questions sur l'interface graphique
-- Quel interface utilisateur permet d'utiliser ces APIs ?
+- Quelle interface utilisateur permet d'utiliser ces APIs ?
+- Quels composants React sont nécessaires ?
 
 **Principe clé** : **Une question à la fois**
 - Présenter 2-5 options de réponse pour faciliter le choix
-- Permettre à l'utilisateur de répondre "Je ne sais pas" pour que vous proposiez une solution
+- Permettre à l'utilisateur de répondre "Je ne sais pas" pour proposer une solution
 - Documenter chaque décision avec sa justification
 
-**Exemple de séquence** :
+**Transformer les exigences vagues en critères mesurables** :
 ```
-Question 1 : Upload des données
-├─ Option A : Dans le même appel API
-├─ Option B : Séparément via un nouvel endpoint
-└─ Option C : Les deux options possibles
-
-↓ Réponse obtenue
-
-Question 2 : Stockage des données
-├─ Option A : Base de données relationnelle
-├─ Option B : Stockage objet (S3)
-└─ Option C : Autre système
-
-↓ Réponse obtenue
-
-... et ainsi de suite
+EXIGENCE : "Améliorer la performance"
+→ CRITÈRES MESURABLES :
+- Temps de chargement < 2s
+- LCP < 2.5s sur 4G
+- Pas de CLS > 0.1
 ```
 
-**Livrable** : Décisions architecturales claires et documentées
+### 3. Structure du Document de Spécification
+
+Le document doit couvrir **9 sections principales** :
+
+#### 1. Objectif
+- **Quoi** : Description de la fonctionnalité
+- **Pourquoi** : Problème métier résolu
+- **Pour qui** : Utilisateurs cibles (parents, éducateurs, etc.)
+- **Valeur ajoutée** : Bénéfices concrets
+
+#### 2. Flux Utilisateur
+- **Flux actuel** vs **nouveau flux**
+- **États** : lecture, édition, sauvegarde, erreur
+- **Règles métier** : contraintes de timing, validation, persistance
+- **Cas d'erreur** : que se passe-t-il si échec ?
+
+#### 3. Architecture et Structure
+
+##### 3.1 Identification des Agrégats (DDD Tactique)
+- **Agrégat Root** : entité principale qui contrôle les invariants métier
+- **Entités enfants** : entités appartenant à l'agrégat
+- **Repositories** : chargent l'agrégat complet (root + entités)
+- **Pattern** : modifications passent toujours par l'agrégat root
+
+**Exemple** :
+```typescript
+// Story = Agrégat Root
+// Scene = Entité enfant
+class Story {
+  private scenes: Scene[];
+  
+  updateSceneDescription(sceneId: string, description: string): void {
+    // Validation du statut (invariant métier)
+    if (this.status !== 'pending') {
+      throw new CannotEditSceneAfterGenerationError();
+    }
+    // Modification via l'agrégat root
+    const scene = this.scenes.find(s => s.id === sceneId);
+    scene.description = description;
+  }
+}
+```
+
+**Avantages** :
+- Cohérence forte des invariants métier
+- Une seule requête DB au lieu de deux
+- Validation métier centralisée dans l'agrégat root
+
+##### 3.2 Modification du Schéma de Données
+- **Migrations** : nouvelles colonnes, nouvelles tables
+- **Statuts** : nouveaux statuts de l'agrégat si nécessaire
+- **Pas de migration ?** : préciser si le schéma existant suffit
+
+##### 3.3 API Routes et Architecture
+
+**Nommage REST des Endpoints** :
+- ✅ `POST /api/stories/{id}/scenario-generation` (ressource + action)
+- ✅ `POST /api/stories/{id}/images-generation` (ressource + action)
+- ✅ `PATCH /api/stories/{id}/scenes/{sceneId}` (ressource + verbe HTTP)
+- ❌ `POST /api/stories/{id}/generate-scenario` (éviter verbe dans l'URL avec POST)
+
+**Architecture par Couches** :
+```
+API Route (validation Zod)
+  ↓
+Command Handler (logique applicative)
+  ↓
+Agrégat Root (validation métier)
+  ↓
+Repository (persistance)
+```
+
+**Réponses API** :
+- `200 OK` : requête synchrone réussie avec body
+- `202 Accepted` : requête asynchrone acceptée (génération en background) ou modification acceptée sans body
+- `400 Bad Request` : validation échouée
+- `409 Conflict` : règle métier violée (ex: modification impossible après génération)
+
+##### 3.4 Composants React
+- Structure de fichiers (nouveaux composants, services, handlers)
+- Props des composants (types TypeScript)
+- Utilisation de React Query (`useMutation`, `useQuery` directement)
+- **Pas de hooks personnalisés** sauf si réutilisables à plusieurs endroits
+
+#### 4. Style de Code
+- **Conventions TypeScript** : PascalCase (composants), camelCase (fonctions)
+- **Pas de commentaires** : utiliser des noms explicites et extraire des méthodes
+- **Extraction de méthodes** : clarifier le code par décomposition
+- **Gestion d'état** : `useState` (local), `useMutation`/`useQuery` (serveur)
+
+#### 5. Stratégie de Tests
+- **Tests E2E (Playwright)** : flux utilisateur complet
+- **Tests unitaires (Vitest)** : validation métier du domaine (si nécessaire)
+- **Tests d'API** : validation des entrées, gestion des erreurs (si nécessaire)
+- **Priorité** : E2E couvrant le flux principal > tests unitaires/API
+
+**Convention de sélecteurs Playwright** :
+- ✅ Sélecteurs accessibles : `getByRole`, `getByLabel`, `getByText`
+- ❌ Sélecteurs CSS : `.class`, `#id`, `[data-testid]`
+
+#### 6. Boundaries (Limites et Règles)
+
+**Always Do (Toujours Faire)** :
+- Valider côté client ET serveur
+- Vérifier les invariants métier dans le domaine
+- Utiliser des sélecteurs accessibles dans les tests
+- Extraire des méthodes plutôt que commenter
+- Tester le flux complet en E2E
+
+**Ask First (Demander Avant)** :
+- Ajouter de nouvelles dépendances
+- Modifier le schéma de base de données au-delà du scope
+- Ajouter des fonctionnalités hors scope (feature creep)
+- Changer l'architecture existante (pattern différent)
+
+**Never Do (Ne Jamais Faire)** :
+- Autoriser HTML/scripts dans les inputs utilisateur (XSS)
+- Skip les tests E2E pour "aller plus vite"
+- Utiliser des sélecteurs CSS dans Playwright
+- Sauvegarder automatiquement sans action explicite utilisateur
+- Ajouter des hooks personnalisés React sans justification
+
+#### 7. Critères d'Acceptation
+
+Liste **vérifiable** de conditions pour considérer la feature terminée :
+- ✅ L'utilisateur peut faire X
+- ✅ Les validations Y sont en place
+- ✅ Les tests E2E passent
+- ✅ L'architecture respecte le pattern Z
+- ✅ Les endpoints suivent les conventions REST
+
+#### 8. Étapes d'Implémentation
+
+**Organisation par phases** :
+1. **Phase Domaine** : agrégats, validation métier, erreurs domaine
+2. **Phase Services** : refactoring/création de services applicatifs
+3. **Phase API** : routes, command handlers, validation Zod
+4. **Phase Frontend** : composants React, appels API
+5. **Phase Tests** : mise à jour des tests E2E
+6. **Phase Conservation** : rétrocompatibilité (si nécessaire)
+
+**Chaque phase inclut** :
+- Actions concrètes (créer X, modifier Y)
+- Fichiers impactés
+- Ordre de dépendance
+
+#### 9. Risques et Mitigations
+
+Identifier les **risques techniques et métier** :
+
+| Risque | Impact | Mitigation |
+|--------|--------|------------|
+| PWA installées cassées | Utilisateurs ne peuvent plus accéder | Conserver l'ancien endpoint |
+| Génération sans scénario | Erreur utilisateur | Validation métier dans le handler |
+| Validation client contournée | Données invalides en base | Triple validation (HTML + Zod + Domaine) |
 
 ---
 
-### 🔍 Étape 3 : Recherche technique
+## Phase 2 : Plan — Planification Technique
 
-**Objectif** : Valider la faisabilité et comprendre les APIs/services externes
+Avec la spécification validée, générer un plan d'implémentation :
 
-**Actions** :
-1. Consulter la documentation des services tiers
-2. Vérifier les contraintes techniques (limites d'API, formats supportés, etc.)
-3. Explorer des exemples d'implémentation si disponibles
-4. Identifier les pièges potentiels
+1. **Identifier les composants majeurs** et leurs dépendances
+2. **Déterminer l'ordre d'implémentation** (ce qui doit être construit en premier)
+3. **Noter les risques** et les stratégies de mitigation
+4. **Identifier le parallélisme** : ce qui peut être fait en parallèle vs séquentiel
+5. **Définir les checkpoints de vérification** entre les phases
 
-**Outils** :
-- `execute_command` avec `curl` pour tester des APIs
-- Recherche dans la documentation en ligne
-- Lecture de code d'exemple
-
-**Questions à valider** :
-- La solution proposée est-elle techniquement faisable ?
-- Quelles sont les limites techniques à prendre en compte ?
-- Y a-t-il des meilleures pratiques à suivre ?
-
-**Livrable** : Validation technique et identification des contraintes
+**Le plan doit être reviewable** : l'utilisateur doit pouvoir dire "oui, c'est la bonne approche" ou "non, change X".
 
 ---
 
-### 🏗️ Étape 4 : Proposition de solution
+## Phase 3 : Tasks — Découpage en Tâches
 
-**Objectif** : Proposer une architecture optimale basée sur les contraintes identifiées
+Découper le plan en **tâches implémentables** :
 
-**Structure de la proposition** :
+- Chaque tâche est **complétable en une session** de travail
+- Chaque tâche a des **critères d'acceptation explicites**
+- Chaque tâche inclut une **étape de vérification** (test, build, check manuel)
+- Les tâches sont **ordonnées par dépendance** (pas par importance)
+- Une tâche ne modifie **pas plus de ~5 fichiers**
 
-#### A. Contexte et objectifs
-- Résumé du besoin
-- Objectifs clairs et mesurables
-
-#### B. Décisions architecturales
-Pour chaque décision majeure :
-- **Décision** : Ce qui a été décidé
-- **Raison** : Pourquoi cette décision
-- **Alternatives considérées** : Ce qui n'a pas été retenu et pourquoi
-- **Contraintes** : Limites techniques à respecter
-
-#### C. Spécifications fonctionnelles
-- Cas de tests détailles en utilisant le Behaviour Driven Development et le framework given when then
-- Se mettre dans la peau de l'utilisateur d'interface (pas celui qui utilise les APIs)
-
-#### D. Spécifications techniques
-1. **API REST** : Endpoints, payloads, codes de réponse
-2. **Modèle de données** : Modifications du schéma
-3. **Architecture logicielle** : Nouveaux composants, interfaces
-4. **Intégrations externes** : Configuration, paramètres
-5. **Gestion des erreurs** : Scénarios d'échec et récupération
-
-#### E. Sécurité et considérations
-- Validation des entrées
-- Authentification/Autorisation
-- Protection des données sensibles
-- Quotas et rate limiting
-
-#### F. Plan de déploiement
-- Phases de développement
-- Migrations de base de données
-- Tests requis
-- Stratégie de rollout
-
-**Principe clé** : **Équilibre entre détail et pragmatisme**
-- Assez de détails pour implémenter sans ambiguïté
-- Focus sur les décisions importantes
-
-**Livrable** : Document de spécifications complet
+**Template de tâche** :
+```markdown
+- [ ] Tâche : [Description]
+  - Acceptation : [Ce qui doit être vrai quand c'est terminé]
+  - Vérification : [Comment confirmer — commande de test, build, check manuel]
+  - Fichiers : [Fichiers impactés]
+```
 
 ---
 
-### ✅ Étape 5 : Validation et itération
+## Principes de Cadrage
 
-**Objectif** : S'assurer que les specs répondent aux attentes et sont complètes
+### YAGNI (You Aren't Gonna Need It)
+- **Proposer le minimum** pour implémenter la fonctionnalité
+- **Pas de feature creep** : rester concentré sur le besoin immédiat
+- **Pas d'abstraction prématurée** : trois duplications avant d'abstraire
+- **Pas de sur-ingénierie** : ne pas anticiper des besoins hypothétiques
 
-**Actions** :
-1. Présenter le document de specs
-2. Demander un feedback
-3. Identifier les zones d'ombre ou points manquants
-4. Itérer si nécessaire
+**Exemple** :
+```
+❌ Ajouter un système de versioning des scènes "au cas où"
+✅ Écraser la description directement (besoin actuel)
 
-**Questions de validation** :
-- Les objectifs sont-ils bien définis et mesurables ?
-- Les décisions architecturales sont-elles justifiées ?
-- Le plan de déploiement est-il réaliste ?
-- Les cas limites sont-ils couverts ?
-- Les dépendances sont-elles identifiées ?
+❌ Créer un hook personnalisé useSceneEditor pour un seul usage
+✅ Utiliser useMutation directement dans le composant
+```
 
-**Livrable** : Spécifications validées et prêtes pour l'implémentation
+### DDD Tactique — Agrégats et Invariants
+
+### Conventions REST
+- **Nommage des endpoints** : ressources (noms) + actions (verbes HTTP)
+- **Verbes HTTP sémantiques** : GET (lecture), POST (création/action), PATCH (modification partielle), DELETE (suppression)
+- **Codes HTTP appropriés** : 200 (OK), 202 (Accepted), 400 (Bad Request), 409 (Conflict)
+- **Actions dans l'URL** : utiliser des noms (ex: `/scenario-generation`, pas `/generate-scenario`)
+
+### Validation en Couches
+- **Validation HTML native** : `minLength`, `maxLength`, `required` sur les inputs
+- **Validation Zod (API)** : schéma de validation côté serveur
+- **Validation Domaine** : règles métier dans l'agrégat root
+
+### Conventions d'Écriture
+
+- **Langage clair et sans ambiguïté** : éviter les termes vagues ("améliorer", "optimiser")
+- **Exemples concrets** : code snippets, JSON samples, schémas TypeScript
+- **Valeurs numériques précises** : timeouts (10s, pas "quelques secondes"), limites (10-500 caractères)
+- **Pas de jargon inutile** : expliquer les termes techniques si nécessaire
 
 ---
 
-## Template de document de specs
-
-Voici le template à utiliser pour structurer vos spécifications :
+## Template de Spécification
 
 ```markdown
-# Cadrage : [Nom de la fonctionnalité]
+# Spécification Technique : [Nom de la Fonctionnalité]
 
-## Contexte
-[Description du contexte métier et technique]
+## 1. Objectif
+- **Quoi** : [Description de la fonctionnalité]
+- **Pourquoi** : [Problème métier résolu]
+- **Pour qui** : [Utilisateurs cibles]
+- **Valeur ajoutée** : [Bénéfices concrets]
 
-## Objectifs
-- Objectif 1
-- Objectif 2
-- Objectif 3
+## 2. Flux Utilisateur
+### 2.1 Positionnement dans le Parcours
+**Flux actuel** : [Étapes actuelles]
+**Nouveau flux** : [Étapes avec la nouvelle fonctionnalité]
 
-## Décisions architecturales
+### 2.2 États
+- État 1 : [Description]
+- État 2 : [Description]
 
-### 1. [Aspect décisionnel 1]
-**Décision** : [La décision prise]
-**Raison** : [Justification]
-**Contraintes** : [Limites techniques]
+### 2.3 Règles Métier
+- **Contraintes de timing** : [Quand c'est possible/impossible]
+- **Contraintes de validation** : [Règles de validation]
+- **Contraintes de persistance** : [Comment les données sont sauvegardées]
 
-### 2. [Aspect décisionnel 2]
-...
+## 3. Architecture et Structure
+### 3.1 Agrégats (DDD Tactique)
+- **Agrégat Root** : [Entité principale]
+- **Entités enfants** : [Entités appartenant à l'agrégat]
+- **Invariants métier** : [Règles contrôlées par l'agrégat root]
 
----
+### 3.2 Modification du Schéma de Données
+- **Migrations** : [Nouvelles colonnes/tables]
+- **Statuts** : [Nouveaux statuts si nécessaire]
 
-## Spécifications fonctionnelles
+### 3.3 API Routes
+- **Endpoints** : [Liste des endpoints avec méthodes HTTP]
+- **Architecture** : API → Command Handler → Agrégat → Repository
+- **Réponses** : [Codes HTTP et formats de réponse]
 
-### Flow utilisateur mis à jour
-1. Étape 1
-2. Étape 2
-3. **[NOUVEAU]** Étape nouvelle
-4. Étape 3
+### 3.4 Composants React
+- **Structure de fichiers** : [Arborescence]
+- **Composants** : [Liste des composants avec props]
+- **État** : [useMutation, useQuery, useState]
 
----
+## 4. Style de Code
+- **Conventions TypeScript** : [Nommage, types]
+- **Pas de commentaires** : [Extraction de méthodes]
+- **Gestion d'état** : [useState, useMutation, useQuery]
 
-## Spécifications techniques
+## 5. Stratégie de Tests
+- **Tests E2E (Playwright)** : [Fichiers de test, scénarios]
+- **Tests unitaires (Vitest)** : [Si nécessaire]
+- **Conventions de sélecteurs** : [getByRole, getByLabel, getByText]
 
-### 1. API REST
+## 6. Boundaries (Limites et Règles)
+### Always Do
+- [Liste des règles toujours applicables]
 
-#### [Nom de l'endpoint]
-\`\`\`
-[Method] [Path]
-Content-Type: [type]
+### Ask First
+- [Liste des actions nécessitant approbation]
 
-Body:
-[structure]
+### Never Do
+- [Liste des interdictions]
 
-Response [code]:
-[structure]
-\`\`\`
+## 7. Critères d'Acceptation
+- ✅ [Critère 1]
+- ✅ [Critère 2]
+- ✅ [Critère 3]
 
-### 2. Modifications du schéma de base de données
-\`\`\`typescript
-[Code des modifications]
-\`\`\`
+## 8. Étapes d'Implémentation
+### Phase 1 : [Nom]
+1. [Action 1]
+2. [Action 2]
 
-### 3. [Autres sections techniques]
-...
+### Phase 2 : [Nom]
+3. [Action 3]
+4. [Action 4]
 
----
+## 9. Risques et Mitigations
+| Risque | Impact | Mitigation |
+|--------|--------|------------|
+| [Risque 1] | [Impact] | [Mitigation] |
+| [Risque 2] | [Impact] | [Mitigation] |
 
-## Sécurité et considérations
-
-### Sécurité
-- Point 1
-- Point 2
-
-### Performance
-- Point 1
-- Point 2
-
-### Nettoyage des données
-- Point 1
-- Point 2
-
----
-
-## Plan de déploiement
-
-### Phase 1 : [Nom] (Sprint N)
-- [ ] Tâche 1
-- [ ] Tâche 2
-
-### Phase 2 : [Nom] (Sprint N+1)
-- [ ] Tâche 1
-- [ ] Tâche 2
-
----
-
-## Questions ouvertes / À décider
-1. Question 1
-2. Question 2
-
----
-
-## Références
-- [Lien 1]
-- [Lien 2]
+## 10. Questions Ouvertes
+- [ ] [Question 1]
+- [ ] [Question 2]
 ```
 
 ---
 
-## Bonnes pratiques
+## Garder la Spec Vivante
 
-### ✅ À faire
+La spécification est un **document vivant**, pas un artefact ponctuel :
 
-1. **Explorer avant de spécifier**
-   - Lire le code existant
-   - Comprendre les patterns en place
-   - Identifier les contraintes techniques
-
-2. **Poser une question à la fois**
-   - Éviter de submerger l'utilisateur
-   - Fournir des options de réponse
-   - Documenter chaque décision
-
-3. **Valider la faisabilité technique**
-   - Consulter les documentations des APIs
-   - Tester les intégrations si possible
-   - Identifier les limites tôt
-
-4. **Justifier les décisions**
-   - Chaque décision doit avoir une raison
-   - Mentionner les alternatives considérées
-   - Être transparent sur les compromis
-
-5. **Penser à la maintenance**
-   - Gestion des erreurs
-   - Monitoring et métriques
-   - Nettoyage des données
-   - Migration et déploiement
-
-6. **Rester pragmatique**
-   - Commencer simple (MVP)
-   - Planifier les évolutions futures
-   - Équilibrer perfection et livraison
-
-### ❌ À éviter
-
-1. **Ne pas explorer le contexte**
-   - Spécifier sans comprendre l'existant
-   - Ignorer les conventions en place
-
-2. **Poser trop de questions d'un coup**
-   - Bombarder l'utilisateur
-   - Questions trop techniques sans contexte
-
-3. **Assumer sans valider**
-   - Supposer qu'une API fonctionne d'une certaine manière
-   - Ne pas vérifier les contraintes techniques
-
-4. **Sur-spécifier**
-   - Trop de détails d'implémentation
-   - Enlever toute flexibilité
-
-5. **Sous-spécifier**
-   - Manquer les cas limites
-   - Oublier la gestion des erreurs
-   - Ignorer la sécurité
-
-6. **Oublier l'opérationnel**
-   - Pas de plan de déploiement
-   - Pas de métriques
-   - Pas de stratégie de monitoring
+- **Mettre à jour quand les décisions changent** : si le modèle de données change, mettre à jour la spec d'abord
+- **Mettre à jour quand le scope change** : fonctionnalités ajoutées ou retirées doivent être reflétées
+- **Committer la spec** : la spec fait partie du version control avec le code
+- **Référencer la spec dans les PRs** : lier chaque PR à la section de la spec qu'elle implémente
 
 ---
 
-## Checklist finale
+## Red Flags (Signaux d'Alerte)
 
-Avant de finaliser un document de specs, vérifier :
-
-### Complétude fonctionnelle
-- [ ] Les objectifs sont clairement définis
-- [ ] Le flow utilisateur est complet (cas nominal + erreurs)
-- [ ] Les cas limites sont identifiés
-- [ ] Les validations métier sont spécifiées
-
-### Complétude technique
-- [ ] Tous les endpoints API sont spécifiés
-- [ ] Les modifications de schéma de base de données sont documentées
-- [ ] Les intégrations externes sont détaillées
-- [ ] La gestion des erreurs est couverte
-
-### Décisions et justifications
-- [ ] Chaque décision architecturale est justifiée
-- [ ] Les alternatives ont été considérées
-- [ ] Les contraintes techniques sont documentées
-- [ ] Les compromis sont explicités
-
-### Sécurité et qualité
-- [ ] La validation des entrées est spécifiée
-- [ ] L'authentification/autorisation est couverte
-- [ ] Les quotas et limites sont définis
-- [ ] Les tests à effectuer sont listés
-
-### Opérations
-- [ ] Le plan de déploiement est détaillé
-- [ ] Les migrations sont documentées
-- [ ] Les métriques de succès sont définies
-- [ ] Le monitoring est considéré
-
-### Documentation
-- [ ] Le document est bien structuré
-- [ ] Les références externes sont incluses
-- [ ] Les questions ouvertes sont listées
-- [ ] Le langage est clair et non ambigu
+- Commencer à coder sans aucune exigence écrite
+- Demander "devrais-je juste commencer à construire ?" sans clarifier ce que "terminé" signifie
+- Implémenter des fonctionnalités non mentionnées dans la spec
+- Prendre des décisions architecturales sans les documenter
+- Skip la spec parce que "c'est évident ce qu'il faut construire"
 
 ---
 
-## Exemples
+## Rationalisations Communes
 
-### Exemple : Séquence de questions pour "Upload de fichier"
-
-**Question 1 : Quand uploader ?**
-```
-L'utilisateur va-t-il uploader le fichier :
-A) En même temps que la création de l'entité (même requête)
-B) Après avoir créé l'entité (requête séparée)
-C) Les deux options doivent être possibles
-
-→ Décision : B (requête séparée)
-→ Raison : Séparation des responsabilités, flexibilité
-```
-
-**Question 2 : Où stocker ?**
-```
-Le fichier doit être stocké :
-A) En base de données (BLOB)
-B) Sur un système de fichiers local
-C) Sur un stockage objet (S3/MinIO)
-D) Autre système
-
-→ Décision : C (S3/MinIO)
-→ Raison : Scalabilité, intégration existante
-```
-
-**Question 3 : Validation ?**
-```
-Quelles validations appliquer sur le fichier :
-A) Type de fichier uniquement
-B) Type + taille
-C) Type + taille + contenu (scan antivirus)
-
-→ Décision : B (type + taille pour la v1)
-→ Raison : Bon compromis sécurité/simplicité
-→ Évolution : Ajouter scan antivirus en v2
-```
+| Rationalisation | Réalité |
+|---|---|
+| "C'est simple, pas besoin de spec" | Les tâches simples ne nécessitent pas de *longues* specs, mais elles ont besoin de critères d'acceptation. Une spec de 2 lignes suffit. |
+| "J'écrirai la spec après avoir codé" | C'est de la documentation, pas une spécification. La valeur de la spec est de forcer la clarté *avant* le code. |
+| "La spec va nous ralentir" | 15 minutes de spec évitent des heures de rework. Waterfall en 15 minutes bat debugging en 15 heures. |
+| "Les exigences vont changer de toute façon" | C'est pourquoi la spec est un document vivant. Une spec obsolète vaut mieux que pas de spec. |
+| "L'utilisateur sait ce qu'il veut" | Même les demandes claires ont des hypothèses implicites. La spec fait ressortir ces hypothèses. |
 
 ---
 
-## Outils et ressources
+## Checklist de Validation
+
+Avant de passer à l'implémentation :
+
+- [ ] La spec couvre les 9 sections principales
+- [ ] Les hypothèses sont explicitement listées et validées
+- [ ] L'utilisateur a reviewé et approuvé la spec
+- [ ] Les critères d'acceptation sont spécifiques et testables
+- [ ] Les boundaries (Always/Ask First/Never) sont définies
+- [ ] Les agrégats DDD sont identifiés (root + entités)
+- [ ] Les endpoints suivent les conventions REST
+- [ ] YAGNI est respecté (pas de sur-ingénierie)
+- [ ] La spec est sauvegardée dans `docs/technical/SPEC-[nom].md`
+
+---
+
+## Outils et Ressources
 
 ### Pour l'exploration
 - `read_file` : Lire les fichiers de code et documentation
-- `list_code_definition_names` : Vue d'ensemble de l'architecture
 - `search_files` : Rechercher des patterns spécifiques
 - `list_files` : Explorer la structure du projet
 
@@ -459,41 +473,9 @@ C) Type + taille + contenu (scan antivirus)
 - Exemples de code et tutoriels
 
 ### Pour la collaboration
-- `ask_followup_question` : Poser des questions ciblées
+- Poser des questions ciblées une par une
 - Proposer des options multiples
 - Itérer sur les réponses
-
----
-
-## Conseils d'expert
-
-1. **Commencez large, puis affinez**
-   - Vue d'ensemble → Détails
-   - Contexte → Décisions → Implémentation
-
-2. **Utilisez des diagrammes si pertinent**
-   - Flow charts pour les processus
-   - Diagrammes de séquence pour les interactions
-   - Schémas d'architecture pour la vue système
-
-3. **Pensez en itérations**
-   - V1 : MVP fonctionnel
-   - V2 : Améliorations et optimisations
-   - V3+ : Features avancées
-
-4. **Anticipez les questions**
-   - "Que se passe-t-il si... ?"
-   - "Comment gérer le cas où... ?"
-   - "Quelle est la limite de... ?"
-
-5. **Documentez les "pourquoi"**
-   - Le "quoi" et le "comment" évoluent
-   - Le "pourquoi" reste pertinent
-
-6. **Soyez un facilitateur**
-   - Aidez l'utilisateur à clarifier sa pensée
-   - Proposez des solutions quand il hésite
-   - Challengez gentiment les hypothèses
 
 ---
 
@@ -502,8 +484,8 @@ C) Type + taille + contenu (scan antivirus)
 Cette méthodologie vise à produire des spécifications techniques de qualité de manière collaborative et structurée. L'objectif est d'équilibrer :
 
 - **Rigueur** : Couvrir tous les aspects importants
-- **Pragmatisme** : Ne pas sur-spécifier, rester actionable
+- **Pragmatisme** : Ne pas sur-spécifier, rester actionable (YAGNI)
 - **Collaboration** : Impliquer l'utilisateur dans les décisions
 - **Clarté** : Produire une documentation compréhensible et non ambiguë
 
-**Principe directeur** : Les meilleures specs sont celles qui permettent à une équipe de développer la fonctionnalité avec confiance, tout en laissant de la place pour les décisions d'implémentation détaillées.
+**Principe directeur** : Les meilleures specs sont celles qui permettent de développer la fonctionnalité avec confiance, tout en évitant la sur-ingénierie et en respectant les principes DDD tactiques.

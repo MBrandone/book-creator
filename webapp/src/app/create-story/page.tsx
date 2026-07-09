@@ -11,12 +11,17 @@ import {Progress} from "@/components/shadcn-ui/progress"
 import {CharacterPhotoUpload} from "@/components/character-photo-upload"
 import {createStory} from "@/app/_app-http-requests/create-story"
 import {createCharacter, type CreateCharacterPayload} from "@/app/_app-http-requests/create-character"
-import {generateStory} from "@/app/_app-http-requests/generate-story"
+import {generateScenario} from "@/app/_app-http-requests/generate-scenario"
 import {fetchStatus} from "@/app/_app-http-requests/fetch-status"
 import {fetchStoryData} from "@/app/_app-http-requests/fetch-story-data"
+import {ScenarioViewer} from "@/components/scenario-editor/scenario-viewer"
 import Link from "next/link"
+import {useRouter} from "next/navigation"
+
+const STORY_STATUS_POLLING_INTERVAL = 5000;
 
 export default function CreateStoryPage() {
+  const router = useRouter()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [storyId, setStoryId] = useState<string | null>(null)
@@ -24,7 +29,8 @@ export default function CreateStoryPage() {
   const [characterDescription, setCharacterDescription] = useState("")
   const [characters, setCharacters] = useState<Array<{ id: string, name: string, description: string, photoUrl?: string | null }>>([])
   const [showCharacterForm, setShowCharacterForm] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingScenario, setIsGeneratingScenario] = useState(false)
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false)
   const [photoData, setPhotoData] = useState<{ storageKey: string; storageBucket: string; previewUrl: string } | null>(null)
 
   const storyMutation = useMutation({
@@ -88,21 +94,21 @@ export default function CreateStoryPage() {
   const { data: statusData } = useQuery({
     queryKey: ['story-status', storyId],
     queryFn: () => fetchStatus(storyId!),
-    enabled: isGenerating && !!storyId,
-    refetchInterval: 10000, // 10 secondes
+    enabled: (isGeneratingScenario || isGeneratingImages) && !!storyId,
+    refetchInterval: STORY_STATUS_POLLING_INTERVAL,
     refetchIntervalInBackground: true,
   })
 
-  const { data: storyData } = useQuery({
+  const { data: storyData, refetch: refetchStoryData } = useQuery({
     queryKey: ['story-data', storyId],
     queryFn: () => fetchStoryData(storyId!),
-    enabled: statusData?.status === 'completed',
+    enabled: !!storyId && (statusData?.status === 'completed' || statusData?.status === 'pending'),
   })
 
-  const generateMutation = useMutation({
-    mutationFn: generateStory,
+  const generateScenarioMutation = useMutation({
+    mutationFn: generateScenario,
     onSuccess: () => {
-      setIsGenerating(true)
+      setIsGeneratingScenario(true)
     },
   })
 
@@ -113,16 +119,34 @@ export default function CreateStoryPage() {
     setShowCharacterForm(true)
   }
 
-  const handleGenerateStory = () => {
+  const handleGenerateScenario = () => {
     if (!storyId) return
-    generateMutation.mutate(storyId)
+    generateScenarioMutation.mutate(storyId)
+  }
+
+  const handleImagesGenerationStarted = () => {
+    setIsGeneratingImages(true)
+  }
+
+  const handleScenesUpdated = () => {
+    refetchStoryData()
   }
 
   useEffect(() => {
-    if (isGenerating && statusData && (statusData.status === 'completed' || statusData.status === 'failed')) {
-      setIsGenerating(false)
+    if (isGeneratingScenario && storyData && storyData.scenes.length === 4) {
+      setIsGeneratingScenario(false)
     }
-  }, [isGenerating, statusData])
+  }, [isGeneratingScenario, storyData])
+
+  useEffect(() => {
+    if (isGeneratingImages && statusData && (statusData.status === 'completed' || statusData.status === 'failed')) {
+      setIsGeneratingImages(false)
+
+      if (statusData.status === 'completed' && storyId) {
+        router.push(`/stories/${storyId}`)
+      }
+    }
+  }, [isGeneratingImages, statusData, storyId, router])
 
   return (
     <div className="container mx-auto py-10 max-w-2xl px-8 md:px-0">
@@ -331,35 +355,86 @@ export default function CreateStoryPage() {
             </Button>
           )}
 
-          {/* Bouton pour générer l'histoire (apparaît quand 2 personnages sont créés) */}
-          {characters.length === 2 && !isGenerating && !storyData && (
-            <Button 
-              onClick={handleGenerateStory} 
+          {/* Bouton pour générer le scénario (apparaît quand 2 personnages sont créés) */}
+          {characters.length === 2 && !isGeneratingScenario && !storyData && (
+            <Button
+              onClick={handleGenerateScenario}
               className="w-full"
-              disabled={generateMutation.isPending}
+              disabled={generateScenarioMutation.isPending}
             >
-              {generateMutation.isPending ? "Lancement..." : "Générer l'histoire"}
+              {generateScenarioMutation.isPending ? "Lancement..." : "Générer le scénario"}
             </Button>
           )}
 
-          {/* Message d'erreur de génération */}
-          {generateMutation.isError && (
+          {/* Message d'erreur de génération du scénario */}
+          {generateScenarioMutation.isError && (
             <div className="p-4 rounded-md bg-red-50 border border-red-200">
               <p className="text-sm font-medium text-red-800">
-                ✗ {generateMutation.error.message}
+                ✗ {generateScenarioMutation.error.message}
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* Section de génération en cours */}
-      {isGenerating && (
+      {/* Section de génération du scénario en cours */}
+      {isGeneratingScenario && (
         <Card>
           <CardHeader>
-            <CardTitle>Génération en cours...</CardTitle>
+            <CardTitle>Génération du scénario en cours...</CardTitle>
             <CardDescription>
-              Veuillez patienter pendant que nous créons votre histoire
+              Veuillez patienter pendant que nous créons les scènes de votre histoire
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>⏳ Génération des scènes...</span>
+              </div>
+              <Progress value={undefined} className="w-full" />
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Vérification automatique toutes les 10 secondes...
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Affichage du scénario avec possibilité d'édition */}
+      {storyData && storyData.scenes.length === 4 && !storyData.scenes[0].image_url && !isGeneratingImages && (
+        <div className="space-y-6">
+          <div className="p-4 rounded-md bg-green-50 border border-green-200">
+            <p className="text-sm font-medium text-green-800">
+              ✓ Scénario généré avec succès !
+            </p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Édition du scénario</CardTitle>
+              <CardDescription>
+                Vous pouvez modifier les descriptions des scènes avant de générer les images
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScenarioViewer
+                storyId={storyId!}
+                scenes={storyData.scenes}
+                onScenesUpdated={handleScenesUpdated}
+                onImagesGenerationStarted={handleImagesGenerationStarted}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Section de génération des images en cours */}
+      {isGeneratingImages && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Génération des images en cours...</CardTitle>
+            <CardDescription>
+              Veuillez patienter pendant que nous créons les illustrations. Vous serez automatiquement redirigé une fois la génération terminée.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -375,45 +450,6 @@ export default function CreateStoryPage() {
             </p>
           </CardContent>
         </Card>
-      )}
-
-      {/* Affichage des images générées */}
-      {storyData && (
-        <div className="space-y-6">
-          <div className="p-4 rounded-md bg-green-50 border border-green-200">
-            <p className="text-sm font-medium text-green-800">
-              ✓ Histoire générée avec succès !
-            </p>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{storyData.story.title}</CardTitle>
-              <CardDescription>{storyData.story.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Scènes avec images */}
-              {storyData.scenes.map((scene) => (
-                <div key={scene.id} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Scène {scene.scene_number}:</span>
-                    <span className="text-sm text-muted-foreground">{scene.scene_type}</span>
-                  </div>
-                  <p className="text-sm">{scene.description}</p>
-                  {scene.image_url && (
-                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-                      <img
-                        src={scene.image_url}
-                        alt={`Scène ${scene.scene_number}: ${scene.scene_type}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
       )}
 
       <div className="my-8 mb-0 flex justify-center">

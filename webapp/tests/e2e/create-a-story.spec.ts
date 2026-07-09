@@ -48,14 +48,45 @@ test.describe('Create a Story', () => {
     await expect(page.getByText('Bob')).toBeVisible();
     await expect(page.getByText('Alice')).toBeVisible();
 
-    await expect(page.getByRole('button', { name: /Générer l'histoire/i })).toBeVisible();
-    await page.getByRole('button', { name: /Générer l'histoire/i }).click();
+    await expect(page.getByRole('button', { name: /Générer le scénario/i })).toBeVisible();
+    await page.getByRole('button', { name: /Générer le scénario/i }).click();
 
-    await expect(page.getByText(/Génération en cours/i)).toBeVisible();
+    await expect(page.getByText(/Génération du scénario en cours/i)).toBeVisible();
 
-    await page.waitForTimeout(15000);
+    await expect(page.getByText(/Scénario généré avec succès/i)).toBeVisible({ timeout: 2000 });
+    await expect(page.getByText(/Scène 1/i)).toBeVisible();
 
-    await expect(page.getByText(/Histoire générée avec succès/i)).toBeVisible({ timeout: 15000 });
+    const editButtons = page.getByRole('button', { name: /Éditer/i });
+    await editButtons.first().click();
+
+    const textarea = page.getByRole('textbox').first();
+    await textarea.clear();
+    await textarea.fill('Une description personnalisée pour la première scène de notre histoire.');
+
+    const saveButton = page.getByRole('button', { name: /Enregistrer/i }).first();
+    await saveButton.click();
+
+    await expect(page.getByText('Une description personnalisée')).toBeVisible();
+
+    await page.getByRole('button', { name: /Éditer/i }).nth(3).click();
+
+    const textareaScene4 = page.getByRole('textbox').first();
+    await textareaScene4.clear();
+    await textareaScene4.fill('Une conclusion modifiée pour terminer cette belle aventure.');
+
+    await page.getByRole('button', { name: /Enregistrer/i }).first().click();
+
+    await expect(page.getByText('Une conclusion modifiée')).toBeVisible();
+
+    await expect(page.getByRole('button', { name: /Générer les images/i })).toBeVisible();
+    await page.getByRole('button', { name: /Générer les images/i }).click();
+
+    await expect(page.getByText(/Génération des images en cours/i)).toBeVisible();
+
+    await page.waitForURL(/\/stories\/[a-f0-9-]+$/, { timeout: 15000 });
+
+    await expect(page.getByText('Une description personnalisée')).toBeVisible();
+    await expect(page.getByText('Une conclusion modifiée')).toBeVisible();
 
     const sceneImages = page.locator('img[alt^="Scène"]');
     await expect(sceneImages).toHaveCount(4);

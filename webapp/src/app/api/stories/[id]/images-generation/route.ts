@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import {
-  GenerateStoryBookImagesCommandHandler
-} from "@/lib/application/handlers/command/generate-story-book-images/generate-story-book-images-command-handler";
+import { GenerateImagesCommandHandler } from "@/lib/application/handlers/command/generate-images/generate-images-command-handler";
 import { SqlStoryRepository } from '@/lib/infrastructure/repositories/story-repository/sql-story-repository';
 import { StoryNotFoundError } from '@/lib/domain/story-not-found-error';
-import { StoryAlreadyGeneratingError } from '@/lib/application/handlers/command/generate-story-book-images/story-already-generating-error';
-import { NoCharactersFoundError } from '@/lib/application/handlers/command/generate-story-book-images/no-characters-found-error';
-import { StoryGeneratorService } from '@/lib/story-generator-service/story-generator-service';
-import { SqlSceneRepository } from '@/lib/infrastructure/repositories/scene-repository/sql-scene-repository';
+import { GenerationCannotBeStartedError } from '@/lib/domain/generation-cannot-be-started-error';
+import { NoCharactersError } from '@/lib/domain/no-characters-error';
+import { StoryImagesGeneratorService } from '@/lib/story-generator-service/story-images-generator-service';
 import { getStorage } from '@/lib/infrastructure/storage/storage-factory';
-
-import {
-  StoryScenesDescriptionGeneratorFactory
-} from "@/lib/story-scenes-description-generator/factory";
 import { SceneImageGeneratorFactory } from '@/lib/scene-image-generator/factory';
 
 interface RouteContext {
@@ -40,28 +33,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const storyRepository = new SqlStoryRepository();
-    const sceneRepository = new SqlSceneRepository();
-    const scenesGenerator = await StoryScenesDescriptionGeneratorFactory.getGenerator();
     const sceneImageGenerator = await SceneImageGeneratorFactory.getGenerator();
     const storage = getStorage();
-    
-    const storyGeneratorService = new StoryGeneratorService(
+
+    const storyImagesGeneratorService = new StoryImagesGeneratorService(
       storyRepository,
-      scenesGenerator,
       sceneImageGenerator,
-      sceneRepository,
       storage
     );
-    
-    const commandHandler = new GenerateStoryBookImagesCommandHandler(
+
+    const commandHandler = new GenerateImagesCommandHandler(
       storyRepository,
-      storyGeneratorService
+      storyImagesGeneratorService
     );
 
     await commandHandler.execute(storyId);
 
     return NextResponse.json(
-      { message: 'Generation started' },
+      { message: 'Image generation started' },
       { status: 202 }
     );
   } catch (error) {
@@ -74,33 +63,27 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    if (error instanceof StoryAlreadyGeneratingError) {
+    if (error instanceof GenerationCannotBeStartedError) {
       return NextResponse.json(
         {
-          error: 'La génération a déjà été lancée pour cette story',
-          details: [{
-            path: 'status',
-            message: `Le statut actuel est "${error.currentStatus}". Seules les stories avec le statut "pending" peuvent être générées.`,
-          }],
+          error: 'Génération impossible',
+          message: error.message,
+        },
+        { status: 409 }
+      );
+    }
+
+    if (error instanceof NoCharactersError) {
+      return NextResponse.json(
+        {
+          error: 'Aucun personnage',
+          message: error.message,
         },
         { status: 400 }
       );
     }
 
-    if (error instanceof NoCharactersFoundError) {
-      return NextResponse.json(
-        {
-          error: 'Aucun personnage trouvé',
-          details: [{
-            path: 'characters',
-            message: error.message,
-          }],
-        },
-        { status: 400 }
-      );
-    }
-
-    console.error('Erreur serveur lors du lancement de la génération:', error);
+    console.error('Erreur serveur lors du lancement de la génération des images:', error);
     return new NextResponse(null, { status: 500 });
   }
 }

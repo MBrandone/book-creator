@@ -3,6 +3,7 @@ import { Story } from '@/lib/domain/story';
 import { Character } from '@/lib/domain/character';
 import { StoryRepository } from '@/lib/domain/story-repository';
 import {StoryNotFoundError} from "@/lib/domain/story-not-found-error";
+import {SceneType} from "@/lib/domain/scene";
 
 export class SqlStoryRepository implements StoryRepository {
   async save(story: Story): Promise<void> {
@@ -26,6 +27,30 @@ export class SqlStoryRepository implements StoryRepository {
           })
         )
         .execute();
+
+      for (const scene of story.scenes) {
+        await db
+          .insertInto('scenes')
+          .values({
+            id: scene.id,
+            story_id: scene.storyId,
+            scene_number: scene.sceneNumber,
+            scene_type: scene.sceneType,
+            description: scene.description,
+            prompt: scene.prompt,
+            storage_bucket: scene.storageBucket,
+            storage_key: scene.storageKey,
+          })
+          .onConflict((oc) =>
+            oc.column('id').doUpdateSet({
+              description: scene.description,
+              prompt: scene.prompt,
+              storage_bucket: scene.storageBucket,
+              storage_key: scene.storageKey,
+            })
+          )
+          .execute();
+      }
     } catch (error: any) {
       console.error('Erreur lors de la sauvegarde en base de données:', error);
       throw error;
@@ -60,6 +85,24 @@ export class SqlStoryRepository implements StoryRepository {
       })
     );
 
+    const scenesResult = await db
+      .selectFrom('scenes')
+      .selectAll()
+      .where('story_id', '=', storyId)
+      .orderBy('scene_number', 'asc')
+      .execute();
+
+    const scenes = scenesResult.map(scene => ({
+      id: scene.id,
+      storyId: scene.story_id,
+      sceneNumber: scene.scene_number,
+      sceneType: scene.scene_type,
+      description: scene.description,
+      prompt: scene.prompt || '',
+      storageBucket: scene.storage_bucket,
+      storageKey: scene.storage_key,
+    }));
+
     return Story.hydrate({
       id: storyResult.id,
       title: storyResult.title || '',
@@ -68,10 +111,8 @@ export class SqlStoryRepository implements StoryRepository {
       createdAt: storyResult.created_at,
       updatedAt: storyResult.updated_at,
       characters,
+      scenes,
     });
   }
 
-  private isDuplicateKeyError(error: any): boolean {
-    return error.code === '23505';
-  }
 }

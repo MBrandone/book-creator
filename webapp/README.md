@@ -20,6 +20,29 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Code Quality
+
+This project uses [Biome](https://biomejs.dev/) for linting and formatting (replaces ESLint + Prettier).
+
+### Commands
+
+```bash
+npm run format    # Format code (write)
+npm run lint      # Lint code
+npm run check     # Format + lint (write + auto-fix)
+```
+
+### Pre-commit Hook
+
+A git pre-commit hook automatically runs `biome check --write` on staged files via `lint-staged`. Your code is formatted and linted automatically before each commit.
+
+If you need to skip the hook (not recommended):
+```bash
+git commit --no-verify
+```
+
+Configuration: `biome.json` (domains: next, react, test, project).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

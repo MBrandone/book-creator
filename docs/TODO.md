@@ -1,8 +1,4 @@
 # Todo
-- [AGENTIC] Hooks
-  - de build
-  - de tests 
-  - de lint (biome plutot que eslint et prettier) 
 - [BUG] La dernière scène n'arrive pas à être crée
 - [PARCOURS CREATION] Ajouter une image de couverture
 - [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
@@ -16,6 +12,7 @@
 - [TECH] Comment combattre l'injection de prompt ?
 - [TECH] Avoir un rate limiter applicatif
 - [TECH] CI/CD
+- [TECH] Test d'archi applicative
 - [AGENTIC] Idées d'agents
   - Business expert with DDD domain modelling
   - Un agent qui simplifie l'installation et la stack
@@ -48,7 +45,12 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [PARCOURS CREATION] L'utilisateur peut modifier les scènes
+- [TECH] mise en place de biome, plutôt que eslint + prettier
+- [AGENTIC] mettre en place les Hooks claude
+- à la fin de chaque modification de code de Claude, je veux que : 
+  - la commande de lint soit passé
+  - la command de build soit passé
+  - la commande de test soit passé
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -94,3 +96,4 @@
       - => Suppression des numeros de scene pour l'instant et toujours la meme photo pour la scene
     - [X] Les bonnes pratiques de test ne vont pas dans le readme, mais dans un skill
     - [X] Supprimer les consoles logs pour les durées
+- [PARCOURS CREATION] L'utilisateur peut modifier les scènes

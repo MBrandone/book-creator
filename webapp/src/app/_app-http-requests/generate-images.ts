@@ -1,13 +1,13 @@
 export async function generateImages(storyId: string): Promise<void> {
-  const response = await fetch(`/api/stories/${storyId}/images-generation`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+	const response = await fetch(`/api/stories/${storyId}/images-generation`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Échec de la génération des images');
-  }
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || "Échec de la génération des images");
+	}
 }

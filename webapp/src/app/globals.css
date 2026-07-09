@@ -1,52 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  /* Couleurs de base  */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  
-  /* Couleurs de la carte */
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  
-  /* Couleurs du popover */
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  
-  /* Couleur primaire - Violet Book Creator */
-  --primary: 243 100% 68%;
-  --primary-dark: 243 75% 59%;
-  --primary-foreground: 0 0% 100%;
-  
-  /* Couleur secondaire - Lavande clair pour backgrounds */
-  --secondary: 252 77% 96%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  
-  /* Couleur muted */
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  
-  /* Couleur accent - Orange doux pour l'énergie */
-  --accent: 24.6 95% 53.1%;
-  --accent-foreground: 60 9.1% 97.8%;
-  
-  /* Couleurs de statut */
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  
-  --success: 142.1 76.2% 36.3%;
-  --success-foreground: 355.7 100% 97.3%;
-  
-  --warning: 37.7 92.1% 50.2%;
-  --warning-foreground: 26 83.3% 14.1%;
-  
-  /* Bordures et anneaux */
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 262.1 83.3% 57.8%;
-  
-  /* Radius personnalisé */
-  --radius: 0.75rem;
+	/* Couleurs de base  */
+	--background: 0 0% 100%;
+	--foreground: 222.2 84% 4.9%;
+
+	/* Couleurs de la carte */
+	--card: 0 0% 100%;
+	--card-foreground: 222.2 84% 4.9%;
+
+	/* Couleurs du popover */
+	--popover: 0 0% 100%;
+	--popover-foreground: 222.2 84% 4.9%;
+
+	/* Couleur primaire - Violet Book Creator */
+	--primary: 243 100% 68%;
+	--primary-dark: 243 75% 59%;
+	--primary-foreground: 0 0% 100%;
+
+	/* Couleur secondaire - Lavande clair pour backgrounds */
+	--secondary: 252 77% 96%;
+	--secondary-foreground: 222.2 47.4% 11.2%;
+
+	/* Couleur muted */
+	--muted: 210 40% 96.1%;
+	--muted-foreground: 215.4 16.3% 46.9%;
+
+	/* Couleur accent - Orange doux pour l'énergie */
+	--accent: 24.6 95% 53.1%;
+	--accent-foreground: 60 9.1% 97.8%;
+
+	/* Couleurs de statut */
+	--destructive: 0 84.2% 60.2%;
+	--destructive-foreground: 210 40% 98%;
+
+	--success: 142.1 76.2% 36.3%;
+	--success-foreground: 355.7 100% 97.3%;
+
+	--warning: 37.7 92.1% 50.2%;
+	--warning-foreground: 26 83.3% 14.1%;
+
+	/* Bordures et anneaux */
+	--border: 214.3 31.8% 91.4%;
+	--input: 214.3 31.8% 91.4%;
+	--ring: 262.1 83.3% 57.8%;
+
+	/* Radius personnalisé */
+	--radius: 0.75rem;
 }
 
 @theme inline {
@@ -100,10 +100,15 @@
 }
 
 body {
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+	font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-jakarta), Arial, Helvetica, sans-serif;
-  font-weight: 700;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-jakarta), Arial, Helvetica, sans-serif;
+	font-weight: 700;
 }

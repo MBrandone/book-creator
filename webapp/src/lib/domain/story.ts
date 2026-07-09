@@ -1,153 +1,162 @@
-import {Character} from './character';
-import {Scene, SceneType} from './scene';
-import {SceneDescriptionTooShortError} from './scene-description-too-short-error';
-import {SceneDescriptionTooLongError} from './scene-description-too-long-error';
-import {CannotEditSceneAfterGenerationError} from './cannot-edit-scene-after-generation-error';
-import {SceneNotFoundInStoryError} from './scene-not-found-in-story-error';
-import {NoCharactersError} from './no-characters-error';
-import {StoryAlreadyGeneratingError} from "@/lib/domain/story-already-generating-error";
+import { StoryAlreadyGeneratingError } from "@/lib/domain/story-already-generating-error";
+import { CannotEditSceneAfterGenerationError } from "./cannot-edit-scene-after-generation-error";
+import type { Character } from "./character";
+import { NoCharactersError } from "./no-characters-error";
+import type { Scene, SceneType } from "./scene";
+import { SceneDescriptionTooLongError } from "./scene-description-too-long-error";
+import { SceneDescriptionTooShortError } from "./scene-description-too-short-error";
+import { SceneNotFoundInStoryError } from "./scene-not-found-in-story-error";
 
-export type StoryStatus = 'pending' | 'generating' | 'completed' | 'failed';
+export type StoryStatus = "pending" | "generating" | "completed" | "failed";
 
 export class Story {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  status: StoryStatus;
-  readonly createdAt: Date;
-  updatedAt: Date;
-  readonly characters: Character[];
-  private _scenes: Scene[];
+	readonly id: string;
+	readonly title: string;
+	readonly description: string;
+	status: StoryStatus;
+	readonly createdAt: Date;
+	updatedAt: Date;
+	readonly characters: Character[];
+	private _scenes: Scene[];
 
-  private constructor(data: {
-    id: string;
-    title: string;
-    description: string;
-    status: StoryStatus;
-    createdAt: Date;
-    updatedAt: Date;
-    characters: Character[];
-    scenes: Scene[];
-  }) {
-    this.id = data.id;
-    this.title = data.title;
-    this.description = data.description;
-    this.status = data.status;
-    this.createdAt = data.createdAt;
-    this.updatedAt = data.updatedAt;
-    this.characters = data.characters;
-    this._scenes = data.scenes;
-  }
+	private constructor(data: {
+		id: string;
+		title: string;
+		description: string;
+		status: StoryStatus;
+		createdAt: Date;
+		updatedAt: Date;
+		characters: Character[];
+		scenes: Scene[];
+	}) {
+		this.id = data.id;
+		this.title = data.title;
+		this.description = data.description;
+		this.status = data.status;
+		this.createdAt = data.createdAt;
+		this.updatedAt = data.updatedAt;
+		this.characters = data.characters;
+		this._scenes = data.scenes;
+	}
 
-  static create(data: {
-    id: string;
-    title: string;
-    description: string;
-  }): Story {
-    return new Story({
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      characters: [],
-      scenes: [],
-    });
-  }
+	static create(data: {
+		id: string;
+		title: string;
+		description: string;
+	}): Story {
+		return new Story({
+			id: data.id,
+			title: data.title,
+			description: data.description,
+			status: "pending",
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			characters: [],
+			scenes: [],
+		});
+	}
 
-  static hydrate(data: {
-    id: string;
-    title: string;
-    description: string;
-    status: StoryStatus;
-    createdAt: Date;
-    updatedAt: Date;
-    characters: Character[];
-    scenes: Scene[];
-  }): Story {
-    return new Story(data);
-  }
+	static hydrate(data: {
+		id: string;
+		title: string;
+		description: string;
+		status: StoryStatus;
+		createdAt: Date;
+		updatedAt: Date;
+		characters: Character[];
+		scenes: Scene[];
+	}): Story {
+		return new Story(data);
+	}
 
-  canAddMoreCharacters(): boolean {
-    return this.characters.length < 2;
-  }
+	canAddMoreCharacters(): boolean {
+		return this.characters.length < 2;
+	}
 
-  startGeneration(): void {
-    if (this.status === 'generating') {
-      throw new StoryAlreadyGeneratingError(this.status);
-    }
+	startGeneration(): void {
+		if (this.status === "generating") {
+			throw new StoryAlreadyGeneratingError(this.status);
+		}
 
-    if (this.characters.length === 0) {
-      throw new NoCharactersError();
-    }
+		if (this.characters.length === 0) {
+			throw new NoCharactersError();
+		}
 
-    this.status = 'generating';
-    this.updatedAt = new Date();
-  }
+		this.status = "generating";
+		this.updatedAt = new Date();
+	}
 
-  markAsCompleted(): void {
-    this.status = 'completed';
-    this.updatedAt = new Date();
-  }
+	markAsCompleted(): void {
+		this.status = "completed";
+		this.updatedAt = new Date();
+	}
 
-  markAsFailed(): void {
-    this.status = 'failed';
-    this.updatedAt = new Date();
-  }
+	markAsFailed(): void {
+		this.status = "failed";
+		this.updatedAt = new Date();
+	}
 
-  updateSceneDescription(sceneId: string, newDescription: string): void {
-    if (this.status !== 'pending') {
-      throw new CannotEditSceneAfterGenerationError(this.status);
-    }
+	updateSceneDescription(sceneId: string, newDescription: string): void {
+		if (this.status !== "pending") {
+			throw new CannotEditSceneAfterGenerationError(this.status);
+		}
 
-    const scene = this._scenes.find(scene => scene.id === sceneId);
-    if (!scene) {
-      throw new SceneNotFoundInStoryError(sceneId);
-    }
+		const scene = this._scenes.find((scene) => scene.id === sceneId);
+		if (!scene) {
+			throw new SceneNotFoundInStoryError(sceneId);
+		}
 
-    const trimmed = newDescription.trim();
+		const trimmed = newDescription.trim();
 
-    if (trimmed.length < 10) {
-      throw new SceneDescriptionTooShortError();
-    }
+		if (trimmed.length < 10) {
+			throw new SceneDescriptionTooShortError();
+		}
 
-    if (trimmed.length > 500) {
-      throw new SceneDescriptionTooLongError();
-    }
+		if (trimmed.length > 500) {
+			throw new SceneDescriptionTooLongError();
+		}
 
-    scene.description = newDescription;
-    this.updatedAt = new Date();
-  }
+		scene.description = newDescription;
+		this.updatedAt = new Date();
+	}
 
-  get scenes(): Scene[] {
-    return this._scenes;
-  }
+	get scenes(): Scene[] {
+		return this._scenes;
+	}
 
-  createScene(sceneNumber: number, sceneType: SceneType, description: string, prompt: string): void {
-    const scene: Scene = {
-      id: crypto.randomUUID(),
-      storyId: this.id,
-      sceneNumber,
-      sceneType,
-      description,
-      prompt,
-      storageBucket: null,
-      storageKey: null,
-    };
+	createScene(
+		sceneNumber: number,
+		sceneType: SceneType,
+		description: string,
+		prompt: string
+	): void {
+		const scene: Scene = {
+			id: crypto.randomUUID(),
+			storyId: this.id,
+			sceneNumber,
+			sceneType,
+			description,
+			prompt,
+			storageBucket: null,
+			storageKey: null,
+		};
 
-    this._scenes.push(scene);
-    this.updatedAt = new Date();
-  }
+		this._scenes.push(scene);
+		this.updatedAt = new Date();
+	}
 
-  setImageToScene(sceneId: string, storageBucket: string, storageKey: string): void {
-    const scene = this._scenes.find(s => s.id === sceneId);
-    if (!scene) {
-      throw new SceneNotFoundInStoryError(sceneId);
-    }
+	setImageToScene(
+		sceneId: string,
+		storageBucket: string,
+		storageKey: string
+	): void {
+		const scene = this._scenes.find((s) => s.id === sceneId);
+		if (!scene) {
+			throw new SceneNotFoundInStoryError(sceneId);
+		}
 
-    scene.storageBucket = storageBucket;
-    scene.storageKey = storageKey;
-    this.updatedAt = new Date();
-  }
+		scene.storageBucket = storageBucket;
+		scene.storageKey = storageKey;
+		this.updatedAt = new Date();
+	}
 }

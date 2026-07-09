@@ -1,3 +1,3 @@
 export interface RetryStrategy {
-  execute<T>(fn: () => Promise<T>): Promise<T>;
+	execute<T>(fn: () => Promise<T>): Promise<T>;
 }

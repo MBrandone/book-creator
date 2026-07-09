@@ -1,43 +1,47 @@
-import { Readable } from 'stream';
+import type { Readable } from "stream";
 
 export interface Storage {
-  initialize(): Promise<void>;
+	initialize(): Promise<void>;
 
-  uploadImage(
-    file: Buffer | Readable,
-    key: string,
-    metadata?: Record<string, string>
-  ): Promise<{ bucket: string; key: string }>;
+	uploadImage(
+		file: Buffer | Readable,
+		key: string,
+		metadata?: Record<string, string>
+	): Promise<{ bucket: string; key: string }>;
 
-  getImageUrl(bucket: string, key: string): string;
+	getImageUrl(bucket: string, key: string): string;
 
-  getImageBuffer(key: string): Promise<Buffer>;
+	getImageBuffer(key: string): Promise<Buffer>;
 
-  getPresignedUploadUrl(key: string, contentType: string, expirySeconds?: number): Promise<string>;
+	getPresignedUploadUrl(
+		key: string,
+		contentType: string,
+		expirySeconds?: number
+	): Promise<string>;
 
-  deleteImages(keys: string[]): Promise<void>;
+	deleteImages(keys: string[]): Promise<void>;
 
-  imageExists(key: string): Promise<boolean>;
+	imageExists(key: string): Promise<boolean>;
 
-  listImages(prefix?: string): Promise<string[]>;
+	listImages(prefix?: string): Promise<string[]>;
 
-  getImageMetadata(key: string): Promise<ImageMetadata>;
+	getImageMetadata(key: string): Promise<ImageMetadata>;
 }
 
 export interface ImageMetadata {
-  size: number;
-  etag: string;
-  lastModified: Date;
-  contentType?: string;
-  metadata?: Record<string, any>;
+	size: number;
+	etag: string;
+	lastModified: Date;
+	contentType?: string;
+	metadata?: Record<string, any>;
 }
 
 export interface StorageConfig {
-  endpoint: string;
-  port?: number;
-  useSSL: boolean;
-  accessKey: string;
-  secretKey: string;
-  bucket: string;
-  region: string;
+	endpoint: string;
+	port?: number;
+	useSSL: boolean;
+	accessKey: string;
+	secretKey: string;
+	bucket: string;
+	region: string;
 }

@@ -1,22 +1,22 @@
-import type {CharactersTable} from "@/lib/infrastructure/db";
-import {StoryContext} from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
+import type { CharactersTable } from "@/lib/infrastructure/db";
+import type { StoryContext } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 
 export class StorySceneDescriptionPromptBuilder {
-    private userPrompt = ""
+	private userPrompt = "";
 
-    constructor() {
-        return this
-    }
+	constructor() {
+		return this;
+	}
 
-    setUserPrompt(context : StoryContext) {
-        const characterDescriptions = context.characters
-            .map((char, index) => {
-                return `Personnage ${index + 1} : ${char.name}
+	setUserPrompt(context: StoryContext) {
+		const characterDescriptions = context.characters
+			.map((char, index) => {
+				return `Personnage ${index + 1} : ${char.name}
 Description : ${char.description}`;
-            })
-            .join('\n\n');
+			})
+			.join("\n\n");
 
-        this.userPrompt = `Crée une histoire pour enfants avec les informations suivantes :
+		this.userPrompt = `Crée une histoire pour enfants avec les informations suivantes :
 
 TITRE : ${context.title}
 THÈME/CONTEXTE : ${context.description}
@@ -48,17 +48,17 @@ Réponds au format JSON suivant :
     },
     ...
   ]
-}`
-        return this
-    }
+}`;
+		return this;
+	}
 
-    getPrompt() {
-        return `${SYSTEM_PROMPT}
+	getPrompt() {
+		return `${SYSTEM_PROMPT}
 ---
 ${this.userPrompt}
 
 Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
-    }
+	}
 }
 
 export const SYSTEM_PROMPT = `Tu es un écrivain créatif spécialisé dans les histoires pour enfants de 3 à 8 ans.
@@ -78,15 +78,19 @@ Tu dois générer exactement 4 scènes pour chaque histoire :
 3. Action : Les personnages tentent de résoudre le problème
 4. Résolution : Le problème est résolu, fin heureuse`;
 
-export function generateUserPrompt(title: string, description: string, characters: CharactersTable[]): string {
-    const characterDescriptions = characters
-        .map((char, index) => {
-            return `Personnage ${index + 1} : ${char.name}
+export function generateUserPrompt(
+	title: string,
+	description: string,
+	characters: CharactersTable[]
+): string {
+	const characterDescriptions = characters
+		.map((char, index) => {
+			return `Personnage ${index + 1} : ${char.name}
 Description : ${char.description}`;
-        })
-        .join('\n\n');
+		})
+		.join("\n\n");
 
-    return `Crée une histoire pour enfants avec les informations suivantes :
+	return `Crée une histoire pour enfants avec les informations suivantes :
 
 TITRE : ${title}
 THÈME/CONTEXTE : ${description}
@@ -121,46 +125,66 @@ Réponds au format JSON suivant :
 }`;
 }
 
-export type ArtStyle = 'watercolor' | 'digital-painting' | 'soft-pastel' | 'storybook-classic';
-export const ART_STYLES: Record<ArtStyle, {
-    name: string;
-    description: string;
-    basePrompt: string;
-    qualityModifiers: string;
-    colorPalette: string;
-}> = {
-    'watercolor': {
-        name: 'Aquarelle',
-        description: 'Style aquarelle doux et fluide, parfait pour les histoires poétiques',
-        basePrompt: "watercolor illustration for children's book, soft brush strokes, fluid colors, gentle textures",
-        qualityModifiers: 'professional illustration, high detail, storybook quality, award-winning',
-        colorPalette: 'pastel colors, warm tones, harmonious palette, soft lighting',
-    },
-    'digital-painting': {
-        name: 'Peinture digitale',
-        description: 'Peinture numérique vibrante et moderne',
-        basePrompt: "digital painting for children's book, smooth rendering, vibrant colors, modern illustration style",
-        qualityModifiers: 'professional digital art, detailed, polished, high quality render',
-        colorPalette: 'rich vibrant colors, balanced saturation, beautiful lighting, colorful',
-    },
-    'soft-pastel': {
-        name: 'Pastel doux',
-        description: 'Style pastel tendre et apaisant',
-        basePrompt: "soft pastel illustration for children's book, gentle textures, dreamy atmosphere",
-        qualityModifiers: 'professional illustration, delicate details, storybook quality',
-        colorPalette: 'soft pastel colors, muted tones, gentle hues, warm and inviting',
-    },
-    'storybook-classic': {
-        name: 'Conte classique',
-        description: 'Style conte traditionnel, rappelant les grands classiques',
-        basePrompt: "classic storybook illustration, traditional children's book art, timeless style",
-        qualityModifiers: 'professional book illustration, detailed, refined, classic quality',
-        colorPalette: 'balanced colors, classic palette, nostalgic feel, warm and welcoming',
-    },
+export type ArtStyle =
+	| "watercolor"
+	| "digital-painting"
+	| "soft-pastel"
+	| "storybook-classic";
+export const ART_STYLES: Record<
+	ArtStyle,
+	{
+		name: string;
+		description: string;
+		basePrompt: string;
+		qualityModifiers: string;
+		colorPalette: string;
+	}
+> = {
+	watercolor: {
+		name: "Aquarelle",
+		description:
+			"Style aquarelle doux et fluide, parfait pour les histoires poétiques",
+		basePrompt:
+			"watercolor illustration for children's book, soft brush strokes, fluid colors, gentle textures",
+		qualityModifiers:
+			"professional illustration, high detail, storybook quality, award-winning",
+		colorPalette:
+			"pastel colors, warm tones, harmonious palette, soft lighting",
+	},
+	"digital-painting": {
+		name: "Peinture digitale",
+		description: "Peinture numérique vibrante et moderne",
+		basePrompt:
+			"digital painting for children's book, smooth rendering, vibrant colors, modern illustration style",
+		qualityModifiers:
+			"professional digital art, detailed, polished, high quality render",
+		colorPalette:
+			"rich vibrant colors, balanced saturation, beautiful lighting, colorful",
+	},
+	"soft-pastel": {
+		name: "Pastel doux",
+		description: "Style pastel tendre et apaisant",
+		basePrompt:
+			"soft pastel illustration for children's book, gentle textures, dreamy atmosphere",
+		qualityModifiers:
+			"professional illustration, delicate details, storybook quality",
+		colorPalette:
+			"soft pastel colors, muted tones, gentle hues, warm and inviting",
+	},
+	"storybook-classic": {
+		name: "Conte classique",
+		description: "Style conte traditionnel, rappelant les grands classiques",
+		basePrompt:
+			"classic storybook illustration, traditional children's book art, timeless style",
+		qualityModifiers:
+			"professional book illustration, detailed, refined, classic quality",
+		colorPalette:
+			"balanced colors, classic palette, nostalgic feel, warm and welcoming",
+	},
 };
-export const DEFAULT_ART_STYLE: ArtStyle = 'watercolor';
+export const DEFAULT_ART_STYLE: ArtStyle = "watercolor";
 
 export function getStylePrefix(style: ArtStyle = DEFAULT_ART_STYLE): string {
-    const styleConfig = ART_STYLES[style];
-    return `${styleConfig.basePrompt}, ${styleConfig.colorPalette}, ${styleConfig.qualityModifiers}`;
+	const styleConfig = ART_STYLES[style];
+	return `${styleConfig.basePrompt}, ${styleConfig.colorPalette}, ${styleConfig.qualityModifiers}`;
 }

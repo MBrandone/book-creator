@@ -1,42 +1,47 @@
-import { StoryRepository } from "@/lib/domain/story-repository";
-import { ScenarioGeneratorService } from "@/lib/story-generator-service/scenario-generator-service";
-import {NoCharactersError} from "@/lib/domain/no-characters-error";
+import { NoCharactersError } from "@/lib/domain/no-characters-error";
+import type { StoryRepository } from "@/lib/domain/story-repository";
+import type { ScenarioGeneratorService } from "@/lib/story-generator-service/scenario-generator-service";
 
 export class GenerateScenarioCommandHandler {
-  constructor(
-    private readonly storyRepository: StoryRepository,
-    private readonly scenarioGeneratorService: ScenarioGeneratorService,
-  ) {}
+	constructor(
+		private readonly storyRepository: StoryRepository,
+		private readonly scenarioGeneratorService: ScenarioGeneratorService
+	) {}
 
-  async execute(storyId: string): Promise<void> {
-    const story = await this.storyRepository.get(storyId);
+	async execute(storyId: string): Promise<void> {
+		const story = await this.storyRepository.get(storyId);
 
-    if (story.status !== 'pending') {
-      throw new Error(`Cannot generate scenario for story in status "${story.status}"`);
-    }
+		if (story.status !== "pending") {
+			throw new Error(
+				`Cannot generate scenario for story in status "${story.status}"`
+			);
+		}
 
-    if (story.characters.length === 0) {
-      throw new NoCharactersError();
-    }
+		if (story.characters.length === 0) {
+			throw new NoCharactersError();
+		}
 
-    try {
-      const generatedScenes = await this.scenarioGeneratorService.generateScenario(story);
+		try {
+			const generatedScenes =
+				await this.scenarioGeneratorService.generateScenario(story);
 
-      for (const generatedScene of generatedScenes) {
-        story.createScene(
-          generatedScene.scene_number,
-          generatedScene.scene_type,
-          generatedScene.description,
-          generatedScene.prompt
-        );
-      }
+			for (const generatedScene of generatedScenes) {
+				story.createScene(
+					generatedScene.scene_number,
+					generatedScene.scene_type,
+					generatedScene.description,
+					generatedScene.prompt
+				);
+			}
 
-      await this.storyRepository.save(story);
+			await this.storyRepository.save(story);
 
-      console.log(`[${storyId}] ✅ Scenario generated successfully with ${generatedScenes.length} scenes`);
-    } catch (error) {
-      console.error(`[${storyId}] ❌ Scenario generation failed:`, error);
-      throw error;
-    }
-  }
+			console.log(
+				`[${storyId}] ✅ Scenario generated successfully with ${generatedScenes.length} scenes`
+			);
+		} catch (error) {
+			console.error(`[${storyId}] ❌ Scenario generation failed:`, error);
+			throw error;
+		}
+	}
 }

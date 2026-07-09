@@ -1,3 +1,3 @@
 export type StoryStatusView = {
-  status: string;
+	status: string;
 };

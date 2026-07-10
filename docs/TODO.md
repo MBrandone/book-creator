@@ -1,11 +1,11 @@
 # Todo
-- [BUG] La dernière scène n'arrive pas à être crée
 - [PARCOURS CREATION] Ajouter une image de couverture
 - [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
   - Quel élément de description de l'histoire donné ?
   - Quel élément de description des personnages donner ? Comment fournir un bon personnage ?
 - [AMELIORATION GENERATION] Mettre une photo de couverture servant de base à la suite
   - Les générations de photos se basent sur la première génération.
+- [BUG] La dernière scène n'arrive pas à être crée
 - [PARCOURS CREATION] Faire une première génération avec la tête des personnages
   - et proposer à l'utilisateur de changer si besoin
 - [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
@@ -45,7 +45,6 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [TECH] mise en place de biome, plutôt que eslint + prettier
 - [AGENTIC] mettre en place les Hooks claude
 - à la fin de chaque modification de code de Claude, je veux que : 
   - la commande de lint soit passé
@@ -97,3 +96,4 @@
     - [X] Les bonnes pratiques de test ne vont pas dans le readme, mais dans un skill
     - [X] Supprimer les consoles logs pour les durées
 - [PARCOURS CREATION] L'utilisateur peut modifier les scènes
+- [TECH] mise en place de biome, plutôt que eslint + prettier

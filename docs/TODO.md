@@ -28,6 +28,7 @@
 - [ACHAT] API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
 - [ACHAT] Paiement et Livraison
 ============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
+- [TECH] Script pour nettoyer la base de données
 - Arrêter le promise.then pour générer une histoire et faire une vraie queue rejouable pour la creation d'histoire
   - redis-mq pour lancer une génération
   - Si fail, rejeu automatique

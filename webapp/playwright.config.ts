@@ -2,7 +2,8 @@ import * as path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "dotenv";
 
-config({ path: path.resolve(__dirname, ".env.test") });
+const testEnv =
+	config({ path: path.resolve(__dirname, ".env.test") }).parsed || {};
 
 const isCI = !!process.env.CI;
 
@@ -32,8 +33,6 @@ export default defineConfig({
 		url: "http://localhost:3000",
 		reuseExistingServer: !isCI,
 		timeout: 120000,
-		env: {
-			NODE_ENV: "development",
-		},
+		env: testEnv,
 	},
 });

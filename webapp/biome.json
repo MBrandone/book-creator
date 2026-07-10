@@ -7,8 +7,15 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json"],
-		"experimentalScannerIgnores": ["public/sw.js", "**/*.css"]
+		"includes": [
+			"**/*.ts",
+			"**/*.tsx",
+			"**/*.js",
+			"**/*.jsx",
+			"**/*.json",
+			"!!**/public/sw.js",
+			"!!**/*.css"
+		]
 	},
 	"formatter": {
 		"enabled": true,

@@ -62,12 +62,17 @@ export class StoryGeneratorService {
 				await this.sceneRepository.save(scene);
 			}
 
-			const referenceImageKeys = story.characters
-				.filter((char) => char.photoStorageBucket && char.photoStorageKey)
-				.map((char) => ({
-					bucket: char.photoStorageBucket!,
-					key: char.photoStorageKey!,
-				}));
+			const referenceImageKeys = story.characters.reduce<
+				Array<{ bucket: string; key: string }>
+			>((acc, char) => {
+				if (char.photoStorageBucket && char.photoStorageKey) {
+					acc.push({
+						bucket: char.photoStorageBucket,
+						key: char.photoStorageKey,
+					});
+				}
+				return acc;
+			}, []);
 
 			console.log(
 				`[${story.id}] 📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`

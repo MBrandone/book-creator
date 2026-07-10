@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,7 +34,7 @@ export default function CreateStoryPage() {
 	const router = useRouter();
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
-	const [storyId, setStoryId] = useState<string | null>(null);
+	const [storyId, setStoryId] = useState<string>("");
 	const [characterName, setCharacterName] = useState("");
 	const [characterDescription, setCharacterDescription] = useState("");
 	const [characters, setCharacters] = useState<
@@ -125,7 +126,7 @@ export default function CreateStoryPage() {
 
 	const { data: statusData } = useQuery({
 		queryKey: ["story-status", storyId],
-		queryFn: () => fetchStatus(storyId!),
+		queryFn: () => fetchStatus(storyId),
 		enabled: (isGeneratingScenario || isGeneratingImages) && !!storyId,
 		refetchInterval: STORY_STATUS_POLLING_INTERVAL,
 		refetchIntervalInBackground: true,
@@ -133,7 +134,7 @@ export default function CreateStoryPage() {
 
 	const { data: storyData, refetch: refetchStoryData } = useQuery({
 		queryKey: ["story-data", storyId],
-		queryFn: () => fetchStoryData(storyId!),
+		queryFn: () => fetchStoryData(storyId),
 		enabled:
 			!!storyId &&
 			(statusData?.status === "completed" || statusData?.status === "pending"),
@@ -370,10 +371,12 @@ export default function CreateStoryPage() {
 										<div className="flex gap-4">
 											{character.photoUrl && (
 												<div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-													<img
+													<Image
 														src={character.photoUrl}
 														alt={character.name}
 														className="w-full h-full object-cover"
+														width={1000}
+														height={1000}
 													/>
 												</div>
 											)}
@@ -474,7 +477,7 @@ export default function CreateStoryPage() {
 							</CardHeader>
 							<CardContent>
 								<ScenarioViewer
-									storyId={storyId!}
+									storyId={storyId}
 									scenes={storyData.scenes}
 									onScenesUpdated={handleScenesUpdated}
 									onImagesGenerationStarted={handleImagesGenerationStarted}

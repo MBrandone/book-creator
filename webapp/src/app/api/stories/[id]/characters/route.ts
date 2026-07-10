@@ -122,9 +122,6 @@ const createCharactersSchema = z.object({
 		.min(1, "Au moins un personnage doit être fourni"),
 });
 
-type CharacterInput = z.infer<typeof characterSchema>;
-type CreateCharactersInput = z.infer<typeof createCharactersSchema>;
-
 function buildValidationErrorResponse(error: z.ZodError) {
 	return NextResponse.json(
 		{

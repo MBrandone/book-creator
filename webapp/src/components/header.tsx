@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/shadcn-ui/button";
 
@@ -6,7 +7,13 @@ export function Header() {
 		<header className="py-6">
 			<div className="container mx-auto flex items-center justify-between px-4">
 				<Link href="/" className="flex items-center font-semibold text-xl">
-					<img src="/logo.png" alt="Book Creator Logo" className="h-16 w-16" />
+					<Image
+						src="/logo.png"
+						alt="Book Creator Logo"
+						className="h-16 w-16"
+						width={1000}
+						height={1000}
+					/>
 					<span>Book Creator</span>
 				</Link>
 

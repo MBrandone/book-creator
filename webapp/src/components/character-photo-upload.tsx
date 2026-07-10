@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { Image as ImageIcon, Upload, X } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { getUploadUrl } from "@/app/_app-http-requests/get-upload-url";
 import { uploadFileToStorage } from "@/app/_app-http-requests/upload-file-to-storage";
@@ -132,10 +133,12 @@ export function CharacterPhotoUpload({
 				) : (
 					<div className="space-y-3">
 						<div className="relative w-full aspect-square rounded-lg overflow-hidden">
-							<img
+							<Image
 								src={previewUrl}
-								alt="Photo de référence"
+								alt="Référence pour la génération d'images"
 								className="w-full h-full object-cover"
+								width={1000}
+								height={1000}
 							/>
 							{uploadMutation.isPending && (
 								<div className="absolute inset-0 bg-black/50 flex items-center justify-center">

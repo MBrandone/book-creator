@@ -90,12 +90,12 @@ export class ExponentialBackoffRetryStrategy implements RetryStrategy {
 	private extractRetryAfter(error: any): number | undefined {
 		if (error?.response?.headers?.["retry-after"]) {
 			const retryAfter = parseInt(error.response.headers["retry-after"], 10);
-			return isNaN(retryAfter) ? undefined : retryAfter;
+			return Number.isNaN(retryAfter) ? undefined : retryAfter;
 		}
 
 		if (error?.headers?.["retry-after"]) {
 			const retryAfter = parseInt(error.headers["retry-after"], 10);
-			return isNaN(retryAfter) ? undefined : retryAfter;
+			return Number.isNaN(retryAfter) ? undefined : retryAfter;
 		}
 
 		return undefined;

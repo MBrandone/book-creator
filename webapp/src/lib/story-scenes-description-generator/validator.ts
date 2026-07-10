@@ -2,59 +2,54 @@ import { z } from "zod";
 import type { SceneType } from "@/lib/infrastructure/db/schema";
 import type { StoryContext } from "./story-scenes-description-generator";
 
-export class StoryScenesDescriptionGeneratorValidator {
-	static validateStoryContext(context: StoryContext): void {
-		storyContextSchema.parse(context);
-	}
+export function validateStoryContext(context: StoryContext): void {
+	storyContextSchema.parse(context);
+}
 
-	static validateAIResponse(response: unknown): AIStoryResponse {
-		return aiStoryResponseSchema.parse(response);
-	}
+export function validateAIResponse(response: unknown): AIStoryResponse {
+	return aiStoryResponseSchema.parse(response);
+}
 
-	static normalizeSceneType(sceneType: string): string {
-		return StoryScenesDescriptionGeneratorValidator.removeAccents(
-			sceneType.toLowerCase().trim()
-		);
-	}
+export function normalizeSceneType(sceneType: string): string {
+	return removeAccents(sceneType.toLowerCase().trim());
+}
 
-	static removeAccents(str: string): string {
-		return str.normalize("NFD").replace(/[̀-ͯ]/g, "");
-	}
+function removeAccents(str: string): string {
+	return str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
 
-	static convertDifferentOutputFormatToString(output: object): string {
-		if (typeof output === "string") {
-			return output;
-		} else if (Array.isArray(output)) {
-			return output.join("");
-		} else if (output && typeof output === "object" && "output" in output) {
-			// Si un objet avec une propriété output, on renvoie output ou pareil array.join
-			const typedOutput = output as ReplicateRunOutput;
-			if (typeof typedOutput.output === "string") {
-				return typedOutput.output;
-			} else if (Array.isArray(typedOutput.output)) {
-				return typedOutput.output.join("");
-			} else {
-				throw new Error("Unexpected output format from Replicate");
-			}
+export function convertDifferentOutputFormatToString(output: object): string {
+	if (typeof output === "string") {
+		return output;
+	} else if (Array.isArray(output)) {
+		return output.join("");
+	} else if (output && typeof output === "object" && "output" in output) {
+		const typedOutput = output as ReplicateRunOutput;
+		if (typeof typedOutput.output === "string") {
+			return typedOutput.output;
+		} else if (Array.isArray(typedOutput.output)) {
+			return typedOutput.output.join("");
 		} else {
 			throw new Error("Unexpected output format from Replicate");
 		}
+	} else {
+		throw new Error("Unexpected output format from Replicate");
 	}
+}
 
-	static parseJSONResponse(response: string): unknown {
-		try {
-			return JSON.parse(response);
-		} catch {
-			const jsonMatch = response.match(/\{[\s\S]*\}/);
-			if (jsonMatch) {
-				try {
-					return JSON.parse(jsonMatch[0]);
-				} catch {
-					throw new Error("Failed to parse JSON from response");
-				}
+export function parseJSONResponse(response: string): unknown {
+	try {
+		return JSON.parse(response);
+	} catch {
+		const jsonMatch = response.match(/\{[\s\S]*\}/);
+		if (jsonMatch) {
+			try {
+				return JSON.parse(jsonMatch[0]);
+			} catch {
+				throw new Error("Failed to parse JSON from response");
 			}
-			throw new Error("No valid JSON found in response");
 		}
+		throw new Error("No valid JSON found in response");
 	}
 }
 
@@ -80,9 +75,7 @@ const storyContextSchema = z.object({
 
 const sceneTypeSchema = z
 	.string()
-	.transform((val) =>
-		StoryScenesDescriptionGeneratorValidator.normalizeSceneType(val)
-	)
+	.transform((val) => normalizeSceneType(val))
 	.refine(
 		(val): val is SceneType => {
 			const validSceneTypes: SceneType[] = [

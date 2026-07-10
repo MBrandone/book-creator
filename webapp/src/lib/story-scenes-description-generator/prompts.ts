@@ -4,10 +4,6 @@ import type { StoryContext } from "@/lib/story-scenes-description-generator/stor
 export class StorySceneDescriptionPromptBuilder {
 	private userPrompt = "";
 
-	constructor() {
-		return this;
-	}
-
 	setUserPrompt(context: StoryContext) {
 		const characterDescriptions = context.characters
 			.map((char, index) => {

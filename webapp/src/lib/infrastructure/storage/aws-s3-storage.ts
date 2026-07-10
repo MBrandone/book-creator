@@ -257,7 +257,7 @@ export class AwsS3Storage implements Storage {
 				})
 			);
 			return true;
-		} catch (error) {
+		} catch {
 			return false;
 		}
 	}

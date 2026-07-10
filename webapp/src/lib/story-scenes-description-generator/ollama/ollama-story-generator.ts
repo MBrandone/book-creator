@@ -15,7 +15,11 @@ import type {
 	StoryContext,
 	StoryScenesDescriptionGenerator,
 } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
-import { StoryScenesDescriptionGeneratorValidator } from "@/lib/story-scenes-description-generator/validator";
+import {
+	parseJSONResponse,
+	validateAIResponse,
+	validateStoryContext,
+} from "@/lib/story-scenes-description-generator/validator";
 
 export class OllamaStoryGenerator implements StoryScenesDescriptionGenerator {
 	private readonly config: OllamaConfig = {
@@ -74,7 +78,7 @@ export class OllamaStoryGenerator implements StoryScenesDescriptionGenerator {
 		console.log("Starting story generation for story:", context.title);
 		console.log("Characters:", context.characters.length);
 
-		StoryScenesDescriptionGeneratorValidator.validateStoryContext(context);
+		validateStoryContext(context);
 
 		const available = await this.isAvailable();
 		if (!available) {
@@ -111,14 +115,8 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
 			const duration = Date.now() - startTime;
 			console.log(`Story generated in ${duration}ms`);
 
-			const parsedResponse =
-				StoryScenesDescriptionGeneratorValidator.parseJSONResponse(
-					response.response
-				);
-			const validatedResponse =
-				StoryScenesDescriptionGeneratorValidator.validateAIResponse(
-					parsedResponse
-				);
+			const parsedResponse = parseJSONResponse(response.response);
+			const validatedResponse = validateAIResponse(parsedResponse);
 
 			const stylePrefix = getStylePrefix(DEFAULT_ART_STYLE);
 			const scenes = validatedResponse.scenes.map((scene) => ({

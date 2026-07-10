@@ -9,6 +9,28 @@ if (!buildTimeEnv.success) {
 	process.exit(1);
 }
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+	images: {
+		remotePatterns: [
+			{
+				protocol: "http",
+				hostname: "localhost",
+				port: "9000",
+				pathname: "/book-images/**",
+			},
+			{
+				protocol: "http",
+				hostname: "localhost",
+				port: "9010",
+				pathname: "/book-images-test/**",
+			},
+			{
+				protocol: "https",
+				hostname: "zwuapejxeikbtnrumwtt.supabase.co",
+				pathname: "/storage/v1/object/public/book-images/**",
+			},
+		],
+	},
+};
 
 export default nextConfig;

@@ -19,7 +19,11 @@ import type {
 	StoryContext,
 	StoryScenesDescriptionGenerator,
 } from "../story-scenes-description-generator";
-import { StoryScenesDescriptionGeneratorValidator } from "../validator";
+import {
+	convertDifferentOutputFormatToString,
+	parseJSONResponse,
+	validateAIResponse,
+} from "../validator";
 
 export class ReplicateStoryScenesDescriptionGenerator
 	implements StoryScenesDescriptionGenerator
@@ -55,18 +59,9 @@ export class ReplicateStoryScenesDescriptionGenerator
 				this.callReplicateAPI(prompt)
 			);
 
-			const responseText: string =
-				StoryScenesDescriptionGeneratorValidator.convertDifferentOutputFormatToString(
-					output
-				);
-			const parsedResponse =
-				StoryScenesDescriptionGeneratorValidator.parseJSONResponse(
-					responseText
-				);
-			const validatedResponse =
-				StoryScenesDescriptionGeneratorValidator.validateAIResponse(
-					parsedResponse
-				);
+			const responseText: string = convertDifferentOutputFormatToString(output);
+			const parsedResponse = parseJSONResponse(responseText);
+			const validatedResponse = validateAIResponse(parsedResponse);
 
 			const scenes = validatedResponse.scenes.map((scene) => ({
 				scene_number: scene.scene_number,

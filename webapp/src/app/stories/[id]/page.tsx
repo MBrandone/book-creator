@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { use } from "react";
 import { fetchStoryData } from "@/app/_app-http-requests/fetch-story-data";
@@ -128,10 +129,12 @@ export default function StoryDetailPage({
 										<p className="text-sm">{scene.description}</p>
 										{scene.image_url && (
 											<div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-												<img
+												<Image
 													src={scene.image_url}
 													alt={`Scène ${scene.scene_number}: ${scene.scene_type}`}
 													className="w-full h-full object-cover"
+													width={1000}
+													height={1000}
 												/>
 											</div>
 										)}

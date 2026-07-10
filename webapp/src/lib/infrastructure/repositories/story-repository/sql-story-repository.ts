@@ -1,5 +1,4 @@
 import { Character } from "@/lib/domain/character";
-import { SceneType } from "@/lib/domain/scene";
 import { Story } from "@/lib/domain/story";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
 import type { StoryRepository } from "@/lib/domain/story-repository";

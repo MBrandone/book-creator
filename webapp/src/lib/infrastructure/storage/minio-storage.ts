@@ -190,7 +190,7 @@ export class MinioStorage implements Storage {
 		try {
 			await this.client.statObject(this.config.bucket, key);
 			return true;
-		} catch (error) {
+		} catch {
 			return false;
 		}
 	}

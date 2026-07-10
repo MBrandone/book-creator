@@ -278,6 +278,35 @@ Découper le plan en **tâches implémentables** :
   - Fichiers : [Fichiers impactés]
 ```
 
+### IMPORTANT : Créer les Tâches dans Claude Code
+
+**Une fois que l'utilisateur a validé les tâches**, tu DOIS créer chaque tâche avec l'outil `TaskCreate` de Claude Code :
+
+1. **Load ToolSearch** pour accéder à `TaskCreate` :
+   ```
+   ToolSearch("select:TaskCreate")
+   ```
+
+2. **Créer chaque tâche une par une** avec `TaskCreate` :
+   - `title` : description courte de la tâche
+   - `description` : critères d'acceptation + vérification + fichiers impactés
+   - `status` : `"pending"` (sera marquée `"completed"` une fois terminée)
+
+3. **Exemple** :
+   ```typescript
+   TaskCreate({
+     title: "T1.1 - Créer l'agrégat Story avec validation métier",
+     description: `
+   Acceptation : L'agrégat Story valide les invariants métier (statut, scènes)
+   Vérification : Tests unitaires passent sur Story.updateSceneDescription()
+   Fichiers : src/domain/story/Story.ts, src/domain/story/Story.test.ts
+     `,
+     status: "pending"
+   })
+   ```
+
+**Ne pas passer à l'implémentation sans avoir créé les tâches Claude Code.**
+
 ---
 
 ## Principes de Cadrage

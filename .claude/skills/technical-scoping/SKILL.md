@@ -306,6 +306,35 @@ After the document is created and approved:
 2. **Update CLAUDE.md** with new conventions or standards
 3. **Create implementation tasks** based on the timeline
 
+### IMPORTANT : Créer les Tâches dans Claude Code
+
+**Une fois que l'utilisateur a validé le document de cadrage**, tu DOIS créer chaque tâche d'implémentation avec l'outil `TaskCreate` de Claude Code :
+
+1. **Load ToolSearch** pour accéder à `TaskCreate` :
+   ```
+   ToolSearch("select:TaskCreate")
+   ```
+
+2. **Créer chaque tâche d'implémentation une par une** avec `TaskCreate` :
+   - `title` : identifiant de la tâche (ex: "T1.1 - Inventorier les scripts")
+   - `description` : critère de complétion + fichiers/zones concernés + dépendances
+   - `status` : `"pending"` (sera marquée `"completed"` une fois terminée)
+
+3. **Exemple** :
+   ```typescript
+   TaskCreate({
+     title: "T1.1 - Inventorier tous les scripts dans /scripts",
+     description: `
+   Critère de complétion : tableau scripts × deps publié dans le doc
+   Fichiers/zones : /scripts/*
+   Dépend de : -
+     `,
+     status: "pending"
+   })
+   ```
+
+**Ne pas commencer l'implémentation sans avoir créé les tâches Claude Code.**
+
 ## Common Anti-Patterns
 
 | Anti-Pattern | Why It Fails | Better Approach |

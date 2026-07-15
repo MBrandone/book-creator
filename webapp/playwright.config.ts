@@ -16,7 +16,7 @@ export default defineConfig({
 	reporter: "html",
 
 	use: {
-		baseURL: "http://localhost:3000",
+		baseURL: "http://localhost:3001",
 		trace: "on-first-retry",
 		screenshot: "only-on-failure",
 	},
@@ -30,9 +30,9 @@ export default defineConfig({
 
 	webServer: {
 		command: "npm run db:migrate && npm run dev",
-		url: "http://localhost:3000",
-		reuseExistingServer: !isCI,
+		url: "http://localhost:3001",
+		reuseExistingServer: false,
 		timeout: 120000,
-		env: testEnv,
+		env: { ...testEnv, NEXT_DIST_DIR: ".next.test" },
 	},
 });

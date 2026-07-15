@@ -1,7 +1,12 @@
 // Types pour le schéma de base de données
 
 export type StoryStatus = "pending" | "generating" | "completed" | "failed";
-export type SceneType = "introduction" | "conflict" | "action" | "resolution";
+export type SceneType =
+	| "cover"
+	| "introduction"
+	| "conflict"
+	| "action"
+	| "resolution";
 
 export interface StoriesTable {
 	id: string;

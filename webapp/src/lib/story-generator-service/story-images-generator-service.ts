@@ -13,23 +13,23 @@ export class StoryImagesGeneratorService {
 	) {}
 
 	async generate(story: Story): Promise<void> {
+		const referenceImageKeys = story.characters.reduce<
+			Array<{ bucket: string; key: string }>
+		>((acc, char) => {
+			if (char.photoStorageBucket && char.photoStorageKey) {
+				acc.push({
+					bucket: char.photoStorageBucket,
+					key: char.photoStorageKey,
+				});
+			}
+			return acc;
+		}, []);
+
+		console.log(
+			`[${story.id}] 📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`
+		);
+
 		try {
-			const referenceImageKeys = story.characters.reduce<
-				Array<{ bucket: string; key: string }>
-			>((acc, char) => {
-				if (char.photoStorageBucket && char.photoStorageKey) {
-					acc.push({
-						bucket: char.photoStorageBucket,
-						key: char.photoStorageKey,
-					});
-				}
-				return acc;
-			}, []);
-
-			console.log(
-				`[${story.id}] 📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`
-			);
-
 			const referenceImages = await Promise.all(
 				referenceImageKeys.map(async ({ key }) => {
 					const dataUri = await this.convertImageToDataUri(key);
@@ -40,11 +40,22 @@ export class StoryImagesGeneratorService {
 			console.log(
 				`[${story.id}] ✅ ${referenceImages.length} reference photos converted successfully`
 			);
+
+			console.log(`[${story.id}] 🎨 Generating cover image...`);
+			const coverPrompt = this.buildCoverPrompt(story);
+			const coverResult = await this.sceneImageGenerator.generateImage({
+				prompt: coverPrompt,
+				aspectRatio: "1:1",
+				referenceImages,
+			});
+			story.createCover("", coverPrompt, coverResult.bucket, coverResult.key);
+			console.log(`[${story.id}] ✅ Cover image generated successfully`);
+
 			console.log(
-				`[${story.id}] 🖼️  Starting image generation for ${story.scenes.length} scenes...`
+				`[${story.id}] 🖼️  Starting image generation for ${story.scenes.length - 1} scenes...`
 			);
 
-			for (const scene of story.scenes) {
+			for (const scene of story.scenes.filter((s) => s.sceneType !== "cover")) {
 				try {
 					const imageResult = await this.sceneImageGenerator.generateImage({
 						prompt: scene.prompt,
@@ -53,10 +64,6 @@ export class StoryImagesGeneratorService {
 					});
 
 					story.setImageToScene(scene.id, imageResult.bucket, imageResult.key);
-
-					await new Promise((resolve) =>
-						setTimeout(resolve, this.SECONDS_TO_WAIT * 1000)
-					);
 				} catch (imageError) {
 					console.error(
 						`[${story.id}] ❌ Failed to generate image for scene ${scene.sceneNumber}:`,
@@ -93,6 +100,13 @@ export class StoryImagesGeneratorService {
 				);
 			}
 		}
+	}
+
+	private buildCoverPrompt(story: Story): string {
+		const characterDescriptions = story.characters
+			.map((c) => `${c.name}: ${c.description}`)
+			.join(". ");
+		return `Children book cover illustration. Title: "${story.title}". Characters: ${characterDescriptions}. Style: watercolor illustration, vibrant colors, all characters visible together.`;
 	}
 
 	private async convertImageToDataUri(key: string): Promise<string> {

@@ -116,6 +116,8 @@ test.describe("Create a Story", () => {
 		await expect(page.getByText("Une description personnalisée")).toBeVisible();
 		await expect(page.getByText("Une conclusion modifiée")).toBeVisible();
 
+		await expect(page.getByAltText("Couverture")).toBeVisible();
+
 		const sceneImages = page.locator('img[alt^="Scène"]');
 		await expect(sceneImages).toHaveCount(4);
 

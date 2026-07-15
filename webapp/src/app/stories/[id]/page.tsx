@@ -74,7 +74,7 @@ export default function StoryDetailPage({
 								<StatusBadge status={data.story.status} />
 							</div>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="space-y-4">
 							<div className="flex gap-4 text-sm text-muted-foreground">
 								<span>
 									📅 Créée le{" "}
@@ -85,6 +85,32 @@ export default function StoryDetailPage({
 									{new Date(data.story.updated_at).toLocaleDateString("fr-FR")}
 								</span>
 							</div>
+							{(() => {
+								const coverScene = data.scenes.find(
+									(s) => s.scene_type === "cover"
+								);
+								if (coverScene?.image_url) {
+									return (
+										<div className="relative w-full max-w-sm mx-auto aspect-square rounded-lg overflow-hidden border">
+											<Image
+												src={coverScene.image_url}
+												alt="Couverture"
+												className="w-full h-full object-cover"
+												width={600}
+												height={600}
+											/>
+										</div>
+									);
+								}
+								if (data.story.status === "generating") {
+									return (
+										<div className="w-full max-w-sm mx-auto aspect-square rounded-lg border border-dashed flex items-center justify-center text-muted-foreground">
+											<p className="text-sm">Image en cours de génération...</p>
+										</div>
+									);
+								}
+								return null;
+							})()}
 						</CardContent>
 					</Card>
 
@@ -112,42 +138,45 @@ export default function StoryDetailPage({
 					)}
 
 					{/* Scènes */}
-					{data.scenes.length > 0 && (
+					{data.scenes.filter((s) => s.scene_type !== "cover").length > 0 && (
 						<div className="space-y-6">
 							<h2 className="text-2xl font-bold">Scènes</h2>
-							{data.scenes.map((scene) => (
-								<Card key={scene.id}>
-									<CardHeader>
-										<div className="flex items-center gap-2">
-											<span className="font-semibold">
-												Scène {scene.scene_number}
-											</span>
-											<SceneTypeBadge type={scene.scene_type} />
-										</div>
-									</CardHeader>
-									<CardContent className="space-y-4">
-										<p className="text-sm">{scene.description}</p>
-										{scene.image_url && (
-											<div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-												<Image
-													src={scene.image_url}
-													alt={`Scène ${scene.scene_number}: ${scene.scene_type}`}
-													className="w-full h-full object-cover"
-													width={1000}
-													height={1000}
-												/>
+							{data.scenes
+								.filter((s) => s.scene_type !== "cover")
+								.map((scene) => (
+									<Card key={scene.id}>
+										<CardHeader>
+											<div className="flex items-center gap-2">
+												<span className="font-semibold">
+													Scène {scene.scene_number}
+												</span>
+												<SceneTypeBadge type={scene.scene_type} />
 											</div>
-										)}
-										{!scene.image_url && data.story.status === "generating" && (
-											<div className="w-full aspect-video rounded-lg border border-dashed flex items-center justify-center text-muted-foreground">
-												<p className="text-sm">
-													Image en cours de génération...
-												</p>
-											</div>
-										)}
-									</CardContent>
-								</Card>
-							))}
+										</CardHeader>
+										<CardContent className="space-y-4">
+											<p className="text-sm">{scene.description}</p>
+											{scene.image_url && (
+												<div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+													<Image
+														src={scene.image_url}
+														alt={`Scène ${scene.scene_number}: ${scene.scene_type}`}
+														className="w-full h-full object-cover"
+														width={1000}
+														height={1000}
+													/>
+												</div>
+											)}
+											{!scene.image_url &&
+												data.story.status === "generating" && (
+													<div className="w-full aspect-video rounded-lg border border-dashed flex items-center justify-center text-muted-foreground">
+														<p className="text-sm">
+															Image en cours de génération...
+														</p>
+													</div>
+												)}
+										</CardContent>
+									</Card>
+								))}
 						</div>
 					)}
 

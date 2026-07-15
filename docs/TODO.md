@@ -1,8 +1,7 @@
 # Todo
-- [PARCOURS CREATION] Ajouter une image de couverture
 - [PARCOURS CREATION] Ajouter une vraie page de transition et d'attente pendant la génération
-- [AMELIORATION GENERATION] Mettre une photo de couverture servant de base à la suite
-- [AMELIORATION GENERATION] Les générations de photos se basent sur la première génération.
+- [AMELIORATION GENERATION] Toutes les images généré doivent être cohérentes
+  - Problème : les têtes changent entre les images
 - [BUG] La dernière scène n'arrive pas à être crée
 - [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
 - [TECH] Comment combattre l'injection de prompt ?
@@ -44,22 +43,7 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
-  - Quel élément de description de l'histoire donné ?
-  - Quel élément de description des personnages donner ? Comment fournir un bon personnage ?
-- Proposition
-  - On met les personnages en premier
-  - Avoir la description + un bouton "aidez-moi à décrire mon histoire"
-  - Le clique sur ce bouton met un texte de template dans la description
-  - Le template est à définir : 
-      1. "L'histoire se passe..." [forêt enchantée / ville futuriste / sous l'océan / ...] + image
-      2. "L'ambiance générale est..." [joyeuse / mystérieuse / apaisante / ...] + palette
-      3. "Les couleurs dominantes sont..." [picker visuel avec 3 couleurs max]
-      4. "Le style de dessin ressemble à..." [3-4 exemples d'illustrations]
-      5. "Les détails importants" [liste guidée : vêtements, accessoires, environnement]
-      6. "Quelle émotion doit ressentir l'enfant en regardant vos images et votre histoire ?"
-      7. "Quels détails vont faire sourire ton enfant ?"
-      8. "Quelle est la chose la plus importante à voir en premier ?"
+- [PARCOURS CREATION] Ajouter une image de couverture
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -112,3 +96,5 @@
     - la commande de lint soit passé
     - la command de build soit passé
     - la commande de test soit passé
+- [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
+  - Un bouton "Aidez moi à faire mon histoire pour guider l'utilisateur"

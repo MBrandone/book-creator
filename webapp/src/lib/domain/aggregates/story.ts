@@ -156,6 +156,32 @@ export class Story {
 		return this._scenes;
 	}
 
+	createCover(
+		description: string,
+		prompt: string,
+		storageBucket: string,
+		storageKey: string
+	): void {
+		const coverScene = this.scenes.find((s) => s.sceneType === "cover");
+		if (coverScene) {
+			throw Error("Cover Already exists");
+		}
+
+		const scene: Scene = {
+			id: crypto.randomUUID(),
+			storyId: this.id,
+			sceneNumber: 0,
+			sceneType: "cover",
+			description,
+			prompt,
+			storageBucket,
+			storageKey,
+		};
+
+		this._scenes.unshift(scene);
+		this.updatedAt = new Date();
+	}
+
 	createScene(
 		sceneNumber: number,
 		sceneType: SceneType,

@@ -1,4 +1,9 @@
-export type SceneType = "introduction" | "conflict" | "action" | "resolution";
+export type SceneType =
+	| "cover"
+	| "introduction"
+	| "conflict"
+	| "action"
+	| "resolution";
 
 export type Scene = {
 	id: string;

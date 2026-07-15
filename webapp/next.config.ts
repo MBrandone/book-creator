@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { publicEnvSchema } from "./src/config/env.schema";
+import { publicEnvSchema } from "@/config/env.schema";
 
 const buildTimeEnv = publicEnvSchema.safeParse(process.env);
 
@@ -12,6 +12,7 @@ if (!buildTimeEnv.success) {
 const nextConfig: NextConfig = {
 	distDir: process.env.NEXT_DIST_DIR ?? ".next",
 	images: {
+		dangerouslyAllowLocalIP: true,
 		remotePatterns: [
 			{
 				protocol: "http",

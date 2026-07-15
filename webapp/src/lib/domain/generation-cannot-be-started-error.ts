@@ -1,4 +1,4 @@
-import type { StoryStatus } from "./story";
+import type { StoryStatus } from "./aggregates/story";
 
 export class GenerationCannotBeStartedError extends Error {
 	constructor(status: StoryStatus) {

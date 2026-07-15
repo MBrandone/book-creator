@@ -1,4 +1,4 @@
-import type { Story } from "@/lib/domain/story";
+import type { Story } from "@/lib/domain/aggregates/story";
 
 export interface StoryRepository {
 	save(story: Story): Promise<void>;

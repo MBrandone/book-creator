@@ -1,5 +1,5 @@
 import { NoCharactersError } from "@/lib/domain/no-characters-error";
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import type { ScenarioGeneratorService } from "@/lib/story-generator-service/scenario-generator-service";
 
 export class GenerateScenarioCommandHandler {

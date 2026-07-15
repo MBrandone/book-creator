@@ -1,5 +1,5 @@
-import type { Story } from "@/lib/domain/story";
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import type { Story } from "@/lib/domain/aggregates/story";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import type { Storage } from "@/lib/infrastructure/storage/storage";
 import type { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 

@@ -1,55 +1,79 @@
-import { Character } from "@/lib/domain/character";
-import { Story } from "@/lib/domain/story";
+import { Story } from "@/lib/domain/aggregates/story";
+import { Character } from "@/lib/domain/entities/character";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
-import type { StoryRepository } from "@/lib/domain/story-repository";
 import { db } from "@/lib/infrastructure/db";
 
 export class SqlStoryRepository implements StoryRepository {
 	async save(story: Story): Promise<void> {
 		try {
-			await db
-				.insertInto("stories")
-				.values({
-					id: story.id,
-					title: story.title,
-					description: story.description,
-					status: story.status,
-					created_at: story.createdAt,
-					updated_at: story.updatedAt,
-				})
-				.onConflict((oc) =>
-					oc.column("id").doUpdateSet({
+			await db.transaction().execute(async (transaction) => {
+				await transaction
+					.insertInto("stories")
+					.values({
+						id: story.id,
 						title: story.title,
 						description: story.description,
 						status: story.status,
+						created_at: story.createdAt,
 						updated_at: story.updatedAt,
-					})
-				)
-				.execute();
-
-			for (const scene of story.scenes) {
-				await db
-					.insertInto("scenes")
-					.values({
-						id: scene.id,
-						story_id: scene.storyId,
-						scene_number: scene.sceneNumber,
-						scene_type: scene.sceneType,
-						description: scene.description,
-						prompt: scene.prompt,
-						storage_bucket: scene.storageBucket,
-						storage_key: scene.storageKey,
 					})
 					.onConflict((oc) =>
 						oc.column("id").doUpdateSet({
+							title: story.title,
+							description: story.description,
+							status: story.status,
+							updated_at: story.updatedAt,
+						})
+					)
+					.execute();
+
+				for (const character of story.characters) {
+					await transaction
+						.insertInto("characters")
+						.values({
+							id: character.id,
+							story_id: character.storyId,
+							name: character.name,
+							description: character.description,
+							photo_storage_bucket: character.photoStorageBucket,
+							photo_storage_key: character.photoStorageKey,
+						})
+						.onConflict((oc) =>
+							oc.column("id").doUpdateSet({
+								name: character.name,
+								description: character.description,
+								photo_storage_bucket: character.photoStorageBucket,
+								photo_storage_key: character.photoStorageKey,
+							})
+						)
+						.execute();
+				}
+
+				for (const scene of story.scenes) {
+					await transaction
+						.insertInto("scenes")
+						.values({
+							id: scene.id,
+							story_id: scene.storyId,
+							scene_number: scene.sceneNumber,
+							scene_type: scene.sceneType,
 							description: scene.description,
 							prompt: scene.prompt,
 							storage_bucket: scene.storageBucket,
 							storage_key: scene.storageKey,
 						})
-					)
-					.execute();
-			}
+						.onConflict((oc) =>
+							oc.column("id").doUpdateSet({
+								description: scene.description,
+								prompt: scene.prompt,
+								storage_bucket: scene.storageBucket,
+								storage_key: scene.storageKey,
+							})
+						)
+						.execute();
+				}
+			});
 		} catch (error: any) {
 			console.error("Erreur lors de la sauvegarde en base de données:", error);
 			throw error;

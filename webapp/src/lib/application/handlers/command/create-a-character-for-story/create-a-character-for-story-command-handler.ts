@@ -1,6 +1,6 @@
-import { Character } from "@/lib/domain/character";
-import type { CharacterRepository } from "@/lib/domain/character-repository";
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import { Character } from "@/lib/domain/entities/character";
+import type { CharacterRepository } from "@/lib/domain/repositories/character-repository";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import { MaxCharactersReachedError } from "./max-characters-reached-error";
 
 export type CreateCharacterCommand = {

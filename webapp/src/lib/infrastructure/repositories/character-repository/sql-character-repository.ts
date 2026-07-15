@@ -1,6 +1,6 @@
-import type { Character } from "@/lib/domain/character";
+import type { Character } from "@/lib/domain/entities/character";
 import { db } from "@/lib/infrastructure/db";
-import type { CharacterRepository } from "../../../domain/character-repository";
+import type { CharacterRepository } from "../../../domain/repositories/character-repository";
 
 export class SqlCharacterRepository implements CharacterRepository {
 	async save(character: Character): Promise<void> {

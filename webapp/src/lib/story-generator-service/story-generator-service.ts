@@ -1,7 +1,7 @@
+import type { Story } from "@/lib/domain/aggregates/story";
+import type { SceneRepository } from "@/lib/domain/repositories/scene-repository";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import type { Scene } from "@/lib/domain/scene";
-import type { SceneRepository } from "@/lib/domain/scene-repository";
-import type { Story } from "@/lib/domain/story";
-import type { StoryRepository } from "@/lib/domain/story-repository";
 import type { Storage } from "@/lib/infrastructure/storage/storage";
 import type { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 import type { StoryScenesDescriptionGenerator } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";

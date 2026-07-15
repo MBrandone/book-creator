@@ -1,7 +1,7 @@
 import type {
 	CharacterPhoto,
 	CharacterPhotoRepository,
-} from "@/lib/domain/character-photo-repository";
+} from "@/lib/domain/repositories/character-photo-repository";
 import { db } from "@/lib/infrastructure/db";
 import type { Storage } from "@/lib/infrastructure/storage/storage";
 

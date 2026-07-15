@@ -1,4 +1,4 @@
-import type { Story } from "@/lib/domain/story";
+import type { Story } from "@/lib/domain/aggregates/story";
 import type { StoryScenesDescriptionGenerator } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 import type { GeneratedScene } from "./generated-scene";
 

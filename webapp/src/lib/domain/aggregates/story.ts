@@ -1,11 +1,14 @@
 import { StoryAlreadyGeneratingError } from "@/lib/domain/story-already-generating-error";
-import { CannotEditSceneAfterGenerationError } from "./cannot-edit-scene-after-generation-error";
-import type { Character } from "./character";
-import { NoCharactersError } from "./no-characters-error";
-import type { Scene, SceneType } from "./scene";
-import { SceneDescriptionTooLongError } from "./scene-description-too-long-error";
-import { SceneDescriptionTooShortError } from "./scene-description-too-short-error";
-import { SceneNotFoundInStoryError } from "./scene-not-found-in-story-error";
+import { CannotEditSceneAfterGenerationError } from "../cannot-edit-scene-after-generation-error";
+import { Character } from "../entities/character";
+import { InvalidCharacterCountError } from "../invalid-character-count-error";
+import { NoCharactersError } from "../no-characters-error";
+import type { Scene, SceneType } from "../scene";
+import { SceneDescriptionTooLongError } from "../scene-description-too-long-error";
+import { SceneDescriptionTooShortError } from "../scene-description-too-short-error";
+import { SceneNotFoundInStoryError } from "../scene-not-found-in-story-error";
+import { StoryDescriptionTooLongError } from "../story-description-too-long-error";
+import { StoryDescriptionTooShortError } from "../story-description-too-short-error";
 
 export type StoryStatus = "pending" | "generating" | "completed" | "failed";
 
@@ -43,7 +46,36 @@ export class Story {
 		id: string;
 		title: string;
 		description: string;
+		characters: Array<{
+			id: string;
+			name: string;
+			description: string;
+			photo?: { storageBucket: string; storageKey: string };
+		}>;
 	}): Story {
+		if (data.description.trim().length < 10) {
+			throw new StoryDescriptionTooShortError();
+		}
+
+		if (data.description.length > 2000) {
+			throw new StoryDescriptionTooLongError();
+		}
+
+		if (data.characters.length < 1 || data.characters.length > 2) {
+			throw new InvalidCharacterCountError(data.characters.length);
+		}
+
+		const characters = data.characters.map((characterData) =>
+			Character.create({
+				id: characterData.id,
+				storyId: data.id,
+				name: characterData.name,
+				description: characterData.description,
+				photoStorageBucket: characterData.photo?.storageBucket,
+				photoStorageKey: characterData.photo?.storageKey,
+			})
+		);
+
 		return new Story({
 			id: data.id,
 			title: data.title,
@@ -51,7 +83,7 @@ export class Story {
 			status: "pending",
 			createdAt: new Date(),
 			updatedAt: new Date(),
-			characters: [],
+			characters,
 			scenes: [],
 		});
 	}

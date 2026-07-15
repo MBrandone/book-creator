@@ -1,6 +1,6 @@
+import type { StoryReadModel } from "@/lib/domain/read-models/story-read-model";
+import type { StoryStatusView } from "@/lib/domain/read-models/story-status-view";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
-import type { StoryReadModel } from "@/lib/domain/story-read-model";
-import type { StoryStatusView } from "@/lib/domain/story-status-view";
 
 export class GetStoryStatusQueryHandler {
 	constructor(private readonly storyReadModel: StoryReadModel) {}

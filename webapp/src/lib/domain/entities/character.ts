@@ -1,3 +1,6 @@
+import { CharacterDescriptionTooShortError } from "../character-description-too-short-error";
+import { CharacterNameTooShortError } from "../character-name-too-short-error";
+
 export class Character {
 	readonly id: string;
 	readonly storyId: string;
@@ -30,6 +33,14 @@ export class Character {
 		photoStorageBucket?: string | null;
 		photoStorageKey?: string | null;
 	}): Character {
+		if (data.name.trim().length < 3) {
+			throw new CharacterNameTooShortError();
+		}
+
+		if (data.description.trim().length < 10) {
+			throw new CharacterDescriptionTooShortError();
+		}
+
 		return new Character({
 			id: data.id,
 			storyId: data.storyId,

@@ -1,4 +1,4 @@
-import type { StoryStatus } from "./story";
+import type { StoryStatus } from "./aggregates/story";
 
 export class CannotEditSceneAfterGenerationError extends Error {
 	constructor(status: StoryStatus) {

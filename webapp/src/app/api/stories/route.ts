@@ -56,5 +56,29 @@ const createStorySchema = z.object({
 	title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
 	description: z
 		.string()
-		.min(10, "La description doit contenir au moins 10 caractères"),
+		.min(10, "La description doit contenir au moins 10 caractères")
+		.max(2000, "La description ne peut pas dépasser 2000 caractères"),
+	characters: z
+		.array(
+			z.object({
+				id: z.uuid("L'ID du personnage doit être un UUID valide"),
+				name: z
+					.string()
+					.min(3, "Le nom du personnage doit contenir au moins 3 caractères"),
+				description: z
+					.string()
+					.min(
+						10,
+						"La description du personnage doit contenir au moins 10 caractères"
+					),
+				photo: z
+					.object({
+						storageBucket: z.string(),
+						storageKey: z.string(),
+					})
+					.optional(),
+			})
+		)
+		.min(1, "L'histoire doit avoir au moins 1 personnage")
+		.max(2, "L'histoire ne peut pas avoir plus de 2 personnages"),
 });

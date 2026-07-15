@@ -2,6 +2,12 @@ export interface CreateStoryPayload {
 	id: string;
 	title: string;
 	description: string;
+	characters: Array<{
+		id: string;
+		name: string;
+		description: string;
+		photo?: { storageBucket: string; storageKey: string };
+	}>;
 }
 
 export async function createStory(payload: CreateStoryPayload) {

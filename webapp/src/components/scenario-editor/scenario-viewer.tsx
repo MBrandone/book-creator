@@ -14,14 +14,12 @@ type ScenarioViewerProps = {
 		scene_type: string;
 		description: string;
 	}>;
-	onScenesUpdated: () => void;
 	onImagesGenerationStarted: () => void;
 };
 
 export function ScenarioViewer({
 	storyId,
 	scenes,
-	onScenesUpdated,
 	onImagesGenerationStarted,
 }: ScenarioViewerProps) {
 	const [editingSceneId, setEditingSceneId] = useState<string | null>(null);
@@ -46,7 +44,6 @@ export function ScenarioViewer({
 							isEditing={editingSceneId === scene.id}
 							onEditClick={() => setEditingSceneId(scene.id)}
 							onCancelClick={() => setEditingSceneId(null)}
-							onSceneUpdated={onScenesUpdated}
 						/>
 					))}
 			</div>

@@ -5,10 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-	type CreateCharacterPayload,
-	createCharacter,
-} from "@/app/_app-http-requests/create-character";
 import { createStory } from "@/app/_app-http-requests/create-story";
 import { fetchStatus } from "@/app/_app-http-requests/fetch-status";
 import { fetchStoryData } from "@/app/_app-http-requests/fetch-story-data";
@@ -27,151 +23,122 @@ import { Input } from "@/components/shadcn-ui/input";
 import { Label } from "@/components/shadcn-ui/label";
 import { Progress } from "@/components/shadcn-ui/progress";
 import { Textarea } from "@/components/shadcn-ui/textarea";
+import { StoryDescriptionField } from "../../components/story-description-field/story-description-field";
 
 const STORY_STATUS_POLLING_INTERVAL = 5000;
+const MAX_CHARACTERS = 2;
 
 export default function CreateStoryPage() {
 	const router = useRouter();
-	const [title, setTitle] = useState("");
-	const [description, setDescription] = useState("");
-	const [storyId, setStoryId] = useState<string>("");
+
+	const [characters, setCharacters] = useState<CharacterDraft[]>([]);
 	const [characterName, setCharacterName] = useState("");
 	const [characterDescription, setCharacterDescription] = useState("");
-	const [characters, setCharacters] = useState<
-		Array<{
-			id: string;
-			name: string;
-			description: string;
-			photoUrl?: string | null;
-		}>
-	>([]);
-	const [showCharacterForm, setShowCharacterForm] = useState(false);
-	const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
-	const [isGeneratingImages, setIsGeneratingImages] = useState(false);
 	const [photoData, setPhotoData] = useState<{
 		storageKey: string;
 		storageBucket: string;
 		previewUrl: string;
 	} | null>(null);
+	const [showCharacterForm, setShowCharacterForm] = useState(true);
 
-	const storyMutation = useMutation({
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
+
+	const [storyId, setStoryId] = useState<string>("");
+	const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+
+	const characterNames = characters.map((character) => character.name);
+	const canAddMoreCharacters = characters.length < MAX_CHARACTERS;
+	const hasEnoughCharacters = characters.length >= 1;
+	const isDescriptionValid =
+		description.trim().length >= 10 && description.length <= 2000;
+	const isTitleValid = title.trim().length >= 3;
+	const canSubmit = hasEnoughCharacters && isDescriptionValid && isTitleValid;
+
+	const createStoryMutation = useMutation({
 		mutationFn: createStory,
 		onSuccess: (_, variables) => {
-			setStoryId(variables.id);
-			setShowCharacterForm(true);
-			setTitle("");
-			setDescription("");
+			const createdStoryId = variables.id;
+			setStoryId(createdStoryId);
+			generateScenarioMutation.mutate(createdStoryId);
 		},
-	});
-
-	const handleStorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		const id = crypto.randomUUID();
-
-		storyMutation.mutate({
-			id,
-			title,
-			description,
-		});
-	};
-
-	const characterMutation = useMutation({
-		mutationFn: ({
-			storyId,
-			payload,
-		}: {
-			storyId: string;
-			payload: CreateCharacterPayload;
-		}) => createCharacter(storyId, payload),
-		onSuccess: (_, variables) => {
-			const newCharacter = variables.payload.characters[0];
-			setCharacters((prev) => [
-				...prev,
-				{ ...newCharacter, photoUrl: photoData?.previewUrl || null },
-			]);
-			setCharacterName("");
-			setCharacterDescription("");
-			setPhotoData(null);
-			setShowCharacterForm(false);
-		},
-	});
-
-	const handleCharacterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		if (!storyId) return;
-
-		const characterId = crypto.randomUUID();
-
-		characterMutation.mutate({
-			storyId,
-			payload: {
-				characters: [
-					{
-						id: characterId,
-						name: characterName,
-						description: characterDescription,
-						photo: photoData
-							? {
-									storageKey: photoData.storageKey,
-									storageBucket: photoData.storageBucket,
-								}
-							: undefined,
-					},
-				],
-			},
-		});
-	};
-
-	const { data: statusData } = useQuery({
-		queryKey: ["story-status", storyId],
-		queryFn: () => fetchStatus(storyId),
-		enabled: (isGeneratingScenario || isGeneratingImages) && !!storyId,
-		refetchInterval: STORY_STATUS_POLLING_INTERVAL,
-		refetchIntervalInBackground: true,
-	});
-
-	const { data: storyData, refetch: refetchStoryData } = useQuery({
-		queryKey: ["story-data", storyId],
-		queryFn: () => fetchStoryData(storyId),
-		enabled:
-			!!storyId &&
-			(statusData?.status === "completed" || statusData?.status === "pending"),
 	});
 
 	const generateScenarioMutation = useMutation({
 		mutationFn: generateScenario,
-		onSuccess: () => {
-			setIsGeneratingScenario(true);
-		},
 	});
 
-	const handleAddAnotherCharacter = () => {
+	const { data: statusData } = useQuery({
+		queryKey: ["story-status", storyId],
+		queryFn: () => fetchStatus(storyId),
+		enabled: isGeneratingImages && !!storyId,
+		refetchInterval: STORY_STATUS_POLLING_INTERVAL,
+		refetchIntervalInBackground: true,
+	});
+
+	const { data: storyData } = useQuery({
+		queryKey: ["story-data", storyId],
+		queryFn: () => fetchStoryData(storyId),
+		enabled: !!storyId && generateScenarioMutation.isSuccess,
+	});
+
+	function resetAddCharacterForm() {
 		setCharacterName("");
 		setCharacterDescription("");
 		setPhotoData(null);
+	}
+
+	const handleAddCharacter = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		const newCharacter: CharacterDraft = {
+			id: crypto.randomUUID(),
+			name: characterName,
+			description: characterDescription,
+			photoStorageKey: photoData?.storageKey,
+			photoStorageBucket: photoData?.storageBucket,
+			previewUrl: photoData?.previewUrl,
+		};
+
+		setCharacters((previous) => [...previous, newCharacter]);
+		resetAddCharacterForm();
+		setShowCharacterForm(false);
+	};
+
+	const handleAddAnotherCharacter = () => {
+		resetAddCharacterForm();
 		setShowCharacterForm(true);
 	};
 
-	const handleGenerateScenario = () => {
-		if (!storyId) return;
-		generateScenarioMutation.mutate(storyId);
+	const handleCreateStory = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		if (!canSubmit) return;
+
+		const storyPayload = {
+			id: crypto.randomUUID(),
+			title,
+			description,
+			characters: characters.map((character) => ({
+				id: character.id,
+				name: character.name,
+				description: character.description,
+				photo:
+					character.photoStorageKey && character.photoStorageBucket
+						? {
+								storageKey: character.photoStorageKey,
+								storageBucket: character.photoStorageBucket,
+							}
+						: undefined,
+			})),
+		};
+
+		createStoryMutation.mutate(storyPayload);
 	};
 
 	const handleImagesGenerationStarted = () => {
 		setIsGeneratingImages(true);
 	};
-
-	const handleScenesUpdated = () => {
-		refetchStoryData();
-	};
-
-	useEffect(() => {
-		if (isGeneratingScenario && storyData && storyData.scenes.length === 4) {
-			setIsGeneratingScenario(false);
-		}
-	}, [isGeneratingScenario, storyData]);
 
 	useEffect(() => {
 		if (
@@ -187,6 +154,12 @@ export default function CreateStoryPage() {
 		}
 	}, [isGeneratingImages, statusData, storyId, router]);
 
+	const isCreating =
+		createStoryMutation.isPending || generateScenarioMutation.isPending;
+	const isScenarioGenerating = generateScenarioMutation.isPending;
+	const creationError =
+		createStoryMutation.error || generateScenarioMutation.error;
+
 	return (
 		<div className="container mx-auto py-10 max-w-2xl px-8 md:px-0">
 			<div className="mb-8 flex justify-between items-center">
@@ -201,238 +174,185 @@ export default function CreateStoryPage() {
 			</div>
 
 			{!storyId && (
-				<Card>
-					<CardHeader>
-						<CardTitle>Nouvelle Histoire</CardTitle>
-						<CardDescription>
-							Entrez le nom et la description de votre histoire
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<form onSubmit={handleStorySubmit} className="space-y-6">
-							{/* Message d'erreur */}
-							{storyMutation.isError && (
-								<div className="p-4 rounded-md bg-red-50 border border-red-200">
-									<p className="text-sm font-medium text-red-800">
-										✗ {storyMutation.error.message}
-									</p>
-								</div>
-							)}
+				<div className="space-y-6">
+					{/* Étape 1 : Personnages */}
+					{showCharacterForm && (
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									{characters.length === 0
+										? "Ajouter un personnage"
+										: "Ajouter un autre personnage"}
+								</CardTitle>
+								<CardDescription>
+									Créez les personnages de votre histoire ({characters.length}/
+									{MAX_CHARACTERS})
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<form onSubmit={handleAddCharacter} className="space-y-6">
+									<div className="space-y-2">
+										<Label htmlFor="character-name">Nom du personnage *</Label>
+										<Input
+											id="character-name"
+											type="text"
+											placeholder="Ex: Alice"
+											value={characterName}
+											onChange={(e) => setCharacterName(e.target.value)}
+											required
+											minLength={3}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Minimum 3 caractères
+										</p>
+									</div>
 
-							<div className="space-y-2">
-								<Label htmlFor="title">Nom de l'histoire *</Label>
-								<Input
-									id="title"
-									type="text"
-									placeholder="Ex: L'Aventure Magique"
-									value={title}
-									onChange={(e) => setTitle(e.target.value)}
-									required
-									minLength={3}
-									disabled={storyMutation.isPending}
-								/>
-								<p className="text-xs text-muted-foreground">
-									Minimum 3 caractères
-								</p>
-							</div>
+									<div className="space-y-2">
+										<Label htmlFor="character-description">
+											Description du personnage *
+										</Label>
+										<Textarea
+											id="character-description"
+											placeholder="Décrivez le personnage..."
+											value={characterDescription}
+											onChange={(e) => setCharacterDescription(e.target.value)}
+											required
+											minLength={10}
+											rows={4}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Minimum 10 caractères
+										</p>
+									</div>
 
-							<div className="space-y-2">
-								<Label htmlFor="description">Description *</Label>
-								<Textarea
-									id="description"
-									placeholder="Décrivez votre histoire..."
-									value={description}
-									onChange={(e) => setDescription(e.target.value)}
-									required
-									minLength={10}
-									rows={6}
-									disabled={storyMutation.isPending}
-								/>
-								<p className="text-xs text-muted-foreground">
-									Minimum 10 caractères
-								</p>
-							</div>
+									<CharacterPhotoUpload
+										onPhotoUploaded={setPhotoData}
+										onPhotoRemoved={() => setPhotoData(null)}
+									/>
 
-							<Button
-								type="submit"
-								className="w-full"
-								disabled={storyMutation.isPending}
-							>
-								{storyMutation.isPending
-									? "Création en cours..."
-									: "Créer l'histoire"}
-							</Button>
-						</form>
-					</CardContent>
-				</Card>
-			)}
+									<Button type="submit" className="w-full">
+										Ajouter le personnage
+									</Button>
+								</form>
+							</CardContent>
+						</Card>
+					)}
 
-			{/* Message de succès de la création de l'histoire */}
-			{storyId && (
-				<div className="mb-6 p-4 rounded-md bg-green-50 border border-green-200">
-					<p className="text-sm font-medium text-green-800">
-						✓ Histoire créée avec succès !
-					</p>
-				</div>
-			)}
-
-			{/* Formulaire de création de personnage */}
-			{storyId && showCharacterForm && (
-				<Card className="mb-6">
-					<CardHeader>
-						<CardTitle>Ajouter un Personnage</CardTitle>
-						<CardDescription>
-							Créez un personnage pour votre histoire ({characters.length}/2)
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<form onSubmit={handleCharacterSubmit} className="space-y-6">
-							{characterMutation.isError && (
-								<div className="p-4 rounded-md bg-red-50 border border-red-200">
-									<p className="text-sm font-medium text-red-800">
-										✗ {characterMutation.error.message}
-									</p>
-								</div>
-							)}
-
-							<div className="space-y-2">
-								<Label htmlFor="character-name">Nom du personnage *</Label>
-								<Input
-									id="character-name"
-									type="text"
-									placeholder="Ex: Alice"
-									value={characterName}
-									onChange={(e) => setCharacterName(e.target.value)}
-									required
-									minLength={3}
-									disabled={characterMutation.isPending}
-								/>
-								<p className="text-xs text-muted-foreground">
-									Minimum 3 caractères
-								</p>
-							</div>
-
-							<div className="space-y-2">
-								<Label htmlFor="character-description">
-									Description du personnage *
-								</Label>
-								<Textarea
-									id="character-description"
-									placeholder="Décrivez le personnage..."
-									value={characterDescription}
-									onChange={(e) => setCharacterDescription(e.target.value)}
-									required
-									minLength={10}
-									rows={4}
-									disabled={characterMutation.isPending}
-								/>
-								<p className="text-xs text-muted-foreground">
-									Minimum 10 caractères
-								</p>
-							</div>
-
-							<CharacterPhotoUpload
-								onPhotoUploaded={setPhotoData}
-								onPhotoRemoved={() => setPhotoData(null)}
-							/>
-
-							<Button
-								type="submit"
-								className="w-full"
-								disabled={characterMutation.isPending}
-							>
-								{characterMutation.isPending
-									? "Création en cours..."
-									: "Ajouter le personnage"}
-							</Button>
-						</form>
-					</CardContent>
-				</Card>
-			)}
-
-			{/* Message de succès */}
-			{storyId && !showCharacterForm && characters.length > 0 && (
-				<div className="space-y-4">
-					<div className="p-4 rounded-md bg-green-50 border border-green-200">
-						<p className="text-sm font-medium text-green-800">
-							✓ Personnage créé avec succès !
-						</p>
-					</div>
-
-					{/* Afficher la liste des personnages créés */}
-					<Card className="mb-6">
-						<CardHeader>
-							<CardTitle>Personnages créés ({characters.length}/2)</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-4">
-								{characters.map((character) => (
-									<div key={character.id} className="p-4 border rounded-md">
-										<div className="flex gap-4">
-											{character.photoUrl && (
-												<div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-													<Image
-														src={character.photoUrl}
-														alt={character.name}
-														className="w-full h-full object-cover"
-														width={1000}
-														height={1000}
-													/>
-												</div>
-											)}
-											<div className="flex-1">
-												<h3 className="font-semibold text-lg">
-													{character.name}
-												</h3>
-												<p className="text-sm text-muted-foreground mt-1">
-													{character.description}
-												</p>
-												{character.photoUrl && (
-													<p className="text-xs text-green-600 mt-2">
-														✓ Photo de référence ajoutée
-													</p>
+					{/* Liste des personnages ajoutés */}
+					{characters.length > 0 && !showCharacterForm && (
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									Personnages ({characters.length}/{MAX_CHARACTERS})
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									{characters.map((character) => (
+										<div key={character.id} className="p-4 border rounded-md">
+											<div className="flex gap-4">
+												{character.previewUrl && (
+													<div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+														<Image
+															src={character.previewUrl}
+															alt={character.name}
+															className="w-full h-full object-cover"
+															width={80}
+															height={80}
+														/>
+													</div>
 												)}
+												<div className="flex-1">
+													<h3 className="font-semibold text-lg">
+														{character.name}
+													</h3>
+													<p className="text-sm text-muted-foreground mt-1">
+														{character.description}
+													</p>
+													{character.previewUrl && (
+														<p className="text-xs text-green-600 mt-2">
+															✓ Photo de référence ajoutée
+														</p>
+													)}
+												</div>
 											</div>
 										</div>
+									))}
+								</div>
+
+								{canAddMoreCharacters && (
+									<Button
+										type="button"
+										variant="outline"
+										className="w-full mt-4"
+										onClick={handleAddAnotherCharacter}
+									>
+										Ajouter un autre personnage
+									</Button>
+								)}
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Étape 2 & 3 : Description + Titre (visible dès qu'un personnage est ajouté) */}
+					{hasEnoughCharacters && !showCharacterForm && (
+						<form onSubmit={handleCreateStory} className="space-y-6">
+							<Card>
+								<CardHeader>
+									<CardTitle>Votre histoire</CardTitle>
+									<CardDescription>
+										Décrivez votre histoire, puis donnez-lui un titre
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-6">
+									<StoryDescriptionField
+										value={description}
+										onChange={setDescription}
+										characterNames={characterNames}
+										disabled={isCreating}
+									/>
+
+									<div className="space-y-2">
+										<Label htmlFor="title">Titre de l'histoire *</Label>
+										<Input
+											id="title"
+											type="text"
+											placeholder="Ex: L'Aventure Magique"
+											value={title}
+											onChange={(e) => setTitle(e.target.value)}
+											required
+											minLength={3}
+											disabled={isCreating}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Minimum 3 caractères
+										</p>
 									</div>
-								))}
-							</div>
-						</CardContent>
-					</Card>
 
-					{/* Bouton pour ajouter un autre personnage (seulement si moins de 2) */}
-					{characters.length < 2 && (
-						<Button onClick={handleAddAnotherCharacter} className="w-full">
-							Ajouter un autre personnage
-						</Button>
-					)}
+									{creationError && (
+										<div className="p-4 rounded-md bg-red-50 border border-red-200">
+											<p className="text-sm font-medium text-red-800">
+												✗ {creationError.message}
+											</p>
+										</div>
+									)}
 
-					{/* Bouton pour générer le scénario (apparaît quand 2 personnages sont créés) */}
-					{characters.length === 2 && !isGeneratingScenario && !storyData && (
-						<Button
-							onClick={handleGenerateScenario}
-							className="w-full"
-							disabled={generateScenarioMutation.isPending}
-						>
-							{generateScenarioMutation.isPending
-								? "Lancement..."
-								: "Générer le scénario"}
-						</Button>
-					)}
-
-					{/* Message d'erreur de génération du scénario */}
-					{generateScenarioMutation.isError && (
-						<div className="p-4 rounded-md bg-red-50 border border-red-200">
-							<p className="text-sm font-medium text-red-800">
-								✗ {generateScenarioMutation.error.message}
-							</p>
-						</div>
+									<Button
+										type="submit"
+										className="w-full"
+										disabled={!canSubmit || isCreating}
+									>
+										{isCreating ? "Création en cours..." : "Créer l'histoire"}
+									</Button>
+								</CardContent>
+							</Card>
+						</form>
 					)}
 				</div>
 			)}
 
-			{/* Section de génération du scénario en cours */}
-			{isGeneratingScenario && (
+			{/* Génération du scénario en cours */}
+			{isScenarioGenerating && (
 				<Card>
 					<CardHeader>
 						<CardTitle>Génération du scénario en cours...</CardTitle>
@@ -455,10 +375,11 @@ export default function CreateStoryPage() {
 				</Card>
 			)}
 
-			{/* Affichage du scénario avec possibilité d'édition */}
+			{/* Scénario généré — édition */}
 			{storyData &&
 				storyData.scenes.length === 4 &&
 				!storyData.scenes[0].image_url &&
+				!isScenarioGenerating &&
 				!isGeneratingImages && (
 					<div className="space-y-6">
 						<div className="p-4 rounded-md bg-green-50 border border-green-200">
@@ -479,7 +400,6 @@ export default function CreateStoryPage() {
 								<ScenarioViewer
 									storyId={storyId}
 									scenes={storyData.scenes}
-									onScenesUpdated={handleScenesUpdated}
 									onImagesGenerationStarted={handleImagesGenerationStarted}
 								/>
 							</CardContent>
@@ -487,7 +407,7 @@ export default function CreateStoryPage() {
 					</div>
 				)}
 
-			{/* Section de génération des images en cours */}
+			{/* Génération des images en cours */}
 			{isGeneratingImages && (
 				<Card>
 					<CardHeader>
@@ -519,4 +439,13 @@ export default function CreateStoryPage() {
 			</div>
 		</div>
 	);
+}
+
+interface CharacterDraft {
+	id: string;
+	name: string;
+	description: string;
+	photoStorageKey?: string;
+	photoStorageBucket?: string;
+	previewUrl?: string;
 }

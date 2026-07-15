@@ -17,17 +17,7 @@ test.describe("Create a Story", () => {
 			page.getByRole("heading", { name: /Créer une histoire/i })
 		).toBeVisible();
 
-		const storyTitle = `Test Story ${Date.now()}`;
-		const storyDescription =
-			"Une histoire de test générée automatiquement pour valider le parcours complet";
-
-		await page.getByLabel(/Nom de l'histoire/i).fill(storyTitle);
-		await page.getByLabel(/Description/i).fill(storyDescription);
-		await page.getByRole("button", { name: /Créer l'histoire/i }).click();
-
-		await expect(page.getByText(/Histoire créée avec succès/i)).toBeVisible();
-
-		await expect(page.getByText(/Ajouter un Personnage/i)).toBeVisible();
+		await expect(page.getByText(/Ajouter un personnage/i)).toBeVisible();
 
 		await page.getByLabel(/Nom du personnage/i).fill("Alice");
 		await page
@@ -42,15 +32,12 @@ test.describe("Create a Story", () => {
 
 		await page.getByRole("button", { name: /Ajouter le personnage/i }).click();
 
-		await expect(page.getByText(/Personnage créé avec succès/i)).toBeVisible();
-		await expect(page.getByText("Alice")).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Alice" })).toBeVisible();
 		await expect(page.getByText(/Photo de référence ajoutée/i)).toBeVisible();
 
 		await page
 			.getByRole("button", { name: /Ajouter un autre personnage/i })
 			.click();
-
-		await expect(page.getByText(/Ajouter un Personnage/i)).toBeVisible();
 
 		await page.getByLabel(/Nom du personnage/i).fill("Bob");
 		await page
@@ -59,14 +46,18 @@ test.describe("Create a Story", () => {
 
 		await page.getByRole("button", { name: /Ajouter le personnage/i }).click();
 
-		await expect(page.getByText(/Personnage créé avec succès/i)).toBeVisible();
-		await expect(page.getByText("Bob")).toBeVisible();
-		await expect(page.getByText("Alice")).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Bob" })).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Alice" })).toBeVisible();
 
-		await expect(
-			page.getByRole("button", { name: /Générer le scénario/i })
-		).toBeVisible();
-		await page.getByRole("button", { name: /Générer le scénario/i }).click();
+		const storyDescription =
+			"L'histoire se passe dans une forêt enchantée pleine de magie et de mystères. L'ambiance est joyeuse et colorée.";
+
+		await page.getByLabel(/Description/i).fill(storyDescription);
+
+		const storyTitle = `Test Story ${Date.now()}`;
+		await page.getByLabel(/Titre de l'histoire/i).fill(storyTitle);
+
+		await page.getByRole("button", { name: /Créer l'histoire/i }).click();
 
 		await expect(
 			page.getByText(/Génération du scénario en cours/i)

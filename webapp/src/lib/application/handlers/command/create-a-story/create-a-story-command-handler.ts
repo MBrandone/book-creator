@@ -1,10 +1,16 @@
-import { Story } from "@/lib/domain/story";
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import { Story } from "@/lib/domain/aggregates/story";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 
 export type CreateStoryCommand = {
 	id: string;
 	title: string;
 	description: string;
+	characters: Array<{
+		id: string;
+		name: string;
+		description: string;
+		photo?: { storageBucket: string; storageKey: string };
+	}>;
 };
 
 export class CreateAStoryCommandHandler {
@@ -15,6 +21,7 @@ export class CreateAStoryCommandHandler {
 			id: command.id,
 			title: command.title,
 			description: command.description,
+			characters: command.characters,
 		});
 
 		await this.storyRepository.save(story);

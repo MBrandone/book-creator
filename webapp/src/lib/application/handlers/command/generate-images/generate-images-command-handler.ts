@@ -1,4 +1,4 @@
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import type { StoryImagesGeneratorService } from "@/lib/story-generator-service/story-images-generator-service";
 
 export class GenerateImagesCommandHandler {

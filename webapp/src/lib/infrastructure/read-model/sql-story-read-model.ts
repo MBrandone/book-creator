@@ -1,9 +1,9 @@
 import { env } from "@/config/env";
 import { db } from "@/lib/infrastructure/db";
-import type { StoryDetailsView } from "../../domain/story-details-view";
-import type { StoryListView } from "../../domain/story-list-view";
-import type { StoryReadModel } from "../../domain/story-read-model";
-import type { StoryStatusView } from "../../domain/story-status-view";
+import type { StoryDetailsView } from "../../domain/read-models/story-details-view";
+import type { StoryListView } from "../../domain/read-models/story-list-view";
+import type { StoryReadModel } from "../../domain/read-models/story-read-model";
+import type { StoryStatusView } from "../../domain/read-models/story-status-view";
 
 export class SqlStoryReadModel implements StoryReadModel {
 	constructor(

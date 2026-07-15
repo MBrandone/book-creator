@@ -1,4 +1,4 @@
-import type { StoryRepository } from "@/lib/domain/story-repository";
+import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 
 export class UpdateSceneDescriptionCommandHandler {
 	constructor(private readonly storyRepository: StoryRepository) {}

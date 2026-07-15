@@ -1,17 +1,12 @@
 # Todo
 - [PARCOURS CREATION] Ajouter une image de couverture
-- [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
-  - Quel élément de description de l'histoire donné ?
-  - Quel élément de description des personnages donner ? Comment fournir un bon personnage ?
+- [PARCOURS CREATION] Ajouter une vraie page de transition et d'attente pendant la génération
 - [AMELIORATION GENERATION] Mettre une photo de couverture servant de base à la suite
-  - Les générations de photos se basent sur la première génération.
+- [AMELIORATION GENERATION] Les générations de photos se basent sur la première génération.
 - [BUG] La dernière scène n'arrive pas à être crée
-- [PARCOURS CREATION] Faire une première génération avec la tête des personnages
-  - et proposer à l'utilisateur de changer si besoin
 - [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
 - [TECH] Comment combattre l'injection de prompt ?
 - [TECH] Avoir un rate limiter applicatif
-- [TECH] CI/CD
 - [TECH] Test d'archi applicative
 - [AGENTIC] Idées d'agents
   - Business expert with DDD domain modelling
@@ -28,6 +23,9 @@
 - [ACHAT] API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
 - [ACHAT] Paiement et Livraison
 ============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
+- [PARCOURS CREATION] Faire une première génération avec la tête des personnages
+  - et proposer à l'utilisateur de changer si besoin
+- [TECH] CI/CD
 - [TECH] Script pour nettoyer la base de données
 - Arrêter le promise.then pour générer une histoire et faire une vraie queue rejouable pour la creation d'histoire
   - redis-mq pour lancer une génération
@@ -46,6 +44,22 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
+- [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
+  - Quel élément de description de l'histoire donné ?
+  - Quel élément de description des personnages donner ? Comment fournir un bon personnage ?
+- Proposition
+  - On met les personnages en premier
+  - Avoir la description + un bouton "aidez-moi à décrire mon histoire"
+  - Le clique sur ce bouton met un texte de template dans la description
+  - Le template est à définir : 
+      1. "L'histoire se passe..." [forêt enchantée / ville futuriste / sous l'océan / ...] + image
+      2. "L'ambiance générale est..." [joyeuse / mystérieuse / apaisante / ...] + palette
+      3. "Les couleurs dominantes sont..." [picker visuel avec 3 couleurs max]
+      4. "Le style de dessin ressemble à..." [3-4 exemples d'illustrations]
+      5. "Les détails importants" [liste guidée : vêtements, accessoires, environnement]
+      6. "Quelle émotion doit ressentir l'enfant en regardant vos images et votre histoire ?"
+      7. "Quels détails vont faire sourire ton enfant ?"
+      8. "Quelle est la chose la plus importante à voir en premier ?"
 
 # Done
 - [X] Déployer sur Vercel et Supabase

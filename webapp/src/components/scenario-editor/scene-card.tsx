@@ -24,7 +24,6 @@ type SceneCardProps = {
 	isEditing: boolean;
 	onEditClick: () => void;
 	onCancelClick: () => void;
-	onSceneUpdated: () => void;
 };
 
 export function SceneCard({
@@ -33,16 +32,18 @@ export function SceneCard({
 	isEditing,
 	onEditClick,
 	onCancelClick,
-	onSceneUpdated,
 }: SceneCardProps) {
+	const [committedDescription, setCommittedDescription] = useState(
+		scene.description
+	);
 	const [localDescription, setLocalDescription] = useState(scene.description);
 	const [error, setError] = useState<string | null>(null);
 
 	const updateSceneMutation = useMutation({
 		mutationFn: (description: string) =>
 			updateScene(storyId, scene.id, description),
-		onSuccess: () => {
-			onSceneUpdated();
+		onSuccess: (_, savedDescription) => {
+			setCommittedDescription(savedDescription);
 			onCancelClick();
 		},
 		onError: (err: Error) => {
@@ -72,7 +73,7 @@ export function SceneCard({
 	};
 
 	const handleCancel = () => {
-		setLocalDescription(scene.description);
+		setLocalDescription(committedDescription);
 		setError(null);
 		onCancelClick();
 	};
@@ -85,7 +86,7 @@ export function SceneCard({
 					<CardDescription>{scene.scene_type}</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<p className="text-sm">{scene.description}</p>
+					<p className="text-sm">{committedDescription}</p>
 					<Button onClick={onEditClick} variant="secondary">
 						Éditer
 					</Button>

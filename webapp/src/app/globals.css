@@ -89,6 +89,7 @@
   /* Fonts */
   --font-sans: var(--font-inter);
   --font-heading: var(--font-jakarta);
+  --font-playful: var(--font-fredoka);
   
   /* Breakpoints responsives personnalisés */
   --breakpoint-xs: 375px;

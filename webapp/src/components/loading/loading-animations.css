@@ -1,0 +1,201 @@
+@keyframes dream-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes dream-float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-5%);
+	}
+}
+
+@keyframes dream-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.09);
+	}
+}
+
+@keyframes orbit {
+	from {
+		transform: rotate(var(--orbit-start, 0deg));
+	}
+	to {
+		transform: rotate(calc(var(--orbit-start, 0deg) + 360deg));
+	}
+}
+
+@keyframes orbit-counter {
+	from {
+		transform: rotate(calc(var(--orbit-start, 0deg) * -1));
+	}
+	to {
+		transform: rotate(calc(var(--orbit-start, 0deg) * -1 - 360deg));
+	}
+}
+
+@keyframes twinkle {
+	0% {
+		opacity: 0;
+		transform: scale(0.4);
+	}
+	15%,
+	70% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	85%,
+	100% {
+		opacity: 0;
+		transform: scale(0.4);
+	}
+}
+
+@keyframes dream-message-rise {
+	0% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	25% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+	75% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+}
+
+.dream-cloud-float {
+	animation: dream-float 4s ease-in-out infinite;
+}
+
+.dream-cloud-pulse {
+	animation: dream-pulse 2.6s ease-in-out infinite;
+	transform-origin: center;
+}
+
+.dream-halo-spin {
+	animation: dream-spin 24s linear infinite;
+}
+
+.dream-orbit {
+	animation: orbit var(--orbit-duration, 12s) linear infinite;
+}
+
+.dream-orbit-reverse {
+	animation-direction: reverse;
+}
+
+.dream-orbit-counter {
+	animation: orbit-counter var(--orbit-duration, 12s) linear infinite;
+}
+
+.dream-orbit-reverse .dream-orbit-counter {
+	animation-direction: reverse;
+}
+
+.dream-orbit-object {
+	animation: twinkle var(--twinkle-duration, 8s) ease-in-out infinite both;
+	animation-delay: var(--twinkle-delay, 0s);
+}
+
+.dream-message {
+	animation: dream-message-rise 2.5s ease-in-out infinite;
+}
+
+@keyframes comic-appear {
+	0% {
+		opacity: 0;
+		transform: rotate(var(--comic-tilt, -8deg)) scale(0.2);
+	}
+	70% {
+		opacity: 1;
+		transform: rotate(var(--comic-tilt, -8deg)) scale(1.15);
+	}
+	100% {
+		opacity: 1;
+		transform: rotate(var(--comic-tilt, -8deg)) scale(1);
+	}
+}
+
+@keyframes comic-disappear {
+	from {
+		opacity: 1;
+		transform: rotate(var(--comic-tilt, -8deg)) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: rotate(var(--comic-tilt, -8deg)) scale(1);
+	}
+}
+
+.comic-word {
+	animation:
+		comic-appear var(--comic-appear-duration, 0.45s) ease-out forwards,
+		comic-disappear var(--comic-disappear-duration, 1.5s) ease-out
+			var(--comic-disappear-delay, 1s) forwards;
+}
+
+.comic-burst {
+	clip-path: polygon(
+		50% 0%,
+		61% 20%,
+		83% 12%,
+		78% 35%,
+		100% 40%,
+		82% 55%,
+		96% 76%,
+		72% 73%,
+		68% 96%,
+		50% 82%,
+		32% 96%,
+		28% 73%,
+		4% 76%,
+		18% 55%,
+		0% 40%,
+		22% 35%,
+		17% 12%,
+		39% 20%
+	);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dream-cloud-float,
+	.dream-cloud-pulse,
+	.dream-halo-spin,
+	.dream-orbit,
+	.dream-orbit-counter,
+	.dream-orbit-object,
+	.dream-message,
+	.comic-word {
+		animation: none;
+	}
+
+	.dream-orbit-object {
+		opacity: 1;
+	}
+
+	.comic-word {
+		opacity: 1;
+		transform: rotate(var(--comic-tilt, -8deg));
+	}
+}

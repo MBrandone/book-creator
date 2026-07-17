@@ -43,7 +43,6 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [PARCOURS CREATION] Ajouter une image de couverture
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -98,3 +97,6 @@
     - la commande de test soit passé
 - [AMELIORATION GENERATION] Guider l'utilisateur afin qu'il renseigne les bons trucs
   - Un bouton "Aidez moi à faire mon histoire pour guider l'utilisateur"
+- [PARCOURS CREATION] Ajouter une image de couverture
+- [PARCOURS CREATION] Ajouter une vraie page de transition et d'attente pendant la génération
+  - Dans le style de l'animation de addy dans sa formation

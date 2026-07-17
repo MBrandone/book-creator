@@ -10,6 +10,8 @@ import { fetchStatus } from "@/app/_app-http-requests/fetch-status";
 import { fetchStoryData } from "@/app/_app-http-requests/fetch-story-data";
 import { generateScenario } from "@/app/_app-http-requests/generate-scenario";
 import { CharacterPhotoUpload } from "@/components/character-photo-upload";
+import { ComicWordsLoader } from "@/components/loading/comic-words-loader";
+import { DreamCloudLoader } from "@/components/loading/dream-cloud-loader";
 import { ScenarioViewer } from "@/components/scenario-editor/scenario-viewer";
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -21,9 +23,8 @@ import {
 } from "@/components/shadcn-ui/card";
 import { Input } from "@/components/shadcn-ui/input";
 import { Label } from "@/components/shadcn-ui/label";
-import { Progress } from "@/components/shadcn-ui/progress";
 import { Textarea } from "@/components/shadcn-ui/textarea";
-import { StoryDescriptionField } from "../../components/story-description-field/story-description-field";
+import { StoryDescriptionField } from "@/components/story-description-field/story-description-field";
 
 const STORY_STATUS_POLLING_INTERVAL = 5000;
 const MAX_CHARACTERS = 2;
@@ -361,16 +362,8 @@ export default function CreateStoryPage() {
 							histoire
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span>⏳ Génération des scènes...</span>
-							</div>
-							<Progress value={undefined} className="w-full" />
-						</div>
-						<p className="text-xs text-muted-foreground text-center">
-							Vérification automatique toutes les 10 secondes...
-						</p>
+					<CardContent>
+						<ComicWordsLoader />
 					</CardContent>
 				</Card>
 			)}
@@ -417,17 +410,8 @@ export default function CreateStoryPage() {
 							serez automatiquement redirigé une fois la génération terminée.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-2">
-							<div className="flex justify-between text-sm">
-								<span>Statut: {statusData?.status || "initialisation"}</span>
-								<span>⏳</span>
-							</div>
-							<Progress value={undefined} className="w-full" />
-						</div>
-						<p className="text-xs text-muted-foreground text-center">
-							Vérification automatique toutes les 10 secondes...
-						</p>
+					<CardContent>
+						<DreamCloudLoader />
 					</CardContent>
 				</Card>
 			)}

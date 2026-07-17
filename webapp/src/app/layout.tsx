@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Fredoka, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/app/query-provider";
 import { Footer } from "@/components/footer";
@@ -16,6 +16,12 @@ const inter = Inter({
 	variable: "--font-inter",
 	subsets: ["latin"],
 	weight: ["300", "400", "500", "600", "700"],
+});
+
+const fredoka = Fredoka({
+	variable: "--font-fredoka",
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -45,7 +51,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="fr"
-			className={`${plusJakartaSans.variable} ${inter.variable} h-full antialiased`}
+			className={`${plusJakartaSans.variable} ${inter.variable} ${fredoka.variable} h-full antialiased`}
 		>
 			<head>
 				<link rel="apple-touch-icon" href="/icons/icon-180-apple.png" />

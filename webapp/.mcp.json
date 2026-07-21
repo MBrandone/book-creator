@@ -1,0 +1,15 @@
+{
+	"mcpServers": {
+		"sentry": {
+			"url": "https://mcp.sentry.dev/mcp/brandone-martins/javascript-nextjs"
+		},
+		"context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp"]
+		},
+		"playwright": {
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"]
+		}
+	}
+}

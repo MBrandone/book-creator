@@ -3,6 +3,7 @@ import type {
 	CharacterPhotoRepository,
 } from "@/lib/domain/repositories/character-photo-repository";
 import { db } from "@/lib/infrastructure/db";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { Storage } from "@/lib/infrastructure/storage/storage";
 
 export class SqlCharacterPhotoRepository implements CharacterPhotoRepository {
@@ -31,14 +32,13 @@ export class SqlCharacterPhotoRepository implements CharacterPhotoRepository {
 		if (existingPhoto?.photo_storage_key) {
 			try {
 				await this.storage.deleteImages([existingPhoto.photo_storage_key]);
-				console.log(
-					`✅ Ancienne photo supprimée: ${existingPhoto.photo_storage_key}`
-				);
+				getLogger().info("Ancienne photo supprimée", {
+					key: existingPhoto.photo_storage_key,
+				});
 			} catch (error) {
-				console.error(
-					"⚠️ Erreur lors de la suppression de l'ancienne photo:",
-					error
-				);
+				getLogger().error("Erreur lors de la suppression de l'ancienne photo", {
+					error: String(error),
+				});
 			}
 		}
 

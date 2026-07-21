@@ -4,6 +4,7 @@ import { GenerateImagesCommandHandler } from "@/lib/application/handlers/command
 import { GenerationCannotBeStartedError } from "@/lib/domain/generation-cannot-be-started-error";
 import { NoCharactersError } from "@/lib/domain/no-characters-error";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
 import { getStorage } from "@/lib/infrastructure/storage/storage-factory";
 import { getSceneImageGenerator } from "@/lib/scene-image-generator/factory";
@@ -88,9 +89,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		console.error(
-			"Erreur serveur lors du lancement de la génération des images:",
-			error
+		getLogger().error(
+			"Erreur serveur lors du lancement de la génération des images",
+			{ error: String(error) }
 		);
 		return new NextResponse(null, { status: 500 });
 	}

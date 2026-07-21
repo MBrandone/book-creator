@@ -1,4 +1,5 @@
 import { env } from "@/config/env";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { AwsS3Storage } from "./aws-s3-storage";
 import { MinioStorage } from "./minio-storage";
 import type { Storage } from "./storage";
@@ -8,13 +9,11 @@ export function createStorage(): Storage {
 
 	switch (providerType) {
 		case "minio":
-			console.log("📦 Utilisation du provider MinIO natif");
+			getLogger().info("Storage provider selected", { provider: "minio" });
 			return new MinioStorage();
 
 		case "aws-s3":
-			console.log(
-				"📦 Utilisation du provider AWS S3 (compatible MinIO, Supabase, AWS S3)"
-			);
+			getLogger().info("Storage provider selected", { provider: "aws-s3" });
 			return new AwsS3Storage();
 
 		default:

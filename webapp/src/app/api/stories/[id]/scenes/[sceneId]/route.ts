@@ -6,6 +6,7 @@ import { SceneDescriptionTooLongError } from "@/lib/domain/scene-description-too
 import { SceneDescriptionTooShortError } from "@/lib/domain/scene-description-too-short-error";
 import { SceneNotFoundInStoryError } from "@/lib/domain/scene-not-found-in-story-error";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
 
 interface RouteContext {
@@ -139,7 +140,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		console.error("Erreur serveur lors de la mise à jour de la scène:", error);
+		getLogger().error("Erreur serveur lors de la mise à jour de la scène", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }

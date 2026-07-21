@@ -1,4 +1,5 @@
 import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { StoryImagesGeneratorService } from "@/lib/story-generator-service/story-images-generator-service";
 
 export class GenerateImagesCommandHandler {
@@ -14,10 +15,10 @@ export class GenerateImagesCommandHandler {
 		await this.storyRepository.save(story);
 
 		this.storyImagesGeneratorService.generate(story).catch((error) => {
-			console.error(
-				`[${storyId}] Unhandled error in background process:`,
-				error
-			);
+			getLogger().error("Unhandled error in background image generation", {
+				storyId,
+				error: String(error),
+			});
 		});
 	}
 }

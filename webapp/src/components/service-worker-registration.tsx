@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { getBrowserLogger } from "@/lib/infrastructure/logging/sentry-logger";
 
 export function ServiceWorkerRegistration() {
 	useEffect(() => {
@@ -8,13 +9,15 @@ export function ServiceWorkerRegistration() {
 			navigator.serviceWorker
 				.register("/sw.js")
 				.then((registration) => {
-					console.log(
-						"Service Worker enregistré avec succès:",
-						registration.scope
-					);
+					getBrowserLogger().info("Service Worker enregistré avec succès", {
+						scope: registration.scope,
+					});
 				})
 				.catch((error) => {
-					console.error("Échec de l'enregistrement du Service Worker:", error);
+					getBrowserLogger().error(
+						"Échec de l'enregistrement du Service Worker",
+						{ error: String(error) }
+					);
 				});
 		}
 	}, []);

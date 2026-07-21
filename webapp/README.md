@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Logging
+
+Les logs utilisent une interface `Logger` (Ports & Adapters) — jamais `console.*` directement dans le code applicatif.
+
+```ts
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
+
+getLogger().info("Événement", { key: "value" });
+getLogger().error("Erreur", { error: String(error) });
+
+// Contexte corrélé (dans un service injecté) :
+const logger = this.logger.child({ storyId });
+logger.info("Génération démarrée");
+```
+
+| Environnement | Adapter actif |
+|---|---|
+| `test` | `NoopLogger` — silencieux (forcé par `.env.test`) |
+| `development` | `ConsoleLogger` — sortie lisible |
+| `production` | `SentryLogger` — logs structurés vers Sentry |
+
+`console.*` est interdit dans `src/` par la règle Biome `noConsole` — tout commit qui en introduit un échoue au lint.
+
+Voir le guide complet : [`docs/technical/logging-guide.md`](../docs/technical/logging-guide.md)
+
 ## Code Quality
 
 This project uses [Biome](https://biomejs.dev/) for linting and formatting (replaces ESLint + Prettier).

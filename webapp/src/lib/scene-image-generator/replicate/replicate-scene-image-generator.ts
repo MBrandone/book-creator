@@ -1,6 +1,7 @@
 import Replicate from "replicate";
 import { env } from "@/config/env";
 import type { RetryStrategy } from "@/lib/infrastructure/http-request-retry-strategy/retry-strategy";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { getStorage } from "@/lib/infrastructure/storage/storage-factory";
 import {
 	DEFAULT_ASPECT_RATIO,
@@ -34,11 +35,10 @@ export class ReplicateSceneImageGenerator implements SceneImageGenerator {
 			referenceImages = [],
 		} = options;
 
-		console.log("Generating image with Replicate Flux Klein...");
-		console.log("Prompt:", prompt);
-		console.log("Aspect ratio:", aspectRatio);
-		console.log("Reference images:", referenceImages.length);
-		if (seed) console.log("Seed:", seed);
+		getLogger().info("Generating image with Replicate Flux Klein", {
+			aspectRatio,
+			referenceImagesCount: referenceImages.length,
+		});
 
 		try {
 			const input: any = {
@@ -50,9 +50,6 @@ export class ReplicateSceneImageGenerator implements SceneImageGenerator {
 			};
 
 			if (referenceImages.length > 0) {
-				console.log(
-					`Using ${referenceImages.length} pre-converted reference images`
-				);
 				input.images = referenceImages.map((img) => img.dataUri);
 			}
 
@@ -64,25 +61,25 @@ export class ReplicateSceneImageGenerator implements SceneImageGenerator {
 				this.client.run(FLUX_KLEIN_MODEL, { input })
 			);
 
-			console.log("Image generated successfully");
+			getLogger().info("Image generated, retrieving from Replicate");
 
 			const imageUrl = Array.isArray(output) ? output[0] : output;
 
-			console.log("Retrieving image from Replicate...");
 			const response = await fetch(imageUrl);
 			const arrayBuffer = await response.arrayBuffer();
 			const imageBuffer = Buffer.from(arrayBuffer);
-			console.log(`Image buffer created (${imageBuffer.length} bytes)`);
 
 			const timestamp = Date.now();
 			const filename = `images/generated/${timestamp}-${seed || "random"}.${DEFAULT_OUTPUT_FORMAT}`;
 
-			console.log("Uploading to storage...");
 			const storage = getStorage();
 			const { bucket, key } = await storage.uploadImage(imageBuffer, filename, {
 				"Content-Type": `image/${DEFAULT_OUTPUT_FORMAT}`,
 			});
-			console.log("Image uploaded to storage");
+			getLogger().info("Image uploaded to storage", {
+				key,
+				bytes: imageBuffer.length,
+			});
 
 			return {
 				bucket,
@@ -97,7 +94,7 @@ export class ReplicateSceneImageGenerator implements SceneImageGenerator {
 				},
 			};
 		} catch (error) {
-			console.error("Error generating image:", error);
+			getLogger().error("Error generating image", { error: String(error) });
 			throw new Error(
 				`Failed to generate image with Replicate Flux Klein: ${error instanceof Error ? error.message : "Unknown error"}`
 			);

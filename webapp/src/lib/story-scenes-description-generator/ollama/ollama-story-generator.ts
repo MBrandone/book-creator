@@ -1,4 +1,5 @@
 import { env } from "@/config/env";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import {
 	DEFAULT_OPTIONS,
 	type StoryGeneratorOptions,
@@ -32,23 +33,26 @@ export class OllamaStoryGenerator implements StoryScenesDescriptionGenerator {
 
 	constructor(options: StoryGeneratorOptions = {}) {
 		this.options = { ...DEFAULT_OPTIONS, ...options };
-		console.log("Initialized with config:", this.config);
+		getLogger().debug("OllamaStoryGenerator initialized", {
+			baseUrl: this.config.baseUrl,
+			model: this.config.model,
+		});
 	}
 
 	async isAvailable(): Promise<boolean> {
 		try {
-			console.log("Checking Ollama availability...");
-
 			const response = await fetch(`${this.config.baseUrl}/api/tags`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				signal: AbortSignal.timeout(5000), // 5 secondes pour le health check
+				signal: AbortSignal.timeout(5000),
 			});
 
 			if (!response.ok) {
-				console.log("Ollama server not responding:", response.status);
+				getLogger().warn("Ollama server not responding", {
+					status: response.status,
+				});
 				return false;
 			}
 
@@ -59,24 +63,27 @@ export class OllamaStoryGenerator implements StoryScenesDescriptionGenerator {
 			);
 
 			if (!modelAvailable) {
-				console.log(
-					`Model "${this.config.model}" not found. Available models:`,
-					data.models.map((m) => m.name)
-				);
+				getLogger().warn("Ollama model not found", {
+					model: this.config.model,
+				});
 				return false;
 			}
 
-			console.log("Ollama is available with model:", this.config.model);
+			getLogger().info("Ollama available", { model: this.config.model });
 			return true;
 		} catch (error) {
-			console.log("Ollama availability check failed:", error);
+			getLogger().warn("Ollama availability check failed", {
+				error: String(error),
+			});
 			return false;
 		}
 	}
 
 	async generateStory(context: StoryContext): Promise<GeneratedScene[]> {
-		console.log("Starting story generation for story:", context.title);
-		console.log("Characters:", context.characters.length);
+		getLogger().info("Starting story generation", {
+			title: context.title,
+			characterCount: context.characters.length,
+		});
 
 		validateStoryContext(context);
 
@@ -104,7 +111,6 @@ ${userPrompt}
 
 Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
 
-			console.log("Sending request to Ollama...");
 			const startTime = Date.now();
 
 			const response = await this.withTimeout(
@@ -113,7 +119,7 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
 			);
 
 			const duration = Date.now() - startTime;
-			console.log(`Story generated in ${duration}ms`);
+			getLogger().info("Ollama story generated", { durationMs: duration });
 
 			const parsedResponse = parseJSONResponse(response.response);
 			const validatedResponse = validateAIResponse(parsedResponse);
@@ -128,15 +134,13 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
 					: scene.image_prompt,
 			}));
 
-			console.log(
-				"Successfully generated",
-				scenes.length,
-				"scenes with style:",
-				DEFAULT_ART_STYLE
-			);
+			getLogger().info("Story scenes generated", {
+				sceneCount: scenes.length,
+				artStyle: DEFAULT_ART_STYLE,
+			});
 			return scenes;
 		} catch (error) {
-			console.log("Story generation failed:", error);
+			getLogger().error("Story generation failed", { error: String(error) });
 
 			if (error instanceof StoryGenerationError) {
 				throw error;
@@ -187,11 +191,9 @@ Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.`;
 				);
 			}
 
-			console.log("Received response from Ollama:", {
+			getLogger().debug("Received response from Ollama", {
 				model: data.model,
 				responseLength: data.response.length,
-				evalCount: data.eval_count,
-				duration: data.total_duration,
 			});
 
 			return data;

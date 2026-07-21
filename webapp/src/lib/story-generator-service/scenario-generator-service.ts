@@ -1,4 +1,5 @@
 import type { Story } from "@/lib/domain/aggregates/story";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { StoryScenesDescriptionGenerator } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 import type { GeneratedScene } from "./generated-scene";
 
@@ -8,6 +9,8 @@ export class ScenarioGeneratorService {
 	) {}
 
 	async generateScenario(story: Story): Promise<GeneratedScene[]> {
+		const storyLogger = getLogger().child({ storyId: story.id });
+
 		const isAvailable = await this.scenesGenerator.isAvailable();
 
 		if (!isAvailable) {
@@ -35,6 +38,10 @@ export class ScenarioGeneratorService {
 		if (generatedScenes.length !== 4) {
 			throw new Error(`Expected 4 scenes, got ${generatedScenes.length}`);
 		}
+
+		storyLogger.info("Scenario generated successfully", {
+			sceneCount: generatedScenes.length,
+		});
 
 		return generatedScenes;
 	}

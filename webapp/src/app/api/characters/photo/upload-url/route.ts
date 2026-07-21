@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GetPhotoUploadUrlCommandHandler } from "@/lib/application/handlers/command/get-photo-upload-url/get-photo-upload-url-command-handler";
 import { InvalidContentTypeError } from "@/lib/application/handlers/command/get-photo-upload-url/invalid-content-type-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { getStorage } from "@/lib/infrastructure/storage/storage-factory";
 
 const requestSchema = z.object({
@@ -53,9 +54,9 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		console.error(
-			"Erreur serveur lors de la génération de l'URL d'upload:",
-			error
+		getLogger().error(
+			"Erreur serveur lors de la génération de l'URL d'upload",
+			{ error: String(error) }
 		);
 		return NextResponse.json(
 			{ error: "Internal server error" },

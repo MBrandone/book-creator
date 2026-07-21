@@ -1,5 +1,6 @@
 import type { Scene } from "@/lib/domain/scene";
 import { db } from "@/lib/infrastructure/db";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { SceneRepository } from "../../../domain/repositories/scene-repository";
 
 export class SqlSceneRepository implements SceneRepository {
@@ -27,9 +28,9 @@ export class SqlSceneRepository implements SceneRepository {
 				)
 				.execute();
 		} catch (error: any) {
-			console.error(
-				"Erreur lors de la sauvegarde de la scène en base de données:",
-				error
+			getLogger().error(
+				"Erreur lors de la sauvegarde de la scène en base de données",
+				{ error: String(error) }
 			);
 			throw error;
 		}

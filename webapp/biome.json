@@ -37,7 +37,8 @@
 				"noRedundantAlt": "warn"
 			},
 			"suspicious": {
-				"noExplicitAny": "off"
+				"noExplicitAny": "off",
+				"noConsole": "error"
 			},
 			"correctness": {
 				"noUnusedFunctionParameters": "off",
@@ -68,5 +69,22 @@
 				"organizeImports": "on"
 			}
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"scripts/**",
+				"src/lib/infrastructure/logging/console-logger.ts",
+				"src/config/env.ts",
+				"next.config.ts"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
 }

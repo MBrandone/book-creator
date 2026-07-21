@@ -1,6 +1,7 @@
 import * as Minio from "minio";
 import { Readable } from "stream";
 import { env } from "@/config/env";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type {
 	ImageMetadata,
 	Storage,
@@ -44,7 +45,9 @@ export class MinioStorage implements Storage {
 
 			if (!bucketExists) {
 				await this.client.makeBucket(this.config.bucket, this.config.region);
-				console.log(`✅ Bucket "${this.config.bucket}" créé avec succès`);
+				getLogger().info("Bucket créé avec succès", {
+					bucket: this.config.bucket,
+				});
 
 				const policy = {
 					Version: "2012-10-17",
@@ -62,17 +65,19 @@ export class MinioStorage implements Storage {
 					this.config.bucket,
 					JSON.stringify(policy)
 				);
-				console.log(
-					`✅ Politique de lecture publique configurée pour le bucket "${this.config.bucket}"`
-				);
+				getLogger().info("Politique de lecture publique configurée", {
+					bucket: this.config.bucket,
+				});
 			} else {
-				console.log(`✅ Bucket "${this.config.bucket}" existe déjà`);
+				getLogger().info("Bucket existe déjà", { bucket: this.config.bucket });
 			}
 
 			await this.client.listBuckets();
-			console.log("✅ Connexion MinIO établie avec succès");
+			getLogger().info("Connexion MinIO établie avec succès");
 		} catch (error) {
-			console.error("❌ Erreur lors de l'initialisation de MinIO:", error);
+			getLogger().error("Erreur lors de l'initialisation de MinIO", {
+				error: String(error),
+			});
 			throw error;
 		}
 	}
@@ -113,11 +118,14 @@ export class MinioStorage implements Storage {
 				metaData
 			);
 
-			console.log(`✅ Image uploadée avec succès: ${key}`);
+			getLogger().info("Image uploadée avec succès", { key });
 
 			return { bucket: this.config.bucket, key };
 		} catch (error) {
-			console.error(`❌ Erreur lors de l'upload de l'image ${key}:`, error);
+			getLogger().error("Erreur lors de l'upload de l'image", {
+				key,
+				error: String(error),
+			});
 			throw new Error(
 				`Échec de l'upload de l'image: ${error instanceof Error ? error.message : "Unknown error"}`
 			);
@@ -138,13 +146,13 @@ export class MinioStorage implements Storage {
 			}
 
 			const buffer = Buffer.concat(chunks);
-			console.log(`✅ Image buffer récupéré: ${key} (${buffer.length} bytes)`);
+			getLogger().info("Image buffer récupéré", { key, bytes: buffer.length });
 			return buffer;
 		} catch (error) {
-			console.error(
-				`❌ Erreur lors de la récupération du buffer pour ${key}:`,
-				error
-			);
+			getLogger().error("Erreur lors de la récupération du buffer", {
+				key,
+				error: String(error),
+			});
 			throw new Error(
 				`Échec de la récupération de l'image: ${error instanceof Error ? error.message : "Unknown error"}`
 			);
@@ -164,9 +172,9 @@ export class MinioStorage implements Storage {
 			);
 			return url;
 		} catch (error) {
-			console.error(
-				`❌ Erreur lors de la génération de l'URL présignée d'upload pour ${key}:`,
-				error
+			getLogger().error(
+				"Erreur lors de la génération de l'URL présignée d'upload",
+				{ key, error: String(error) }
 			);
 			throw new Error(
 				`Échec de la génération de l'URL d'upload: ${error instanceof Error ? error.message : "Unknown error"}`
@@ -177,9 +185,11 @@ export class MinioStorage implements Storage {
 	async deleteImages(keys: string[]): Promise<void> {
 		try {
 			await this.client.removeObjects(this.config.bucket, keys);
-			console.log(`✅ ${keys.length} images supprimées avec succès`);
+			getLogger().info("Images supprimées avec succès", { count: keys.length });
 		} catch (error) {
-			console.error(`❌ Erreur lors de la suppression des images:`, error);
+			getLogger().error("Erreur lors de la suppression des images", {
+				error: String(error),
+			});
 			throw new Error(
 				`Échec de la suppression des images: ${error instanceof Error ? error.message : "Unknown error"}`
 			);
@@ -227,10 +237,10 @@ export class MinioStorage implements Storage {
 				metadata: stat.metaData,
 			};
 		} catch (error) {
-			console.error(
-				`❌ Erreur lors de la récupération des métadonnées pour ${key}:`,
-				error
-			);
+			getLogger().error("Erreur lors de la récupération des métadonnées", {
+				key,
+				error: String(error),
+			});
 			throw new Error(
 				`Échec de la récupération des métadonnées: ${error instanceof Error ? error.message : "Unknown error"}`
 			);

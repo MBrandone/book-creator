@@ -1,5 +1,6 @@
 import { NoCharactersError } from "@/lib/domain/no-characters-error";
 import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { ScenarioGeneratorService } from "@/lib/story-generator-service/scenario-generator-service";
 
 export class GenerateScenarioCommandHandler {
@@ -21,6 +22,8 @@ export class GenerateScenarioCommandHandler {
 			throw new NoCharactersError();
 		}
 
+		const storyLogger = getLogger().child({ storyId });
+
 		try {
 			const generatedScenes =
 				await this.scenarioGeneratorService.generateScenario(story);
@@ -36,11 +39,11 @@ export class GenerateScenarioCommandHandler {
 
 			await this.storyRepository.save(story);
 
-			console.log(
-				`[${storyId}] ✅ Scenario generated successfully with ${generatedScenes.length} scenes`
-			);
+			storyLogger.info("Scenario saved successfully", {
+				sceneCount: generatedScenes.length,
+			});
 		} catch (error) {
-			console.error(`[${storyId}] ❌ Scenario generation failed:`, error);
+			storyLogger.error("Scenario generation failed", { error: String(error) });
 			throw error;
 		}
 	}

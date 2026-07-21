@@ -3,6 +3,7 @@ import {
 	DEFAULT_OPTIONS,
 	type RetryOptions,
 } from "@/lib/infrastructure/http-request-retry-strategy/exponential-backoff/retry-options";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { RetryStrategy } from "../retry-strategy";
 
 export class ExponentialBackoffRetryStrategy implements RetryStrategy {
@@ -26,8 +27,11 @@ export class ExponentialBackoffRetryStrategy implements RetryStrategy {
 				}
 
 				if (attempt === this.options.maxRetries) {
-					console.error(
-						`Rate limit atteint après ${this.options.maxRetries} tentatives`
+					getLogger().error(
+						"Rate limit atteint après le nombre maximum de tentatives",
+						{
+							maxRetries: this.options.maxRetries,
+						}
 					);
 					throw new RateLimitError(
 						`Rate limit exceeded after ${this.options.maxRetries} retries: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -38,10 +42,11 @@ export class ExponentialBackoffRetryStrategy implements RetryStrategy {
 				const retryAfter = this.extractRetryAfter(error);
 				const delayMs = this.calculateBackoffDelay(attempt, retryAfter);
 
-				console.warn(
-					`⚠️ Rate limit 429 détecté (tentative ${attempt + 1}/${this.options.maxRetries + 1}). ` +
-						`Retry dans ${Math.round(delayMs / 1000)}s...`
-				);
+				getLogger().warn("Rate limit 429 détecté, retry planifié", {
+					attempt: attempt + 1,
+					maxAttempts: this.options.maxRetries + 1,
+					delaySeconds: Math.round(delayMs / 1000),
+				});
 
 				await this.sleep(delayMs);
 			}

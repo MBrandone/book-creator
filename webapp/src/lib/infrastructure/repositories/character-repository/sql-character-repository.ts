@@ -1,5 +1,6 @@
 import type { Character } from "@/lib/domain/entities/character";
 import { db } from "@/lib/infrastructure/db";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { CharacterRepository } from "../../../domain/repositories/character-repository";
 
 export class SqlCharacterRepository implements CharacterRepository {
@@ -21,9 +22,9 @@ export class SqlCharacterRepository implements CharacterRepository {
 				throw new DuplicateCharacterError();
 			}
 
-			console.error(
-				"Erreur lors de l'insertion du personnage en base de données:",
-				error
+			getLogger().error(
+				"Erreur lors de l'insertion du personnage en base de données",
+				{ error: String(error) }
 			);
 			throw error;
 		}

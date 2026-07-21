@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CreateAStoryCommandHandler } from "@/lib/application/handlers/command/create-a-story/create-a-story-command-handler";
 import { DuplicateStoryError } from "@/lib/application/handlers/command/create-a-story/duplicate-story-error";
 import { ListStoriesQueryHandler } from "@/lib/application/handlers/query/list-stories/list-stories-query-handler";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryReadModel } from "@/lib/infrastructure/read-model/sql-story-read-model";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
 
@@ -14,7 +15,9 @@ export async function GET() {
 
 		return NextResponse.json({ stories });
 	} catch (error) {
-		console.error("Erreur lors de la récupération des histoires:", error);
+		getLogger().error("Erreur lors de la récupération des histoires", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }
@@ -46,7 +49,9 @@ export async function POST(request: NextRequest) {
 		if (error instanceof DuplicateStoryError) {
 			return new NextResponse(null, { status: 409 });
 		}
-		console.error("Erreur serveur lors de la création de la story:", error);
+		getLogger().error("Erreur serveur lors de la création de la story", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }

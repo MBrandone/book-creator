@@ -3,6 +3,7 @@ import { z } from "zod";
 import { GenerateScenarioCommandHandler } from "@/lib/application/handlers/command/generate-scenario/generate-scenario-command-handler";
 import { NoCharactersError } from "@/lib/domain/no-characters-error";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
 import { ScenarioGeneratorService } from "@/lib/story-generator-service/scenario-generator-service";
 import { getStoryScenesDescriptionGenerator } from "@/lib/story-scenes-description-generator/factory";
@@ -78,9 +79,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		console.error(
-			"Erreur serveur lors du lancement de la génération du scénario:",
-			error
+		getLogger().error(
+			"Erreur serveur lors du lancement de la génération du scénario",
+			{ error: String(error) }
 		);
 		return new NextResponse(null, { status: 500 });
 	}

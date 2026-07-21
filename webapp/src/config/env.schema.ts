@@ -1,8 +1,10 @@
 import { z } from "zod";
 
-export const publicEnvSchema = z.object({});
+export const publicEnvSchema = z.object({
+	NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
+});
 
-export const envSchema = z.object({
+const baseEnvSchema = z.object({
 	...publicEnvSchema.shape,
 
 	NODE_ENV: z.enum(["development", "production"]),
@@ -32,7 +34,7 @@ export const envSchema = z.object({
 
 	STORY_PROVIDER: z.enum(["ollama", "replicate", "mock"]),
 	IMAGE_GENERATION_PROVIDER: z.enum(["replicate", "mock"]),
-	OLLAMA_BASE_URL: z.string().url(),
+	OLLAMA_BASE_URL: z.url(),
 	OLLAMA_MODEL: z.string().min(1, "OLLAMA_MODEL est requis"),
 
 	MAX_FILE_SIZE: z.coerce.number().int().positive(),
@@ -41,6 +43,24 @@ export const envSchema = z.object({
 	STORY_GENERATION_TIMEOUT: z.coerce.number().int().positive(),
 	IMAGE_GENERATION_TIMEOUT: z.coerce.number().int().positive(),
 });
+
+const sentryLogsSchema = z.object({
+	LOGS_PROVIDER: z.literal("sentry"),
+	NEXT_PUBLIC_SENTRY_DSN: z.string().url("NEXT_PUBLIC_SENTRY_DSN est requis"),
+	SENTRY_DSN: z.url("SENTRY_DSN est requis"),
+	SENTRY_ORG: z.string().min(1, "SENTRY_ORG est requis"),
+	SENTRY_PROJECT: z.string().min(1, "SENTRY_PROJECT est requis"),
+	SENTRY_AUTH_TOKEN: z.string().min(1, "SENTRY_AUTH_TOKEN est requis"),
+});
+
+const otherLogsSchema = z.object({
+	LOGS_PROVIDER: z.enum(["console", "noop"]),
+});
+
+export const envSchema = z.intersection(
+	baseEnvSchema,
+	z.discriminatedUnion("LOGS_PROVIDER", [sentryLogsSchema, otherLogsSchema])
+);
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
 export type Env = z.infer<typeof envSchema>;

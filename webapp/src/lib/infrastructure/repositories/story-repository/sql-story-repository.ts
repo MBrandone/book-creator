@@ -3,6 +3,7 @@ import { Character } from "@/lib/domain/entities/character";
 import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
 import { db } from "@/lib/infrastructure/db";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 
 export class SqlStoryRepository implements StoryRepository {
 	async save(story: Story): Promise<void> {
@@ -75,7 +76,9 @@ export class SqlStoryRepository implements StoryRepository {
 				}
 			});
 		} catch (error: any) {
-			console.error("Erreur lors de la sauvegarde en base de données:", error);
+			getLogger().error("Erreur lors de la sauvegarde en base de données", {
+				error: String(error),
+			});
 			throw error;
 		}
 	}

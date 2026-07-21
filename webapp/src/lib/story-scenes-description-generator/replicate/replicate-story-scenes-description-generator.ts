@@ -1,6 +1,7 @@
 import Replicate from "replicate";
 import { env } from "@/config/env";
 import type { RetryStrategy } from "@/lib/infrastructure/http-request-retry-strategy/retry-strategy";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import {
 	LLAMA_MODEL,
 	MAX_TOKENS,
@@ -43,13 +44,15 @@ export class ReplicateStoryScenesDescriptionGenerator
 			await this.client.models.get(MODEL_OWNER, MODEL_NAME);
 			return true;
 		} catch (error) {
-			console.error("[Replicate] Availability check failed:", error);
+			getLogger().error("Replicate availability check failed", {
+				error: String(error),
+			});
 			return false;
 		}
 	}
 
 	async generateStory(context: StoryContext): Promise<GeneratedScene[]> {
-		console.log("[Replicate] Starting story generation for:", context.title);
+		getLogger().info("Starting story generation", { title: context.title });
 
 		try {
 			const prompt = new StorySceneDescriptionPromptBuilder()
@@ -72,17 +75,14 @@ export class ReplicateStoryScenesDescriptionGenerator
 					: scene.image_prompt,
 			}));
 
-			console.log(
-				"[Replicate] Successfully generated",
-				scenes.length,
-				"scenes"
-			);
+			getLogger().info("Story generation completed", {
+				sceneCount: scenes.length,
+			});
 			return scenes;
 		} catch (error) {
-			console.error(
-				"[Replicate] Error:",
-				error instanceof Error ? error.message : error
-			);
+			getLogger().error("Story generation error", {
+				error: error instanceof Error ? error.message : String(error),
+			});
 			return await this.fallbackGenerator.generateStory(context);
 		}
 	}

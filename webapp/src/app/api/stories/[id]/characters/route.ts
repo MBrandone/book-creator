@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CreateACharacterForStoryCommandHandler } from "@/lib/application/handlers/command/create-a-character-for-story/create-a-character-for-story-command-handler";
 import { MaxCharactersReachedError } from "@/lib/application/handlers/command/create-a-character-for-story/max-characters-reached-error";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import {
 	DuplicateCharacterError,
 	SqlCharacterRepository,
@@ -92,7 +93,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			return new NextResponse(null, { status: 409 });
 		}
 
-		console.error("Erreur serveur lors de la création des personnages:", error);
+		getLogger().error("Erreur serveur lors de la création des personnages", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }

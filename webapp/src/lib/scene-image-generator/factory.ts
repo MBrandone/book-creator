@@ -1,5 +1,6 @@
 import { env } from "@/config/env";
 import { ExponentialBackoffRetryStrategy } from "@/lib/infrastructure/http-request-retry-strategy/exponential-backoff/exponential-backoff-retry-strategy";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 
 let cachedInstance: SceneImageGenerator | null = null;
@@ -11,7 +12,9 @@ export async function getSceneImageGenerator(): Promise<SceneImageGenerator> {
 
 	const provider = env.IMAGE_GENERATION_PROVIDER;
 
-	console.log("Image Generator provider:", provider.toLowerCase());
+	getLogger().info("Image Generator provider selected", {
+		provider: provider.toLowerCase(),
+	});
 
 	switch (provider.toLowerCase()) {
 		case "replicate": {

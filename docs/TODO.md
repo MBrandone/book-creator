@@ -1,27 +1,41 @@
 # Todo
-- [PARCOURS CREATION] Ajouter une vraie page de transition et d'attente pendant la génération
+- [BUG] La dernière scène n'arrive pas à être crée
+  - Sur Vercel/AWS Lambda : la fonction serverless peut être gelée immédiatement après l'envoi de la réponse. La génération d'images (qui prend potentiellement des dizaines de secondes) serait interrompue sans
+    garantie de reprise.
+  - On a un plan avec after de next
+  - Attention, faut prendre en compte le cas où on a une autre chose que 202 (si le command handler renvoie une erreur, on stoppe)
+  - on peut set une maxDuration (sinon il se passe quoi ?) https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/maxDuration
+- S'inspirer de lepetitheros.com
+- Un skill pour créer une factory
+  - Identifier comment je veux qu'ils soient (class, module, sur la base de quoi?, quels fonctions exportés)
+- [TECH] Un agent claude qui fait un npm outdated et faire une PR avec la resolution
+  - Voir du côté de claude /loop
+- [TECH] Test d'archi applicative
 - [AMELIORATION GENERATION] Toutes les images généré doivent être cohérentes
   - Problème : les têtes changent entre les images
-- [BUG] La dernière scène n'arrive pas à être crée
-- [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
+  - Solutions :
+    - Des images de références pour les personnages qui ne sont pas les photos mais le perso générés
+    - Des pré-prompts partagés entre chaque génération pour re-situer le contexte à chaque génération
+- [ACHAT] Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
+- [ACHAT] API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
+- [ACHAT] Paiement et Livraison
+============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
 - [TECH] Comment combattre l'injection de prompt ?
+- - [TECH] Un agent claude qui va voir les logs, trouve les 500 et fait une proposition de resolution
+- Voir du côté de claude /loop
+- [REFACTOR] Ollama en dependances, encore pertinent ? le ollama generator a été modifié alors qu'il sert plus;
 - [TECH] Avoir un rate limiter applicatif
-- [TECH] Test d'archi applicative
 - [AGENTIC] Idées d'agents
   - Business expert with DDD domain modelling
   - Un agent qui simplifie l'installation et la stack
   - Nest.JS Expert
   - SQL Expert
-  - Créer des specs pour des features produit, mais un autre pour créer des specs pour des sujets techniques (logs, architecture, ops, tests)
+  - Agent de scoping, qui utilise les skills product-scoping et technical-scoping
 - [LANDING] Améliorer la landing page
   - Animations (subtil, apparition, mouvement au hover, couleurs, micro-interaction)
   - Faire une revue de design (est-ce-que les espacement sont cohérents, les couleurs)
   - Voir le skill front-design dans mastering ai 2.1
 - [TECH] **Memory Management - Image Loading** - Triple copie des images en mémoire (fetch buffer + arrayBuffer + Buffer) - Pour 10 images de 5MB: 150MB de RAM - **Fix**: Utiliser streaming vers storage
-- [ACHAT] Faire un bouton commander : Combien serais-tu prêt à payer pour ce livre ?
-- [ACHAT] API pour créer des livres à partir d'images https://chatgpt.com/c/6a3e8c6f-1958-83ed-8f33-5538ce640493
-- [ACHAT] Paiement et Livraison
-============= ⬆️ Nécessaire pour partir en prod ⬆️ ==========
 - [PARCOURS CREATION] Faire une première génération avec la tête des personnages
   - et proposer à l'utilisateur de changer si besoin
 - [TECH] CI/CD
@@ -43,6 +57,11 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
+- [ ] [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
+  - https://blog.sentry.io/logging-in-next-js-is-hard-but-it-doesnt-have-to-be/
+  - https://blog.sentry.io/javascript-logging-library-definitive-guide/
+- [X] Sentry.flush(2000), ça fait quoi ? c'est nécessaire ?
+  - On implémente une solution qui rendra le truc non nécessaire (after avec nextjs)
 
 # Done
 - [X] Déployer sur Vercel et Supabase

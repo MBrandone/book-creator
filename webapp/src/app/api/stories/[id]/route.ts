@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GetStoryQueryHandler } from "@/lib/application/handlers/query/get-story/get-story-query-handler";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryReadModel } from "@/lib/infrastructure/read-model/sql-story-read-model";
 
 interface RouteContext {
@@ -48,10 +49,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		console.error(
-			"Erreur serveur lors de la récupération de l'histoire:",
-			error
-		);
+		getLogger().error("Erreur serveur lors de la récupération de l'histoire", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }

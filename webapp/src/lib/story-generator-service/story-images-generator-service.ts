@@ -1,11 +1,11 @@
+import * as Sentry from "@sentry/nextjs";
 import type { Story } from "@/lib/domain/aggregates/story";
 import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { Storage } from "@/lib/infrastructure/storage/storage";
 import type { SceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator";
 
 export class StoryImagesGeneratorService {
-	private readonly SECONDS_TO_WAIT = 2;
-
 	constructor(
 		private readonly storyRepository: StoryRepository,
 		private readonly sceneImageGenerator: SceneImageGenerator,
@@ -13,6 +13,16 @@ export class StoryImagesGeneratorService {
 	) {}
 
 	async generate(story: Story): Promise<void> {
+		try {
+			await this.generateImages(story);
+		} finally {
+			await Sentry.flush(2000);
+		}
+	}
+
+	private async generateImages(story: Story): Promise<void> {
+		const storyLogger = getLogger().child({ storyId: story.id });
+
 		const referenceImageKeys = story.characters.reduce<
 			Array<{ bucket: string; key: string }>
 		>((acc, char) => {
@@ -25,23 +35,23 @@ export class StoryImagesGeneratorService {
 			return acc;
 		}, []);
 
-		console.log(
-			`[${story.id}] 📸 Converting ${referenceImageKeys.length} reference photos to data URIs...`
-		);
+		storyLogger.info("Converting reference photos to data URIs", {
+			count: referenceImageKeys.length,
+		});
 
 		try {
 			const referenceImages = await Promise.all(
 				referenceImageKeys.map(async ({ key }) => {
-					const dataUri = await this.convertImageToDataUri(key);
+					const dataUri = await this.convertImageToDataUri(key, storyLogger);
 					return { dataUri };
 				})
 			);
 
-			console.log(
-				`[${story.id}] ✅ ${referenceImages.length} reference photos converted successfully`
-			);
+			storyLogger.info("Reference photos converted successfully", {
+				count: referenceImages.length,
+			});
 
-			console.log(`[${story.id}] 🎨 Generating cover image...`);
+			storyLogger.info("Generating cover image");
 			const coverPrompt = this.buildCoverPrompt(story);
 			const coverResult = await this.sceneImageGenerator.generateImage({
 				prompt: coverPrompt,
@@ -49,13 +59,16 @@ export class StoryImagesGeneratorService {
 				referenceImages,
 			});
 			story.createCover("", coverPrompt, coverResult.bucket, coverResult.key);
-			console.log(`[${story.id}] ✅ Cover image generated successfully`);
+			storyLogger.info("Cover image generated successfully");
 
-			console.log(
-				`[${story.id}] 🖼️  Starting image generation for ${story.scenes.length - 1} scenes...`
+			const scenesWithoutCover = story.scenes.filter(
+				(s) => s.sceneType !== "cover"
 			);
+			storyLogger.info("Starting image generation for scenes", {
+				sceneCount: scenesWithoutCover.length,
+			});
 
-			for (const scene of story.scenes.filter((s) => s.sceneType !== "cover")) {
+			for (const scene of scenesWithoutCover) {
 				try {
 					const imageResult = await this.sceneImageGenerator.generateImage({
 						prompt: scene.prompt,
@@ -65,10 +78,10 @@ export class StoryImagesGeneratorService {
 
 					story.setImageToScene(scene.id, imageResult.bucket, imageResult.key);
 				} catch (imageError) {
-					console.error(
-						`[${story.id}] ❌ Failed to generate image for scene ${scene.sceneNumber}:`,
-						imageError
-					);
+					storyLogger.error("Failed to generate image for scene", {
+						sceneNumber: scene.sceneNumber,
+						error: String(imageError),
+					});
 					throw new Error(
 						`Failed to generate image for scene ${scene.sceneNumber}: ${imageError instanceof Error ? imageError.message : "Unknown error"}`
 					);
@@ -78,26 +91,22 @@ export class StoryImagesGeneratorService {
 			story.markAsCompleted();
 			await this.storyRepository.save(story);
 
-			console.log(
-				`[${story.id}] ✅ Images generated successfully for ${story.scenes.length} scenes`
-			);
+			storyLogger.info("Images generated successfully", {
+				sceneCount: story.scenes.length,
+			});
 		} catch (error) {
-			console.error(`[${story.id}] ❌ Image generation failed:`, error);
-			console.error(`[${story.id}] Error details:`, {
+			storyLogger.error("Image generation failed", {
 				message: error instanceof Error ? error.message : "Unknown error",
-				stack: error instanceof Error ? error.stack : undefined,
 			});
 
 			try {
 				story.markAsFailed();
 				await this.storyRepository.save(story);
-
-				console.log(`[${story.id}] ℹ️  Story status set to 'failed'`);
+				storyLogger.info("Story status set to failed");
 			} catch (updateError) {
-				console.error(
-					`[${story.id}] ❌ Failed to update story status to 'failed':`,
-					updateError
-				);
+				storyLogger.error("Failed to update story status to failed", {
+					error: String(updateError),
+				});
 			}
 		}
 	}
@@ -109,7 +118,10 @@ export class StoryImagesGeneratorService {
 		return `Children book cover illustration. Title: "${story.title}". Characters: ${characterDescriptions}. Style: watercolor illustration, vibrant colors, all characters visible together.`;
 	}
 
-	private async convertImageToDataUri(key: string): Promise<string> {
+	private async convertImageToDataUri(
+		key: string,
+		storyLogger: ReturnType<typeof getLogger>
+	): Promise<string> {
 		try {
 			const buffer = await this.storage.getImageBuffer(key);
 
@@ -123,13 +135,17 @@ export class StoryImagesGeneratorService {
 			const base64 = buffer.toString("base64");
 			const dataUri = `data:${mimeType};base64,${base64}`;
 
-			console.log(
-				`✅ Image converted to data URI: ${key} (${buffer.length} bytes -> ${dataUri.length} chars)`
-			);
+			storyLogger.info("Image converted to data URI", {
+				key,
+				bytes: buffer.length,
+			});
 
 			return dataUri;
 		} catch (error) {
-			console.error(`❌ Error converting image ${key} to data URI:`, error);
+			storyLogger.error("Error converting image to data URI", {
+				key,
+				error: String(error),
+			});
 			throw error;
 		}
 	}

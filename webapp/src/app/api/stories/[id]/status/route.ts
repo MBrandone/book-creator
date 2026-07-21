@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GetStoryStatusQueryHandler } from "@/lib/application/handlers/query/get-story-status/get-story-status-query-handler";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryReadModel } from "@/lib/infrastructure/read-model/sql-story-read-model";
 
 interface RouteContext {
@@ -48,7 +49,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		console.error("Erreur serveur lors de la récupération du statut:", error);
+		getLogger().error("Erreur serveur lors de la récupération du statut", {
+			error: String(error),
+		});
 		return new NextResponse(null, { status: 500 });
 	}
 }

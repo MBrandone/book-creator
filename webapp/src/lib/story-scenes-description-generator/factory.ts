@@ -1,5 +1,6 @@
 import { env } from "@/config/env";
 import { ExponentialBackoffRetryStrategy } from "@/lib/infrastructure/http-request-retry-strategy/exponential-backoff/exponential-backoff-retry-strategy";
+import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import type { StoryScenesDescriptionGenerator } from "@/lib/story-scenes-description-generator/story-scenes-description-generator";
 
 let cachedInstance: StoryScenesDescriptionGenerator | null = null;
@@ -11,7 +12,9 @@ export async function getStoryScenesDescriptionGenerator(): Promise<StoryScenesD
 
 	const provider = env.STORY_PROVIDER;
 
-	console.log("Story Generator provider : ", provider.toLowerCase());
+	getLogger().info("Story Generator provider selected", {
+		provider: provider.toLowerCase(),
+	});
 
 	switch (provider.toLowerCase()) {
 		case "ollama": {

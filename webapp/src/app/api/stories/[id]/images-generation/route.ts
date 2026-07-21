@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { after, type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GenerateImagesCommandHandler } from "@/lib/application/handlers/command/generate-images/generate-images-command-handler";
-import { GenerationCannotBeStartedError } from "@/lib/domain/generation-cannot-be-started-error";
 import { NoCharactersError } from "@/lib/domain/no-characters-error";
+import { StoryAlreadyGeneratingError } from "@/lib/domain/story-already-generating-error";
 import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
 import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
@@ -19,7 +19,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 		const { id: storyId } = await context.params;
 
 		const idValidationResult = z
-			.string()
 			.uuid("L'ID doit être un UUID valide")
 			.safeParse(storyId);
 
@@ -48,12 +47,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			storage
 		);
 
-		const commandHandler = new GenerateImagesCommandHandler(
-			storyRepository,
-			storyImagesGeneratorService
-		);
+		const commandHandler = new GenerateImagesCommandHandler(storyRepository);
 
 		await commandHandler.execute(storyId);
+		after(() => storyImagesGeneratorService.generate(storyId));
 
 		return NextResponse.json(
 			{ message: "Image generation started" },
@@ -69,7 +66,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 			);
 		}
 
-		if (error instanceof GenerationCannotBeStartedError) {
+		if (error instanceof StoryAlreadyGeneratingError) {
 			return NextResponse.json(
 				{
 					error: "Génération impossible",

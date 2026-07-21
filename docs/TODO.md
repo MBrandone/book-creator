@@ -1,11 +1,5 @@
 # Todo
-- [BUG] La dernière scène n'arrive pas à être crée
-  - Sur Vercel/AWS Lambda : la fonction serverless peut être gelée immédiatement après l'envoi de la réponse. La génération d'images (qui prend potentiellement des dizaines de secondes) serait interrompue sans
-    garantie de reprise.
-  - On a un plan avec after de next
-  - Attention, faut prendre en compte le cas où on a une autre chose que 202 (si le command handler renvoie une erreur, on stoppe)
-  - on peut set une maxDuration (sinon il se passe quoi ?) https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/maxDuration
-- S'inspirer de lepetitheros.com
+- S'inspirer de lepetitheros.com pour les prochaines features
 - Un skill pour créer une factory
   - Identifier comment je veux qu'ils soient (class, module, sur la base de quoi?, quels fonctions exportés)
 - [TECH] Un agent claude qui fait un npm outdated et faire une PR avec la resolution
@@ -57,11 +51,13 @@
 - Idée docker => Créer un nouvelle image perso ollama avec des modèles déjà installé dessus (plutôt qu'un deuxième container qui va installer)
 
 # Doing
-- [ ] [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
-  - https://blog.sentry.io/logging-in-next-js-is-hard-but-it-doesnt-have-to-be/
-  - https://blog.sentry.io/javascript-logging-library-definitive-guide/
-- [X] Sentry.flush(2000), ça fait quoi ? c'est nécessaire ?
-  - On implémente une solution qui rendra le truc non nécessaire (after avec nextjs)
+- [BUG] La dernière scène n'arrive pas à être crée
+  - Sur Vercel/AWS Lambda : la fonction serverless peut être gelée immédiatement après l'envoi de la réponse. La génération d'images (qui prend potentiellement des dizaines de secondes) serait interrompue sans
+    garantie de reprise.
+  - On a un plan avec after de next
+  - Attention, faut prendre en compte le cas où on a une autre chose que 202 (si le command handler renvoie une erreur, on stoppe)
+  - on peut set une maxDuration (sinon il se passe quoi ?) https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/maxDuration
+    - 5 minutes par défaut
 
 # Done
 - [X] Déployer sur Vercel et Supabase
@@ -119,3 +115,6 @@
 - [PARCOURS CREATION] Ajouter une image de couverture
 - [PARCOURS CREATION] Ajouter une vraie page de transition et d'attente pendant la génération
   - Dans le style de l'animation de addy dans sa formation
+- [ ] [TECH] C'est quoi la stratégie de log. injecter un logger propre dans l'application
+  - https://blog.sentry.io/logging-in-next-js-is-hard-but-it-doesnt-have-to-be/
+  - https://blog.sentry.io/javascript-logging-library-definitive-guide/

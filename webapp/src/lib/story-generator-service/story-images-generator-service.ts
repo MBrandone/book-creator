@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs";
 import type { Story } from "@/lib/domain/aggregates/story";
 import type { StoryRepository } from "@/lib/domain/repositories/story-repository";
 import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
@@ -12,16 +11,10 @@ export class StoryImagesGeneratorService {
 		private readonly storage: Storage
 	) {}
 
-	async generate(story: Story): Promise<void> {
-		try {
-			await this.generateImages(story);
-		} finally {
-			await Sentry.flush(2000);
-		}
-	}
+	async generate(storyId: string): Promise<void> {
+		const storyLogger = getLogger().child({ storyId });
 
-	private async generateImages(story: Story): Promise<void> {
-		const storyLogger = getLogger().child({ storyId: story.id });
+		const story = await this.storyRepository.get(storyId);
 
 		const referenceImageKeys = story.characters.reduce<
 			Array<{ bucket: string; key: string }>

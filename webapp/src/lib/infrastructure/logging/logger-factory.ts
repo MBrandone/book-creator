@@ -1,25 +1,23 @@
 import { env } from "@/config/env";
 import { ConsoleLogger } from "./console-logger";
 import type { Logger } from "./logger";
+import type { LoggerProvider } from "./logger-provider";
 import { NoopLogger } from "./noop-logger";
 import { SentryLogger } from "./sentry-logger";
 
-let loggerInstance: Logger | null = null;
+const providers = {
+	sentry: () => new SentryLogger(),
+	console: () => new ConsoleLogger(),
+	noop: () => new NoopLogger(),
+} satisfies Record<LoggerProvider, () => Logger>;
+
+let cachedInstance: Logger | null = null;
 
 export function getLogger(): Logger {
-	if (!loggerInstance) {
-		loggerInstance = createLogger();
+	if (cachedInstance) {
+		return cachedInstance;
 	}
-	return loggerInstance;
-}
 
-function createLogger(): Logger {
-	switch (env.LOGS_PROVIDER) {
-		case "sentry":
-			return new SentryLogger();
-		case "noop":
-			return new NoopLogger();
-		case "console":
-			return new ConsoleLogger();
-	}
+	cachedInstance = providers[env.LOGS_PROVIDER]();
+	return cachedInstance;
 }

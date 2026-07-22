@@ -72,4 +72,6 @@ const sentryConfig = {
 	},
 };
 
-export default withSentryConfig(nextConfig, sentryConfig);
+export default process.env.NEXT_DIST_DIR
+	? nextConfig
+	: withSentryConfig(nextConfig, sentryConfig);

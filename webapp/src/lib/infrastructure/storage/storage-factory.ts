@@ -3,32 +3,23 @@ import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { AwsS3Storage } from "./aws-s3-storage";
 import { MinioStorage } from "./minio-storage";
 import type { Storage } from "./storage";
+import type { StorageProvider } from "./storage-provider";
 
-export function createStorage(): Storage {
-	const providerType = env.STORAGE_PROVIDER;
+const providers = {
+	minio: () => new MinioStorage(),
+	"aws-s3": () => new AwsS3Storage(),
+} satisfies Record<StorageProvider, () => Storage>;
 
-	switch (providerType) {
-		case "minio":
-			getLogger().info("Storage provider selected", { provider: "minio" });
-			return new MinioStorage();
-
-		case "aws-s3":
-			getLogger().info("Storage provider selected", { provider: "aws-s3" });
-			return new AwsS3Storage();
-
-		default:
-			throw new Error(
-				`Provider de storage inconnu: "${providerType}". ` +
-					`Les valeurs supportées sont: "minio", "aws-s3"`
-			);
-	}
-}
-
-let storageInstance: Storage | null = null;
+let cachedInstance: Storage | null = null;
 
 export function getStorage(): Storage {
-	if (!storageInstance) {
-		storageInstance = createStorage();
+	if (cachedInstance) {
+		return cachedInstance;
 	}
-	return storageInstance;
+
+	const provider = env.STORAGE_PROVIDER;
+	getLogger().info("Storage provider selected", { provider });
+
+	cachedInstance = providers[provider]();
+	return cachedInstance;
 }

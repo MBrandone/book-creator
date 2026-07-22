@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+	NON_SENTRY_LOGGER_PROVIDERS,
+	SENTRY_LOGGER_PROVIDER,
+} from "../lib/infrastructure/logging/logger-provider";
+import { STORAGE_PROVIDERS } from "../lib/infrastructure/storage/storage-provider";
+import { SCENE_IMAGE_GENERATOR_PROVIDERS } from "../lib/scene-image-generator/scene-image-generator-provider";
+import { STORY_SCENES_DESCRIPTION_GENERATOR_PROVIDERS } from "../lib/story-scenes-description-generator/story-scenes-description-generator-provider";
 
 export const publicEnvSchema = z.object({
 	NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
@@ -15,7 +22,7 @@ const baseEnvSchema = z.object({
 	POSTGRES_USER: z.string().min(1, "POSTGRES_USER est requis"),
 	POSTGRES_PASSWORD: z.string().min(1, "POSTGRES_PASSWORD est requis"),
 
-	STORAGE_PROVIDER: z.enum(["minio", "aws-s3"]),
+	STORAGE_PROVIDER: z.enum(STORAGE_PROVIDERS),
 	STORAGE_ENDPOINT: z.string().min(1, "STORAGE_ENDPOINT est requis"),
 	STORAGE_PORT: z.coerce.number().int().positive().optional(),
 	STORAGE_USE_SSL: z.preprocess(
@@ -32,8 +39,8 @@ const baseEnvSchema = z.object({
 
 	REPLICATE_API_TOKEN: z.string().min(1, "REPLICATE_API_TOKEN est requis"),
 
-	STORY_PROVIDER: z.enum(["ollama", "replicate", "mock"]),
-	IMAGE_GENERATION_PROVIDER: z.enum(["replicate", "mock"]),
+	STORY_PROVIDER: z.enum(STORY_SCENES_DESCRIPTION_GENERATOR_PROVIDERS),
+	IMAGE_GENERATION_PROVIDER: z.enum(SCENE_IMAGE_GENERATOR_PROVIDERS),
 	OLLAMA_BASE_URL: z.url(),
 	OLLAMA_MODEL: z.string().min(1, "OLLAMA_MODEL est requis"),
 
@@ -45,7 +52,7 @@ const baseEnvSchema = z.object({
 });
 
 const sentryLogsSchema = z.object({
-	LOGS_PROVIDER: z.literal("sentry"),
+	LOGS_PROVIDER: z.literal(SENTRY_LOGGER_PROVIDER),
 	NEXT_PUBLIC_SENTRY_DSN: z.string().url("NEXT_PUBLIC_SENTRY_DSN est requis"),
 	SENTRY_DSN: z.url("SENTRY_DSN est requis"),
 	SENTRY_ORG: z.string().min(1, "SENTRY_ORG est requis"),
@@ -54,7 +61,7 @@ const sentryLogsSchema = z.object({
 });
 
 const otherLogsSchema = z.object({
-	LOGS_PROVIDER: z.enum(["console", "noop"]),
+	LOGS_PROVIDER: z.enum(NON_SENTRY_LOGGER_PROVIDERS),
 });
 
 export const envSchema = z.intersection(

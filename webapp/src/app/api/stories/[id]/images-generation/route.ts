@@ -7,7 +7,7 @@ import { StoryNotFoundError } from "@/lib/domain/story-not-found-error";
 import { getLogger } from "@/lib/infrastructure/logging/logger-factory";
 import { SqlStoryRepository } from "@/lib/infrastructure/repositories/story-repository/sql-story-repository";
 import { getStorage } from "@/lib/infrastructure/storage/storage-factory";
-import { getSceneImageGenerator } from "@/lib/scene-image-generator/factory";
+import { getSceneImageGenerator } from "@/lib/scene-image-generator/scene-image-generator-factory";
 import { StoryImagesGeneratorService } from "@/lib/story-generator-service/story-images-generator-service";
 
 interface RouteContext {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 		}
 
 		const storyRepository = new SqlStoryRepository();
-		const sceneImageGenerator = await getSceneImageGenerator();
+		const sceneImageGenerator = getSceneImageGenerator();
 		const storage = getStorage();
 
 		const storyImagesGeneratorService = new StoryImagesGeneratorService(

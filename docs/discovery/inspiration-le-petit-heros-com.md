@@ -1,0 +1,50 @@
+- Flux :
+    - definition générale (heros, age, sexe)
+    - description du monde de l'histoire
+    - description physique du perso principale
+    - Les autres personnages
+    - Les passions du héros
+    - Generation de scenario
+
+  - Parcours
+      - Sauvegarde locale pour reprendre la creation d'une histoire plus tard
+
+Pour créer son histoire
+  - Creation de personnage : https://www.lepetitheros.com/create/hero
+      - Le texte est plus avenant
+      - Définit le sexe
+      - Définit l'age, qui va orienté l'histoire : 0-2 ans eveil, 2-5 ans imaginaire, 6-8 ans exploration, 9-12 ans aventure
+          - Cela définit le nombre de mot par chapitre
+  - Le monde de l'histoire :
+      - 2 choix :
+          - Invention d'un univers (avec de l'aide)
+          - Utilisation d'un univers prêt à l'emploi
+          - l'univers prêt à l'emploi est privilégié
+  - Creation de personnage
+      - Couleurs des cheveux et couleurs des yeux et autre details
+  - Creation des autres personnages
+      - Rôle : maman, papa, frère/soeur, grand-parent, copains/copines, parrain marraine, animal, doudou, autres
+          - Papa : age, photo, couleur des yex et couleurs des cheveux et une description
+  - Les passions du héros
+      - En 3 catégories, sport, creatif et decouverte (facultatif)
+  - Generation des scenarios et choix
+      - Proposition de 3 générations de scenario avec une description en 2 phrases puis les évènements plus précis en 2 phrases
+      - Choix d'un des scenarios ou l'utilisateur peut en définir un
+  - Loading
+      - une vidéo montrant une petite fille ouvrir son livre
+  - Donner un aperçu avant de commander
+      - Une image montrant les personnages dans l'univers voulu
+      - L'intrigue
+      - Les personnages (prénom, rôle, description, tenue)
+      - Les différentes étapes de l'histoire (en version courte ou version longue)
+      - Possibilité de faire des ajustements
+          - Apparence des personnages (tenue, apparence)
+          - Ajout d'un personnage dans la limite
+          - préciser une fin
+          - souhait ouvert
+  - Commande
+      - 2 offres : standard ou long
+  - Panier
+      - Des offres avec un double etc ...
+  - Contact
+      - Envoi de livraison, adresse
